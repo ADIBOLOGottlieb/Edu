@@ -12,7 +12,14 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 - Tests GUT : configuration du projet, actions d'entrée, scène de démarrage.
 - Documentation : architecture, décisions, règles de jeu, tests.
 
+- GUT 9.7.1 vendorisé dans `addons/gut/` (archive source du tag `v9.7.1`, licence MIT).
+- Fichiers `.uid` générés par Godot 4.7, versionnés.
+
+### Vérifié
+- `godot --headless --import` : aucune erreur de script.
+- Tests GUT : **11/11 verts**, 63 assertions, code de sortie 0 (Godot 4.7.2-stable officiel, SHA-512 vérifié, Windows 11).
+- Lancement du jeu en headless pendant 120 frames : aucune erreur.
+
 ### Non fait / reporté
-- GUT n'est pas encore copié dans `addons/gut/` (téléchargement à valider).
-- Tests **non exécutés** : Godot n'est pas installé sur la machine de développement.
-- `export_presets.cfg` Android : reporté au jalon M13 (nécessite le SDK Android).
+- Ouverture dans l'éditeur graphique et affichage de l'écran de démarrage : non vérifiés visuellement.
+- `export_presets.cfg` Android : reporté au jalon M13 (nécessite le SDK Android). Rien n'est testé sur Android.

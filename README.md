@@ -8,7 +8,7 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 
 | Jalon | Contenu | État |
 |---|---|---|
-| M0 Socle | configuration, autoloads vides, actions d'entrée, tests | écrit, **pas encore exécuté** (Godot absent de la machine de dev) |
+| M0 Socle | configuration, autoloads vides, actions d'entrée, tests | terminé : 11/11 tests verts (Godot 4.7.2, GUT 9.7.1, headless, Windows) ; non testé sur Android |
 | M1 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Aucun gameplay n'est implémenté pour l'instant.

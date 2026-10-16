@@ -2,9 +2,7 @@
 
 ## Installation de GUT (une fois)
 
-1. Télécharger **GUT 9.7.1** : <https://github.com/bitwes/Gut/releases/tag/v9.7.1>
-2. Copier le dossier `addons/gut/` de l'archive dans `addons/gut/` du projet.
-3. GUT est vendorisé (copié dans le dépôt) pour que tout le monde teste avec la même version.
+GUT 9.7.1 est **déjà vendorisé** dans `addons/gut/` : rien à installer. Pour le mettre à jour, remplacer ce dossier par `addons/gut/` de l'archive source du tag voulu (<https://github.com/bitwes/Gut/releases>), puis noter le changement dans `DECISIONS.md`.
 
 ## Première ouverture (cache d'import)
 
