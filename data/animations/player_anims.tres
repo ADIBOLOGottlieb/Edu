@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="AnimationSet" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/anim_clip.gd" id="1_5vlsh"]
+[ext_resource type="Script" path="res://src/data_types/animation_set.gd" id="2_i2n7d"]
+
+[sub_resource type="Resource" id="Resource_r6veb"]
+script = ExtResource("1_5vlsh")
+lean = 0.04
+crouch = 0.04
+arm_base = 0.12
+arm_swing = 0.04
+knee_bend = 0.08
+cycle_hz = 0.5
+
+[sub_resource type="Resource" id="Resource_mudlf"]
+script = ExtResource("1_5vlsh")
+lean = 0.22
+crouch = 0.1
+leg_base = 0.05
+arm_base = 0.15
+stride = 0.75
+arm_swing = 0.8
+knee_bend = 0.35
+cycle_hz = 2.4
+
+[sub_resource type="Resource" id="Resource_6u2a5"]
+script = ExtResource("1_5vlsh")
+lean = 0.4
+crouch = 0.15
+leg_base = 0.1
+arm_base = 0.2
+stride = 1.0
+arm_swing = 1.1
+knee_bend = 0.45
+cycle_hz = 2.0
+
+[sub_resource type="Resource" id="Resource_e3ree"]
+script = ExtResource("1_5vlsh")
+lean = 0.1
+crouch = 0.08
+leg_base = 0.55
+arm_base = 2.3
+knee_bend = 0.6
+
+[sub_resource type="Resource" id="Resource_fjk4d"]
+script = ExtResource("1_5vlsh")
+lean = 0.04
+leg_base = 0.25
+arm_base = 1.9
+arm_swing = 0.2
+knee_bend = 0.3
+cycle_hz = 1.5
+
+[sub_resource type="Resource" id="Resource_cngq4"]
+script = ExtResource("1_5vlsh")
+lean = 0.32
+crouch = 0.45
+leg_base = 0.35
+arm_base = 0.6
+knee_bend = 0.8
+
+[sub_resource type="Resource" id="Resource_uwlbv"]
+script = ExtResource("1_5vlsh")
+lean = -0.9
+crouch = 0.7
+leg_base = 1.3
+arm_base = -0.6
+knee_bend = 0.2
+
+[resource]
+script = ExtResource("2_i2n7d")
+clips = Dictionary[StringName, ExtResource("1_5vlsh")]({
+&"fall": SubResource("Resource_fjk4d"),
+&"idle": SubResource("Resource_r6veb"),
+&"jump": SubResource("Resource_e3ree"),
+&"landing": SubResource("Resource_cngq4"),
+&"run": SubResource("Resource_mudlf"),
+&"slide": SubResource("Resource_uwlbv"),
+&"sprint": SubResource("Resource_6u2a5")
+})

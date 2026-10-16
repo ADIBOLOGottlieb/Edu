@@ -9,9 +9,10 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 | Jalon | Contenu | État |
 |---|---|---|
 | M0 Socle | configuration, autoloads vides, actions d'entrée, tests | terminé : 11/11 tests verts (Godot 4.7.2, GUT 9.7.1, headless, Windows) ; non testé sur Android |
-| M1 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
+| M1 Mouvement de base | Idle, Run, Sprint, Jump, Fall, Landing, Slide ; clavier + tactile ; bac à sable | terminé : 65/65 tests verts, captures contrôlées ; non testé sur Android |
+| M2 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
-Aucun gameplay n'est implémenté pour l'instant.
+Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.
 
 ## Prérequis
 

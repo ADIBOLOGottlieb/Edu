@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="MoveTuning" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/move_tuning.gd" id="1_ibeey"]
+
+[resource]
+script = ExtResource("1_ibeey")
