@@ -1,0 +1,84 @@
+[gd_resource type="Resource" script_class="ChunkLibrary" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/chunk_layout.gd" id="1_2lj7y"]
+[ext_resource type="Script" path="res://src/data_types/chunk_library.gd" id="2_gtesx"]
+
+[sub_resource type="Resource" id="Resource_daevl"]
+script = ExtResource("1_2lj7y")
+id = &"flat_run"
+blocks = Array[Rect2]([Rect2(0, 0, 800, 200)])
+
+[sub_resource type="Resource" id="Resource_233bh"]
+script = ExtResource("1_2lj7y")
+id = &"vault_pair"
+width = 900.0
+blocks = Array[Rect2]([Rect2(0, 0, 900, 200), Rect2(300, -40, 100, 40), Rect2(620, -36, 90, 36)])
+tags = Array[StringName]([&"vault"])
+
+[sub_resource type="Resource" id="Resource_3ktfu"]
+script = ExtResource("1_2lj7y")
+id = &"low_tunnel"
+width = 1000.0
+blocks = Array[Rect2]([Rect2(0, 0, 1000, 200), Rect2(380, -420, 380, 372)])
+difficulty = 1
+tags = Array[StringName]([&"slide"])
+
+[sub_resource type="Resource" id="Resource_wo18g"]
+script = ExtResource("1_2lj7y")
+id = &"small_gap"
+width = 900.0
+blocks = Array[Rect2]([Rect2(0, 0, 360, 200), Rect2(520, 0, 380, 200)])
+difficulty = 1
+tags = Array[StringName]([&"gap"])
+
+[sub_resource type="Resource" id="Resource_781si"]
+script = ExtResource("1_2lj7y")
+id = &"step_platform"
+width = 1000.0
+blocks = Array[Rect2]([Rect2(0, 0, 1000, 200), Rect2(360, -100, 300, 100)])
+difficulty = 1
+tags = Array[StringName]([&"jump", &"wall"])
+
+[sub_resource type="Resource" id="Resource_m1lqw"]
+script = ExtResource("1_2lj7y")
+id = &"wall_ledge"
+width = 1000.0
+blocks = Array[Rect2]([Rect2(0, 0, 1000, 200), Rect2(460, -220, 90, 220)])
+difficulty = 2
+tags = Array[StringName]([&"wall"])
+
+[sub_resource type="Resource" id="Resource_i6f5i"]
+script = ExtResource("1_2lj7y")
+id = &"tunnel_then_vault"
+width = 1100.0
+blocks = Array[Rect2]([Rect2(0, 0, 1100, 200), Rect2(240, -420, 320, 372), Rect2(820, -40, 100, 40)])
+difficulty = 2
+tags = Array[StringName]([&"slide", &"vault"])
+
+[sub_resource type="Resource" id="Resource_afuko"]
+script = ExtResource("1_2lj7y")
+id = &"double_gap"
+width = 1200.0
+blocks = Array[Rect2]([Rect2(0, 0, 320, 200), Rect2(480, 0, 240, 200), Rect2(880, 0, 320, 200)])
+difficulty = 2
+tags = Array[StringName]([&"gap"])
+
+[sub_resource type="Resource" id="Resource_db182"]
+script = ExtResource("1_2lj7y")
+id = &"high_wall"
+width = 1100.0
+blocks = Array[Rect2]([Rect2(0, 0, 1100, 200), Rect2(520, -260, 100, 260)])
+difficulty = 3
+tags = Array[StringName]([&"wall"])
+
+[sub_resource type="Resource" id="Resource_a6x8w"]
+script = ExtResource("1_2lj7y")
+id = &"gap_then_wall"
+width = 1300.0
+blocks = Array[Rect2]([Rect2(0, 0, 380, 200), Rect2(540, 0, 760, 200), Rect2(900, -200, 90, 200)])
+difficulty = 3
+tags = Array[StringName]([&"gap", &"wall"])
+
+[resource]
+script = ExtResource("2_gtesx")
+layouts = Array[ExtResource("1_2lj7y")]([SubResource("Resource_daevl"), SubResource("Resource_233bh"), SubResource("Resource_3ktfu"), SubResource("Resource_wo18g"), SubResource("Resource_781si"), SubResource("Resource_m1lqw"), SubResource("Resource_i6f5i"), SubResource("Resource_afuko"), SubResource("Resource_db182"), SubResource("Resource_a6x8w")])

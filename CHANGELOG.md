@@ -4,6 +4,31 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M3 Niveau à défilement
+- Tronçons décrits en données (`ChunkLayout`, `ChunkLibrary`, `data/levels/chunk_library.tres`) : 10 tronçons, difficulté 0 à 3.
+- `ChunkSequencer` : parcours ordonné (missions) ou aléatoire à graine (course), sans répétition immédiate, difficulté croissante avec la distance.
+- `LevelValidator` : vérifie sol d'entrée/sortie, trous franchissables, murs escaladables, plafonds glissables, zone de réapparition libre.
+- `ChunkStreamer` : génère devant, recycle derrière, réserve de réutilisation bornée.
+- `LevelRunner` : arrivée (mode ordonné), chute = replacement au début du tronçon (la défaite arrive en M6), distance.
+- `RunnerCamera` : avance dans le sens du regard, recul borné.
+- Scènes `fixed_run.tscn` (avec arrivée) et `endless_run.tscn` (aléatoire) ; boutons sur l'écran de démarrage.
+- `CityBackdrop` et `LevelGeometry` partagés (le bac à sable n'a plus de code dupliqué).
+- `tools/profile_run.gd` : profilage de la course infinie.
+
+### Performances — M3 (PC de développement, Intel UHD, 1280×720, rendu Compatibility)
+- Dessin regroupé : un élément de dessin par tronçon et un pour la skyline → **123 → 8 appels de dessin** par image.
+- Course infinie 45 s à vitesse de sprint : **60 FPS moyen, 1 % bas 60, minimum 60** (deux exécutions).
+- 200 tronçons générés en test : nœuds et réserve bornés ; 14 constructions pour 33 tronçons sur 60 s.
+- **Non mesuré sur Android** : le critère « ≥ 55 FPS sur appareil cible » reste à vérifier au jalon M13.
+
+### Vérifié — M3
+- **133/133 tests verts**, aucune erreur, aucun avertissement.
+
+### Retours de l'utilisateur à traiter (après M3)
+- Parcours trop simples : complexité croissante demandée au fil de la progression.
+- Figures de parkour plus spectaculaires et réalistes demandées.
+- Le personnage ne respecte pas les images de référence (silhouette pleine, sweat à capuche, pantalon ample).
+
 ### Ajouté — M2 Parkour avancé
 - États **Vault, WallRun, WallClimb, LedgeHang, Roll, DoubleJump** (13 états implémentés sur 22).
 - `ParkourSensors` : rayons de détection (mur à la poitrine, obstacle bas avec mesure de hauteur, rebord dans une fenêtre de saisie), sans nœud à placer dans les niveaux.
