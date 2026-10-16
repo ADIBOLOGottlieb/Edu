@@ -99,12 +99,13 @@ func test_air_control_keeps_sprint_momentum() -> void:
 
 
 func test_entering_jump_sets_the_impulse() -> void:
-	var v: Vector2 = LocomotionMotor.on_enter(PlayerState.State.JUMP, Vector2(100, 0), 1, _tuning)
+	var v: Vector2 = LocomotionMotor.on_enter(PlayerState.State.IDLE, PlayerState.State.JUMP, Vector2(100, 0), _ctx, _tuning)
 	assert_eq(v, Vector2(100, -_tuning.jump_velocity))
 
 
 func test_entering_slide_boosts_in_the_direction_of_travel() -> void:
-	var v: Vector2 = LocomotionMotor.on_enter(PlayerState.State.SLIDE, Vector2(-400, 0), 1, _tuning)
+	var v: Vector2 = LocomotionMotor.on_enter(PlayerState.State.RUN, PlayerState.State.SLIDE, Vector2(-400, 0), _ctx, _tuning)
 	assert_almost_eq(v.x, -400.0 * _tuning.slide_boost, 0.01)
-	v = LocomotionMotor.on_enter(PlayerState.State.SLIDE, Vector2.ZERO, -1, _tuning)
+	_ctx.facing = -1
+	v = LocomotionMotor.on_enter(PlayerState.State.RUN, PlayerState.State.SLIDE, Vector2.ZERO, _ctx, _tuning)
 	assert_eq(v.x, -_tuning.run_speed, "à l'arrêt : vitesse de course dans le sens du regard")

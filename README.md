@@ -10,7 +10,8 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 |---|---|---|
 | M0 Socle | configuration, autoloads vides, actions d'entrée, tests | terminé : 11/11 tests verts (Godot 4.7.2, GUT 9.7.1, headless, Windows) ; non testé sur Android |
 | M1 Mouvement de base | Idle, Run, Sprint, Jump, Fall, Landing, Slide ; clavier + tactile ; bac à sable | terminé : 65/65 tests verts, captures contrôlées ; non testé sur Android |
-| M2 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
+| M2 Parkour avancé | Vault, WallRun, WallClimb, LedgeHang, Roll, DoubleJump (capacité à débloquer) | terminé : 108/108 tests verts, captures contrôlées ; non testé sur Android |
+| M3 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.
 
@@ -52,5 +53,12 @@ Voir [docs/TESTING.md](docs/TESTING.md).
 | Esquive | Q |
 | Utiliser / objet suivant | E / Tab |
 | Pause | Échap, P |
+
+Parkour (aucune touche supplémentaire, pensé pour le tactile) :
+- **Franchir** : courir vers un obstacle bas (12–50 px), automatique.
+- **Course murale / escalade** : courir vers un mur en maintenant la direction ; Saut = saut mural.
+- **Rebord** : avant ou Saut = se hisser ; arrière ou Glisse = lâcher.
+- **Roulade** : Glisse au moment d'une réception dure.
+- **Double saut** : Saut en l'air, si la capacité est débloquée (F4 dans le bac à sable).
 
 Les touches correspondent à des positions physiques : sur un clavier AZERTY, « A » est la touche Q et « W » la touche Z.

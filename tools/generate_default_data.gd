@@ -69,5 +69,29 @@ func _player_animations() -> AnimationSet:
 			"lean": -0.9, "crouch": 0.7, "leg_base": 1.3, "arm_base": -0.6,
 			"knee_bend": 0.2,
 		}),
+		# Jalon M2
+		&"double_jump": _clip({
+			"lean": 0.2, "leg_base": 0.9, "arm_base": 1.5,
+			"arm_swing": 0.6, "knee_bend": 0.9, "cycle_hz": 3.0,
+		}),
+		&"roll": _clip({
+			"lean": 1.4, "crouch": 0.85, "leg_base": 1.8, "arm_base": 1.6,
+			"knee_bend": 1.0,
+		}),
+		&"vault": _clip({
+			"lean": 0.5, "crouch": 0.2, "leg_base": 1.1, "arm_base": 0.9,
+			"knee_bend": 0.9,
+		}),
+		&"wall_run": _clip({
+			"lean": -0.15, "leg_base": 1.2, "arm_base": 0.4,
+			"stride": 0.5, "arm_swing": 0.9, "knee_bend": 0.6, "cycle_hz": 1.5,
+		}),
+		&"wall_climb": _clip({
+			"lean": 0.15, "leg_base": 0.8, "arm_base": 2.6, "arm_swing": 0.5,
+			"stride": 0.4, "knee_bend": 0.7, "cycle_hz": 0.9,
+		}),
+		&"ledge_hang": _clip({
+			"lean": 0.08, "leg_base": 0.2, "arm_base": 2.95, "knee_bend": 0.25,
+		}),
 	}
 	return anims

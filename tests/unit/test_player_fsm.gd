@@ -1,7 +1,8 @@
 extends GutTest
 ## Machine à états et table de transitions (PlayerFSM, PlayerFsmRules).
 
-const M1_STATES: Array[int] = [
+## États implémentés (M1 + M2).
+const IMPLEMENTED_STATES: Array[int] = [
 	PlayerState.State.IDLE,
 	PlayerState.State.RUN,
 	PlayerState.State.SPRINT,
@@ -9,6 +10,12 @@ const M1_STATES: Array[int] = [
 	PlayerState.State.FALL,
 	PlayerState.State.LANDING,
 	PlayerState.State.SLIDE,
+	PlayerState.State.DOUBLE_JUMP,
+	PlayerState.State.ROLL,
+	PlayerState.State.VAULT,
+	PlayerState.State.WALL_RUN,
+	PlayerState.State.WALL_CLIMB,
+	PlayerState.State.LEDGE_HANG,
 ]
 
 
@@ -38,7 +45,7 @@ func test_requesting_the_current_state_does_nothing() -> void:
 func test_transition_absent_from_table_is_refused() -> void:
 	var fsm: PlayerFSM = PlayerFSM.new()
 	assert_false(fsm.request(PlayerState.State.LANDING), "IDLE → LANDING n'existe pas")
-	assert_false(fsm.request(PlayerState.State.WALL_RUN), "état du jalon M2")
+	assert_false(fsm.request(PlayerState.State.WALL_RUN), "IDLE → WALL_RUN n'existe pas : il faut de l'élan")
 	assert_false(fsm.request(PlayerState.State.DOUBLE_JUMP), "non débloqué en M1")
 	assert_false(fsm.request(PlayerState.State.ATTACK), "état du jalon M4")
 	assert_eq(fsm.current, PlayerState.State.IDLE)
@@ -67,7 +74,7 @@ func test_transition_resets_ticks_and_exit_flag() -> void:
 	assert_false(fsm.exit_allowed)
 
 
-func test_every_m1_state_is_reachable_from_idle() -> void:
+func test_every_implemented_state_is_reachable_from_idle() -> void:
 	var reached: Dictionary[int, bool] = {PlayerState.State.IDLE: true}
 	var queue: Array[int] = [PlayerState.State.IDLE]
 	while not queue.is_empty():
@@ -76,18 +83,18 @@ func test_every_m1_state_is_reachable_from_idle() -> void:
 			if not reached.has(to):
 				reached[to] = true
 				queue.append(to)
-	for state: int in M1_STATES:
+	for state: int in IMPLEMENTED_STATES:
 		assert_true(reached.has(state), "inaccessible : %s" % PlayerState.name_of(state as PlayerState.State))
 
 
-func test_every_m1_state_has_a_way_out() -> void:
-	for state: int in M1_STATES:
+func test_every_implemented_state_has_a_way_out() -> void:
+	for state: int in IMPLEMENTED_STATES:
 		var targets: Array = PlayerFsmRules.TRANSITIONS.get(state, [])
 		assert_gt(targets.size(), 0, "état sans sortie : %s" % PlayerState.name_of(state as PlayerState.State))
 
 
-func test_table_only_targets_m1_states() -> void:
+func test_table_only_targets_implemented_states() -> void:
 	for from: int in PlayerFsmRules.TRANSITIONS:
-		assert_true(M1_STATES.has(from))
+		assert_true(IMPLEMENTED_STATES.has(from))
 		for to: int in PlayerFsmRules.TRANSITIONS[from]:
-			assert_true(M1_STATES.has(to), "cible hors M1 : %s" % PlayerState.name_of(to as PlayerState.State))
+			assert_true(IMPLEMENTED_STATES.has(to), "cible non implémentée : %s" % PlayerState.name_of(to as PlayerState.State))

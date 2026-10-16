@@ -5,15 +5,48 @@ extends RefCounted
 
 
 ## Impulsion appliquée une seule fois, à l'entrée dans un état.
+## from distingue les variantes (saut depuis le sol, un mur ou un rebord).
 static func on_enter(
-	state: PlayerState.State, velocity: Vector2, facing: int, tuning: MoveTuning
+	from: PlayerState.State,
+	to: PlayerState.State,
+	velocity: Vector2,
+	ctx: MovementContext,
+	tuning: MoveTuning
 ) -> Vector2:
-	match state:
+	var forward: float = float(ctx.facing)
+	match to:
 		PlayerState.State.JUMP:
-			velocity.y = -tuning.jump_velocity
+			match from:
+				PlayerState.State.WALL_RUN, PlayerState.State.WALL_CLIMB:
+					# Saut mural : repousse du mur, à l'opposé du regard actuel.
+					velocity = Vector2(-forward * tuning.wall_jump_push, -tuning.wall_jump_velocity)
+				PlayerState.State.LEDGE_HANG:
+					# Se hisser : monte au-dessus du rebord en avançant.
+					velocity = Vector2(forward * tuning.ledge_climb_push, -tuning.ledge_climb_velocity)
+				_:
+					velocity.y = -tuning.jump_velocity
+		PlayerState.State.DOUBLE_JUMP:
+			velocity.y = -tuning.double_jump_velocity
 		PlayerState.State.SLIDE:
-			var direction: float = signf(velocity.x) if absf(velocity.x) > 1.0 else float(facing)
-			velocity.x = direction * maxf(absf(velocity.x) * tuning.slide_boost, tuning.run_speed)
+			var slide_dir: float = signf(velocity.x) if absf(velocity.x) > 1.0 else forward
+			velocity.x = slide_dir * maxf(absf(velocity.x) * tuning.slide_boost, tuning.run_speed)
+		PlayerState.State.ROLL:
+			var roll_dir: float = signf(velocity.x) if absf(velocity.x) > 1.0 else forward
+			velocity.x = roll_dir * maxf(absf(velocity.x), tuning.run_speed)
+		PlayerState.State.VAULT:
+			# Impulsion juste suffisante pour passer l'obstacle mesuré, plus une marge.
+			velocity.x = forward * maxf(absf(velocity.x), tuning.vault_min_speed)
+			velocity.y = -sqrt(
+				2.0 * tuning.gravity_down * (ctx.obstacle_height + tuning.vault_clearance)
+			)
+		PlayerState.State.WALL_RUN:
+			# L'élan horizontal est converti en montée le long du mur.
+			velocity.y = -maxf(absf(velocity.x) * tuning.wall_run_conversion, tuning.wall_run_min_up)
+			velocity.x = forward * tuning.wall_stick_speed
+		PlayerState.State.WALL_CLIMB:
+			velocity = Vector2(forward * tuning.wall_stick_speed, -tuning.wall_climb_speed)
+		PlayerState.State.LEDGE_HANG:
+			velocity = Vector2.ZERO
 	return velocity
 
 
@@ -25,6 +58,17 @@ static func step(
 	tuning: MoveTuning,
 	delta: float
 ) -> Vector2:
+	var forward: float = float(ctx.facing)
+	match state:
+		PlayerState.State.LEDGE_HANG:
+			return Vector2.ZERO
+		PlayerState.State.WALL_CLIMB:
+			return Vector2(forward * tuning.wall_stick_speed, -tuning.wall_climb_speed)
+		PlayerState.State.WALL_RUN:
+			return Vector2(
+				forward * tuning.wall_stick_speed,
+				minf(velocity.y + tuning.wall_run_gravity * delta, tuning.max_fall_speed)
+			)
 	velocity.x = _horizontal(state, velocity.x, intent, ctx, tuning, delta)
 	velocity.y = _vertical(velocity.y, intent, ctx, tuning, delta)
 	return velocity
@@ -51,7 +95,13 @@ static func _horizontal(
 			# une vitesse minimale empêche de rester coincé accroupi.
 			var floor_speed: float = 0.0 if ctx.can_stand else signf(vx) * tuning.slide_crawl_speed
 			return move_toward(vx, floor_speed, tuning.slide_friction * delta)
-		PlayerState.State.JUMP, PlayerState.State.FALL:
+		PlayerState.State.ROLL:
+			# Pas de contrôle ; la roulade ramène vers la vitesse de course.
+			var roll_target: float = tuning.run_speed if ctx.can_stand else tuning.slide_crawl_speed
+			return move_toward(vx, signf(vx) * roll_target, tuning.roll_decel * delta)
+		PlayerState.State.JUMP, PlayerState.State.FALL, PlayerState.State.DOUBLE_JUMP, PlayerState.State.VAULT:
+			if ctx.air_control_lock_left > 0.0:
+				return vx
 			if axis == 0.0:
 				return move_toward(vx, 0.0, tuning.air_decel * delta)
 			# Conserve l'élan d'un sprint tant que l'on pousse dans le même sens.

@@ -107,11 +107,12 @@ func test_expired_slide_buffer_does_nothing() -> void:
 	assert_eq(_next(PlayerState.State.RUN), PlayerState.State.RUN)
 
 
-func test_slide_pressed_just_before_touchdown_chains_from_landing() -> void:
+func test_slide_pressed_just_before_a_soft_touchdown_chains_from_landing() -> void:
 	# Cas réel du bac à sable : on appuie sur Glisse pendant la réception.
+	# (Sur une réception dure, c'est une roulade : voir test_parkour_rules.gd.)
 	_intent.move_axis = 1.0
 	_ctx.velocity = Vector2(_tuning.sprint_speed, 0)
-	_ctx.impact_speed = _tuning.landing_hard_speed + 1.0
+	_ctx.impact_speed = _tuning.landing_hard_speed - 1.0
 	_ctx.slide_buffer_left = 0.08
 	assert_eq(_next(PlayerState.State.LANDING), PlayerState.State.SLIDE)
 
@@ -129,7 +130,7 @@ func test_slide_continues_under_a_low_ceiling() -> void:
 	_ctx.time_in_state = _tuning.slide_duration * 3.0
 	_ctx.can_stand = false
 	assert_eq(_next(PlayerState.State.SLIDE), PlayerState.State.SLIDE)
-	assert_false(MovementDecider.can_exit(PlayerState.State.SLIDE, _ctx, _tuning))
+	assert_false(MovementDecider.can_exit(PlayerState.State.SLIDE, _intent, _ctx, _tuning))
 
 
 func test_slide_can_be_cancelled_by_a_jump_when_there_is_headroom() -> void:
@@ -143,7 +144,7 @@ func test_slide_can_be_cancelled_by_a_jump_when_there_is_headroom() -> void:
 func test_sliding_off_a_ledge_falls() -> void:
 	_ctx.on_floor = false
 	assert_eq(_next(PlayerState.State.SLIDE), PlayerState.State.FALL)
-	assert_true(MovementDecider.can_exit(PlayerState.State.SLIDE, _ctx, _tuning))
+	assert_true(MovementDecider.can_exit(PlayerState.State.SLIDE, _intent, _ctx, _tuning))
 
 
 func test_decisions_are_all_accepted_by_the_fsm_table() -> void:

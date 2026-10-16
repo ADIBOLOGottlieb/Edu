@@ -40,3 +40,54 @@ extends Resource
 @export var slide_friction: float = 500.0
 ## Vitesse conservée sous un plafond bas, pour ne jamais rester bloqué.
 @export var slide_crawl_speed: float = 120.0
+
+@export_group("Roulade")
+## Déclenchée par Glisse au moment d'une réception dure : annule l'immobilisation.
+@export var roll_duration: float = 0.4
+@export var roll_decel: float = 300.0
+
+@export_group("Double saut")
+## Utilisable une fois par phase aérienne, seulement si la capacité est débloquée.
+@export var double_jump_velocity: float = 620.0
+
+@export_group("Franchissement")
+## Hauteurs (px) d'obstacle franchies automatiquement en courant.
+@export var vault_min_height: float = 12.0
+@export var vault_max_height: float = 50.0
+## Distance de détection devant le corps : assez longue pour décoller avant l'obstacle.
+@export var vault_reach: float = 60.0
+@export var vault_min_speed: float = 200.0
+## Marge visée au-dessus de l'obstacle par l'impulsion verticale.
+@export var vault_clearance: float = 16.0
+@export var vault_min_time: float = 0.08
+## Au-delà, un franchissement encore en l'air devient une chute.
+@export var vault_max_time: float = 0.45
+
+@export_group("Mur")
+## Portée du rayon de détection de mur au-delà du corps.
+@export var wall_probe: float = 16.0
+@export var wall_run_min_speed: float = 260.0
+@export var wall_run_duration: float = 0.35
+## Part de la vitesse horizontale convertie en montée.
+@export var wall_run_conversion: float = 0.9
+@export var wall_run_min_up: float = 420.0
+@export var wall_run_gravity: float = 1200.0
+## Poussée horizontale vers le mur pour rester en contact.
+@export var wall_stick_speed: float = 120.0
+@export var wall_climb_speed: float = 110.0
+## Temps d'escalade disponible par phase aérienne (rechargé au sol ou à un rebord).
+@export var wall_climb_max_time: float = 1.2
+@export var wall_jump_velocity: float = 650.0
+@export var wall_jump_push: float = 360.0
+## Après un saut mural, le contrôle aérien est ignoré ce temps-là.
+@export var wall_jump_control_lock: float = 0.18
+
+@export_group("Rebord")
+## Distance verticale entre le haut du rebord et les pieds en suspension.
+@export var ledge_hang_offset: float = 76.0
+## Durée minimale de suspension avant de pouvoir se hisser ou lâcher.
+@export var ledge_min_hang: float = 0.12
+@export var ledge_climb_velocity: float = 720.0
+@export var ledge_climb_push: float = 200.0
+## Après avoir quitté un rebord, impossible de s'y raccrocher pendant ce temps.
+@export var ledge_regrab_cooldown: float = 0.3

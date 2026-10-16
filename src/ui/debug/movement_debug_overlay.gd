@@ -32,7 +32,7 @@ func _process(_delta: float) -> void:
 		return
 	var state: PlayerState.State = body.current_state()
 	_label.text = (
-		"État : %s (priorité %d, %d ticks)\nVitesse : (%.0f, %.0f) px/s\nAu sol : %s · Sens : %s\n%d FPS · F3 : masquer"
+		"État : %s (priorité %d, %d ticks)\nVitesse : (%.0f, %.0f) px/s\nAu sol : %s · Sens : %s\nDouble saut : %s (F4)\n%d FPS · F3 : masquer"
 		% [
 			String(PlayerState.name_of(state)).to_upper(),
 			PlayerState.priority_of(state),
@@ -41,6 +41,7 @@ func _process(_delta: float) -> void:
 			body.velocity.y,
 			"oui" if body.is_on_floor() else "non",
 			"→" if body.facing > 0 else "←",
+			"débloqué" if body.abilities.has(AbilitySet.DOUBLE_JUMP) else "verrouillé",
 			Engine.get_frames_per_second(),
 		]
 	)
