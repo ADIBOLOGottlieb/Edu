@@ -1,0 +1,16 @@
+# Godot 4 : cache d'import et données locales de l'éditeur
+.godot/
+/android/
+
+# Builds et exports
+/build/
+*.apk
+*.aab
+
+# Clés de signature : ne jamais les versionner
+*.keystore
+*.jks
+
+# Systèmes d'exploitation
+.DS_Store
+Thumbs.db

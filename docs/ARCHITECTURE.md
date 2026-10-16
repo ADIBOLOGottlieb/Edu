@@ -32,7 +32,7 @@
 Edu/
 ├── project.godot
 ├── export_presets.cfg              # Android (puis Windows/Linux)
-├── .gitignore  .gitattributes      # .godot/ ignoré, LFS pour PNG/OGG/WAV
+├── .gitignore  .gitattributes      # .godot/ ignoré ; Git LFS reporté (ADR-008)
 ├── README.md  CHANGELOG.md
 ├── docs/
 │   ├── ARCHITECTURE.md             # ce document
@@ -476,8 +476,8 @@ Aucune clé API n'est inventée ; aucune configuration réelle n'est livrée.
 
 ---
 
-## 16. Décisions à valider avant de coder
-1. **Version de Godot** : 4.x stable la plus récente au moment de l'installation, figée dans `project.godot` et le README.
+## 16. Décisions — validées le 2026-10-16 (détail : `DECISIONS.md`, ADR-001 à ADR-006)
+1. **Version de Godot** : 4.7.2-stable, figée dans `project.godot` et le README.
 2. **Framework de test** : GUT (proposé) ou GdUnit4.
 3. **Format narratif** : JSON validé (proposé) ou Resources `.tres`.
 4. **Abandon volontaire = échec** dans le mode course (proposé : oui).
