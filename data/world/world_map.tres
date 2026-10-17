@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="WorldMap" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/world_city.gd" id="1_no5id"]
+[ext_resource type="Resource" path="res://data/cities/lome.tres" id="2_fmvtt"]
+[ext_resource type="Script" path="res://src/data_types/world_map.gd" id="3_hg8gk"]
+
+[sub_resource type="Resource" id="Resource_wcylf"]
+script = ExtResource("1_no5id")
+id = &"lome"
+display_name = "Lomé"
+country = "Togo"
+map_position = Vector2(0.5033889, 0.46594444)
+city = ExtResource("2_fmvtt")
+
+[sub_resource type="Resource" id="Resource_awn1l"]
+script = ExtResource("1_no5id")
+id = &"cotonou"
+display_name = "Cotonou"
+country = "Bénin"
+map_position = Vector2(0.5067222, 0.4646111)
+
+[sub_resource type="Resource" id="Resource_jx432"]
+script = ExtResource("1_no5id")
+id = &"abidjan"
+display_name = "Abidjan"
+country = "Côte d'Ivoire"
+map_position = Vector2(0.4888611, 0.47022223)
+
+[sub_resource type="Resource" id="Resource_4gpye"]
+script = ExtResource("1_no5id")
+id = &"dakar"
+display_name = "Dakar"
+country = "Sénégal"
+map_position = Vector2(0.45155555, 0.4183889)
+
+[sub_resource type="Resource" id="Resource_o2eky"]
+script = ExtResource("1_no5id")
+id = &"rio"
+display_name = "Rio de Janeiro"
+country = "Brésil"
+map_position = Vector2(0.38, 0.62722224)
+
+[sub_resource type="Resource" id="Resource_ytq5s"]
+script = ExtResource("1_no5id")
+id = &"nairobi"
+display_name = "Nairobi"
+country = "Kenya"
+map_position = Vector2(0.60227776, 0.5071667)
+
+[sub_resource type="Resource" id="Resource_6u4ps"]
+script = ExtResource("1_no5id")
+id = &"le_caire"
+display_name = "Le Caire"
+country = "Égypte"
+map_position = Vector2(0.5867778, 0.3331111)
+
+[sub_resource type="Resource" id="Resource_jx7u1"]
+script = ExtResource("1_no5id")
+id = &"paris"
+display_name = "Paris"
+country = "France"
+map_position = Vector2(0.5065278, 0.22855556)
+
+[sub_resource type="Resource" id="Resource_pvb0o"]
+script = ExtResource("1_no5id")
+id = &"new_york"
+display_name = "New York"
+country = "États-Unis"
+map_position = Vector2(0.29444444, 0.27383333)
+
+[sub_resource type="Resource" id="Resource_6yari"]
+script = ExtResource("1_no5id")
+id = &"tokyo"
+display_name = "Tokyo"
+country = "Japon"
+map_position = Vector2(0.8880278, 0.30172223)
+
+[resource]
+script = ExtResource("3_hg8gk")
+cities = Array[ExtResource("1_no5id")]([SubResource("Resource_wcylf"), SubResource("Resource_awn1l"), SubResource("Resource_jx432"), SubResource("Resource_4gpye"), SubResource("Resource_o2eky"), SubResource("Resource_ytq5s"), SubResource("Resource_6u4ps"), SubResource("Resource_jx7u1"), SubResource("Resource_pvb0o"), SubResource("Resource_6yari")])

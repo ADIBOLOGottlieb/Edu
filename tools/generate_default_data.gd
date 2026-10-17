@@ -12,8 +12,10 @@ const ANIMS_PATH: String = "res://data/animations/player_anims.tres"
 const LIBRARY_PATH: String = "res://data/levels/chunk_library.tres"
 const FIGURES_PATH: String = "res://data/animations/player_figures.tres"
 const STYLE_PATH: String = "res://data/animations/protagonist_style.tres"
+const PURSUER_TUNING_PATH: String = "res://data/tuning/pursuer_move.tres"
 const LOME_THEME_PATH: String = "res://data/cities/lome_theme.tres"
 const LOME_PATH: String = "res://data/cities/lome.tres"
+const WORLD_PATH: String = "res://data/world/world_map.tres"
 ## Hauteur des immeubles sous leur toit : la rue est loin en dessous.
 const BUILDING_DEPTH: float = 1400.0
 ## Épaisseur d'une poutre (grue, passerelle).
@@ -23,6 +25,7 @@ const BEAM_THICKNESS: float = 16.0
 func _init() -> void:
 	var force: bool = OS.get_cmdline_user_args().has("--force")
 	_save(MoveTuning.new(), TUNING_PATH, force)
+	_save(_pursuer_tuning(), PURSUER_TUNING_PATH, force)
 	_save(_player_animations(), ANIMS_PATH, force)
 	_save(_chunk_library(), LIBRARY_PATH, force)
 	_save(_figure_library(), FIGURES_PATH, force)
@@ -30,6 +33,7 @@ func _init() -> void:
 	_save(SilhouetteStyle.new(), STYLE_PATH, force)
 	_save(_lome_theme(), LOME_THEME_PATH, force)
 	_save(_lome_city(load(LOME_THEME_PATH) as CityTheme), LOME_PATH, force)
+	_save(_world_map(load(LOME_PATH) as CityDefinition), WORLD_PATH, force)
 	quit()
 
 
@@ -61,12 +65,17 @@ func _lome_theme() -> CityTheme:
 	return theme
 
 
-func _route(id: StringName, display_name: String, difficulty: int, chunks: Array[StringName]) -> CityRoute:
+func _route(
+	id: StringName, display_name: String, difficulty: int, chunks: Array[StringName],
+	par_time: float, pursuit: bool = true
+) -> CityRoute:
 	var route: CityRoute = CityRoute.new()
 	route.id = id
 	route.display_name = display_name
 	route.difficulty = difficulty
 	route.chunk_ids = chunks
+	route.pursuit = pursuit
+	route.par_time = par_time
 	return route
 
 
@@ -80,19 +89,19 @@ func _lome_city(theme: CityTheme) -> CityDefinition:
 	city.routes = [
 		_route(&"lome_grand_marche", "Grand Marché", 0, [
 			&"flat_run", &"vault_pair", &"low_tunnel", &"small_gap", &"step_platform", &"flat_run",
-		] as Array[StringName]),
+		] as Array[StringName], 17.0, false),
 		_route(&"lome_boulevard", "Boulevard du 13-Janvier", 1, [
 			&"flat_run", &"roof_hop", &"stairs_up", &"vent_field", &"drop_down", &"tunnel_then_vault", &"flat_run",
-		] as Array[StringName]),
+		] as Array[StringName], 20.0),
 		_route(&"lome_be", "Quartier Bè", 2, [
 			&"flat_run", &"double_gap", &"wall_ledge", &"roof_climb", &"gap_drop_roll", &"slide_gap", &"flat_run",
-		] as Array[StringName]),
+		] as Array[StringName], 27.0),
 		_route(&"lome_cathedrale", "Cathédrale", 3, [
 			&"flat_run", &"high_wall", &"precision_hops", &"upper_route", &"gap_then_wall", &"wall_gap_wall", &"flat_run",
-		] as Array[StringName]),
+		] as Array[StringName], 29.0),
 		_route(&"lome_independance", "Place de l'Indépendance", 4, [
 			&"flat_run", &"skyline_run", &"crane_line", &"tunnel_drop_climb", &"rooftop_gauntlet", &"flat_run",
-		] as Array[StringName]),
+		] as Array[StringName], 33.0),
 	] as Array[CityRoute]
 	return city
 
@@ -349,7 +358,7 @@ func _flame(x: float, period: float, phase: float = 0.0, top: float = 0.0) -> Ha
 
 ## Écraseur qui s'abat jusqu'au toit `top` (bloc de 60 px, course de `drop`).
 func _crusher(x: float, period: float, top: float = 0.0, drop: float = 90.0, phase: float = 0.0) -> HazardSpec:
-	return _hazard(&"crusher", Rect2(x, top - drop - 60.0, 80.0, 60.0), Vector2(0.0, drop), period, phase, 0.45)
+	return _hazard(&"crusher", Rect2(x, top - drop - 60.0, 80.0, 60.0), Vector2(0.0, drop), period, phase, 0.4)
 
 
 ## Scie mobile (diamètre 44 px) de `from` vers `from + path`.
@@ -370,17 +379,17 @@ func _add_hazards(library: ChunkLibrary) -> void:
 		# Palier 2 : scie, écraseur, flammes désynchronisées.
 		&"wall_ledge": [_saw(Vector2(900, -150), Vector2(0, 106), 2.2)],
 		&"tunnel_then_vault": [_spikes(680, 60)],
-		&"roof_climb": [_crusher(720, 2.8, -200, 80.0)],
+		&"roof_climb": [_crusher(720, 2.0, -200, 80.0)],
 		&"vent_field": [_flame(455, 1.8, 0.0), _flame(715, 1.8, 0.5)],
 		&"gap_drop_roll": [_spikes(985, 55, 240)],
 		# Palier 3 : enchaînements précis.
-		&"high_wall": [_crusher(790, 2.6)],
+		&"high_wall": [_crusher(950, 2.0)],
 		&"gap_then_wall": [_spikes(1210, 50)],
 		&"upper_route": [_spikes(1260, 60)],
 		&"wall_gap_wall": [_spikes(700, 50, -180)],
 		# Palier 4 : expert.
 		&"skyline_run": [_saw(Vector2(1080, -420), Vector2(0, 100), 2.2)],
-		&"tunnel_drop_climb": [_crusher(900, 2.6, 100.0, 80.0)],
+		&"tunnel_drop_climb": [_crusher(900, 2.0, 100.0, 80.0)],
 		&"rooftop_gauntlet": [_flame(1900, 1.8, 0.0, -40.0)],
 	}
 	for layout: ChunkLayout in library.layouts:
@@ -490,3 +499,41 @@ func _player_animations() -> AnimationSet:
 		}),
 	}
 	return anims
+
+
+## Vigile poursuivant (M5) : même corps que le joueur, sprint un peu plus lent (une
+## course propre le distance, une erreur le laisse revenir), accélération plus vive.
+func _pursuer_tuning() -> MoveTuning:
+	var tuning: MoveTuning = MoveTuning.new()
+	tuning.sprint_speed = 455.0
+	tuning.ground_accel = 2600.0
+	return tuning
+
+
+func _world_city(id: StringName, display_name: String, country: String, longitude: float, latitude: float, city: CityDefinition = null) -> WorldCity:
+	var entry: WorldCity = WorldCity.new()
+	entry.id = id
+	entry.display_name = display_name
+	entry.country = country
+	entry.map_position = Vector2((longitude + 180.0) / 360.0, (90.0 - latitude) / 180.0)
+	entry.city = city
+	return entry
+
+
+## Carte du monde (docs/PROPOSITION_TOUR_DU_MONDE.md §2) : Lomé jouable, les
+## autres villes annoncées (« bientôt »), dans l'ordre de déblocage.
+func _world_map(lome: CityDefinition) -> WorldMap:
+	var world: WorldMap = WorldMap.new()
+	world.cities = [
+		_world_city(&"lome", "Lomé", "Togo", 1.22, 6.13, lome),
+		_world_city(&"cotonou", "Cotonou", "Bénin", 2.42, 6.37),
+		_world_city(&"abidjan", "Abidjan", "Côte d'Ivoire", -4.01, 5.36),
+		_world_city(&"dakar", "Dakar", "Sénégal", -17.44, 14.69),
+		_world_city(&"rio", "Rio de Janeiro", "Brésil", -43.2, -22.9),
+		_world_city(&"nairobi", "Nairobi", "Kenya", 36.82, -1.29),
+		_world_city(&"le_caire", "Le Caire", "Égypte", 31.24, 30.04),
+		_world_city(&"paris", "Paris", "France", 2.35, 48.86),
+		_world_city(&"new_york", "New York", "États-Unis", -74.0, 40.71),
+		_world_city(&"tokyo", "Tokyo", "Japon", 139.69, 35.69),
+	] as Array[WorldCity]
+	return world

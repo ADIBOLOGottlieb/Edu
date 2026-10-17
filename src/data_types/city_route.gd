@@ -9,3 +9,9 @@ extends Resource
 @export_range(0, 4) var difficulty: int = 0
 ## Identifiants des tronçons de la ChunkLibrary, dans l'ordre.
 @export var chunk_ids: Array[StringName] = []
+## Un vigile poursuit le coureur sur ce parcours (M5).
+@export var pursuit: bool = false
+## Délai avant l'entrée du vigile (s).
+@export var pursuer_delay: float = 2.5
+## Temps de référence (s) pour la 3e étoile (arrivée sans mort sous ce temps).
+@export var par_time: float = 0.0

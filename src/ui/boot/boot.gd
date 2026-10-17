@@ -1,11 +1,13 @@
 extends Control
-## Écran de démarrage provisoire : accès aux scènes de développement.
-## Sera remplacé par le menu principal au jalon M7 (via SceneRouter).
+## Lanceur développeur : accès direct aux scènes de développement. Depuis M7,
+## la scène principale est le menu (src/ui/menus/main_menu.tscn) ; on arrive
+## ici par son bouton discret « Développeur ».
 
 const BACKGROUND: Color = Color(0.93, 0.93, 0.91)
 const INK: Color = Color(0.05, 0.05, 0.06)
 ## Libellé → scène.
 const DESTINATIONS: Array[Array] = [
+	["Retour au menu principal", "res://src/ui/menus/main_menu.tscn"],
 	["Lomé : Grand Marché", "res://scenes/levels/lome_run.tscn"],
 	["Parcours fixe (avec arrivée)", "res://scenes/levels/fixed_run.tscn"],
 	["Course infinie (aléatoire)", "res://scenes/levels/endless_run.tscn"],
@@ -21,19 +23,19 @@ func _ready() -> void:
 
 	var version: String = str(ProjectSettings.get_setting("application/config/version", "?"))
 	var label: Label = Label.new()
-	label.text = "EDU\nversion %s — prototype (aucune mission jouable)" % version
+	label.text = "EDU\nversion %s — lanceur développeur" % version
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_color_override(&"font_color", INK)
 	label.add_theme_font_size_override(&"font_size", 32)
 	label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	label.offset_bottom = -260.0
+	label.offset_bottom = -440.0
 	add_child(label)
 
 	var buttons: VBoxContainer = VBoxContainer.new()
 	buttons.add_theme_constant_override(&"separation", 14)
 	buttons.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	buttons.position.y += 80.0
+	buttons.position.y -= 120.0
 	for destination: Array in DESTINATIONS:
 		var button: Button = Button.new()
 		button.text = String(destination[0])

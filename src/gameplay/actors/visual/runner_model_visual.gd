@@ -75,8 +75,26 @@ const XFADE: Dictionary[StringName, float] = {
 	&"vault": 0.08,
 }
 
+## Tenue de gardien (poursuivants) : casquette à visière, lampe torche et faisceau.
+const CAP_RADIUS_M: float = 0.115
+const CAP_HEIGHT_M: float = 0.07
+const VISOR_SIZE_M: Vector3 = Vector3(0.2, 0.022, 0.13)
+const BADGE_SIZE_M: Vector3 = Vector3(0.06, 0.04, 0.02)
+const TORCH_SIZE_M: Vector3 = Vector3(0.05, 0.05, 0.2)
+## Faisceau de la lampe (px) : longueur, demi-ouverture (rad), inclinaison vers le sol.
+const BEAM_LENGTH: float = 130.0
+const BEAM_HALF_ANGLE: float = 0.26
+const BEAM_TILT: float = 0.32
+
 @export var figure_library: FigureLibrary
 @export var ink: Color = Color(0.04, 0.04, 0.05)
+## Échelle du mannequin (x : carrure, y : taille, z : épaisseur vue de profil).
+## Le joueur garde Vector3.ONE ; le gardien est plus élancé.
+@export var body_scale: Vector3 = Vector3.ONE
+## Tenue de gardien (casquette, lampe torche et faisceau chaud). Faux pour le joueur.
+@export var guard_gear: bool = false
+## Couleur chaude de la tenue (bandeau de casquette, lampe, faisceau).
+@export var accent: Color = Color(1.0, 0.72, 0.30)
 
 var _body: RunnerBody
 var _viewport: SubViewport
@@ -98,6 +116,10 @@ var _yaw: float = PI * 0.5
 ## Poids des gestes de bras posés par-dessus l'animation (0 = animation pure).
 var _arm_weight: float = 0.0
 var _climb_phase: float = 0.0
+var _camera: Camera3D
+## Tenue de gardien : os de la main qui tient la lampe, faisceau 2D.
+var _torch_bone: int = -1
+var _beam: Polygon2D
 
 
 func _ready() -> void:
@@ -129,6 +151,11 @@ func arm_weight() -> float:
 	return _arm_weight
 
 
+## Faisceau de la lampe du gardien (null sans tenue de gardien), pour les tests.
+func torch_beam() -> Polygon2D:
+	return _beam
+
+
 # --- Construction ---------------------------------------------------------------------
 
 func _build_viewport() -> void:
@@ -147,6 +174,7 @@ func _build_viewport() -> void:
 	camera.near = 0.1
 	camera.far = 50.0
 	_viewport.add_child(camera)
+	_camera = camera
 
 	# Pivot aux hanches : les saltos tournent autour du bassin.
 	_pivot = Node3D.new()
@@ -154,9 +182,12 @@ func _build_viewport() -> void:
 	_viewport.add_child(_pivot)
 	_model = (load(MODEL_SCENE) as PackedScene).instantiate() as Node3D
 	_model.position = Vector3(0.0, -HIP_HEIGHT_M, 0.0)
+	_model.scale = body_scale
 	_pivot.add_child(_model)
 	_apply_ink(_model)
 	_skeleton = _model.find_child("Skeleton3D", true, false) as Skeleton3D
+	if guard_gear and _skeleton != null:
+		_add_guard_gear()
 	_player = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_player.add_animation_library(&"parkour", load(PARKOUR_LIBRARY) as AnimationLibrary)
 
@@ -169,6 +200,8 @@ func _build_viewport() -> void:
 	var screen_scale: float = SCREEN_HEIGHT_PX / (MODEL_HEIGHT_M * pixels_per_m)
 	_sprite.scale = Vector2(screen_scale, screen_scale)
 	add_child(_sprite)
+	if guard_gear:
+		_build_beam()
 
 
 ## Matériau noir uni, sans lumière : une silhouette pure, comme Vector.
@@ -178,6 +211,94 @@ func _apply_ink(node: Node) -> void:
 	material.albedo_color = ink
 	for mesh: Node in node.find_children("*", "MeshInstance3D", true, false):
 		(mesh as MeshInstance3D).material_override = material
+
+
+## Tenue de gardien : casquette (encre) à bandeau chaud et lampe torche dans la main,
+## fixées aux os (BoneAttachment3D). Repère du squelette : +Y en haut, +Z devant.
+func _add_guard_gear() -> void:
+	var dark: StandardMaterial3D = _unshaded(ink)
+	var warm: StandardMaterial3D = _unshaded(accent)
+	var cap: CylinderMesh = CylinderMesh.new()
+	cap.top_radius = CAP_RADIUS_M * 1.15
+	cap.bottom_radius = CAP_RADIUS_M
+	cap.height = CAP_HEIGHT_M
+	var visor: BoxMesh = BoxMesh.new()
+	visor.size = VISOR_SIZE_M
+	var badge: BoxMesh = BoxMesh.new()
+	badge.size = BADGE_SIZE_M
+	var head: BoneAttachment3D = _attach(&"DEF-head")
+	if head != null:
+		_gear_piece(head, cap, dark, Vector3(0.0, 0.165, -0.01))
+		_gear_piece(head, visor, dark, Vector3(0.0, 0.135, 0.12))
+		_gear_piece(head, badge, warm, Vector3(0.0, 0.17, 0.12))
+	var torch: BoxMesh = BoxMesh.new()
+	torch.size = TORCH_SIZE_M
+	var hand: BoneAttachment3D = _attach(&"DEF-hand.L")
+	if hand != null:
+		_gear_piece(hand, torch, warm, Vector3(0.0, -0.04, 0.06))
+		_torch_bone = _skeleton.find_bone("DEF-hand.L")
+
+
+static func _unshaded(color: Color) -> StandardMaterial3D:
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = color
+	return material
+
+
+func _attach(bone_name: StringName) -> BoneAttachment3D:
+	if _skeleton.find_bone(bone_name) < 0:
+		return null
+	var attachment: BoneAttachment3D = BoneAttachment3D.new()
+	attachment.bone_name = bone_name
+	_skeleton.add_child(attachment)
+	return attachment
+
+
+## Pièce de tenue placée à `offset` (repère du squelette, m) de l'os, quelle que
+## soit l'orientation de l'os au repos ; l'échelle du corps est compensée en
+## épaisseur pour garder une casquette ronde.
+func _gear_piece(attachment: BoneAttachment3D, mesh: Mesh, material: Material, offset: Vector3) -> void:
+	var rest: Basis = _skeleton.get_bone_global_rest(_skeleton.find_bone(attachment.bone_name)).basis.orthonormalized()
+	var piece: MeshInstance3D = MeshInstance3D.new()
+	piece.mesh = mesh
+	piece.material_override = material
+	piece.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	piece.transform = Transform3D(rest.inverse(), rest.inverse() * offset)
+	attachment.add_child(piece)
+
+
+## Faisceau 2D : cône chaud, additif, qui s'efface vers le bout.
+func _build_beam() -> void:
+	_beam = Polygon2D.new()
+	_beam.name = "TorchBeam"
+	var tip: Vector2 = Vector2(BEAM_LENGTH, 0.0)
+	_beam.polygon = PackedVector2Array([
+		Vector2.ZERO, tip.rotated(-BEAM_HALF_ANGLE), tip, tip.rotated(BEAM_HALF_ANGLE),
+	])
+	var glow: Color = Color(accent, 0.34)
+	var fade: Color = Color(accent, 0.0)
+	_beam.vertex_colors = PackedColorArray([glow, fade, Color(accent, 0.05), fade])
+	var additive: CanvasItemMaterial = CanvasItemMaterial.new()
+	additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	_beam.material = additive
+	add_child(_beam)
+
+
+## Le faisceau part de la main projetée à l'écran et éclaire devant, vers le sol.
+func _update_beam() -> void:
+	if _beam == null:
+		return
+	var alive: bool = _state != PlayerState.State.DEATH
+	_beam.visible = alive and _torch_bone >= 0
+	if not _beam.visible:
+		return
+	var hand: Vector3 = (_skeleton.global_transform * _skeleton.get_bone_global_pose(_torch_bone)).origin
+	var pixel: Vector2 = _camera.unproject_position(hand)
+	_beam.position = (pixel + _sprite.offset) * _sprite.scale
+	var facing: float = float(_body.facing)
+	_beam.scale = Vector2(facing, 1.0)
+	_beam.rotation = BEAM_TILT * facing
 
 
 ## Clips dérivés (poses figées, extraits accélérés) dans la bibliothèque « gen ».
@@ -349,6 +470,7 @@ func _process(delta: float) -> void:
 	_tree.advance(delta)
 	_apply_arm_gestures(delta)
 	_update_orientation(delta)
+	_update_beam()
 
 
 func _update_orientation(delta: float) -> void:

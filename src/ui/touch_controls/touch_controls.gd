@@ -33,6 +33,10 @@ func _ready() -> void:
 	for entry: Dictionary in LAYOUT:
 		_buttons.append(_create_button(entry))
 	get_viewport().size_changed.connect(_relayout)
+	var settings_service: SettingsServiceNode = get_node_or_null(^"/root/SettingsService") as SettingsServiceNode
+	if settings_service != null:
+		settings_service.changed.connect(_apply_settings)
+	_apply_settings()
 	_relayout()
 
 
@@ -111,3 +115,17 @@ class ButtonFace:
 			size,
 			Color(1, 1, 1, 0.95)
 		)
+
+
+## Opacité et taille réglées par le joueur (écran Réglages, SettingsService).
+func _apply_settings() -> void:
+	var settings_service: SettingsServiceNode = get_node_or_null(^"/root/SettingsService") as SettingsServiceNode
+	if settings_service == null:
+		return
+	opacity = settings_service.settings.touch_opacity
+	var size: float = settings_service.settings.touch_scale
+	for button: TouchScreenButton in _buttons:
+		button.scale = Vector2(size, size)
+		for child: Node in button.get_children():
+			if child is CanvasItem:
+				(child as CanvasItem).modulate.a = opacity

@@ -13,7 +13,7 @@ config_version=5
 config/name="EDU"
 config/description="Jeu d'action-parkour 2D. Édu : « course » / « pays » en ewe."
 config/version="0.0.1"
-run/main_scene="res://scenes/boot.tscn"
+run/main_scene="res://src/ui/menus/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/bg_color=Color(0.93, 0.93, 0.91, 1)
 

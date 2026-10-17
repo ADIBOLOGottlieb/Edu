@@ -2,7 +2,7 @@ extends SceneTree
 ## Filme le coureur (pilote automatique) sur une suite de toits riches en figures :
 ## une image PNG toutes les 2 images, à assembler en vidéo avec ffmpeg.
 ## Contrôle de la fluidité de la gestuelle (nécessite une fenêtre, pas --headless).
-## Usage : godot --path . --fixed-fps 60 -s tools/capture_motion.gd -- <dossier_de_sortie_absolu> [--model2d] [--city=lome] [--route=N]
+## Usage : godot --path . --fixed-fps 60 -s tools/capture_motion.gd -- <dossier_de_sortie_absolu> [--model2d] [--city=lome] [--route=N] [--zoom=1]
 ## Puis : ffmpeg -framerate 30 -i <dossier>/f_%04d.png -pix_fmt yuv420p motion.mp4
 
 const MAX_FRAMES: int = 1500
@@ -12,6 +12,7 @@ const ROUTE: Array[StringName] = [
 ]
 
 var _runner: LevelRunner
+var _director: EncounterDirector
 var _frame: int = 0
 var _shot: int = 0
 var _out: String = ""
@@ -62,11 +63,17 @@ func _init() -> void:
 	_runner.player = body
 	var camera: RunnerCamera = RunnerCamera.new()
 	camera.target = body
-	camera.zoom = Vector2(2.4, 2.4)
-	camera.look_ahead = 90.0
+	var zoom: float = float(_arg(args, "--zoom=")) if _arg(args, "--zoom=") != "" else 2.4
+	camera.zoom = Vector2(zoom, zoom)
+	camera.look_ahead = 90.0 if zoom > 1.5 else 220.0
 	camera.vertical_offset = -50.0
 	world.add_child(_runner)
 	world.add_child(body)
+	if city_arg != "":
+		# Poursuite du parcours (vigile) si le parcours en a une.
+		_director = EncounterDirector.new()
+		_director.runner = _runner
+		world.add_child(_director)
 	world.add_child(camera)
 	root.add_child(world)
 	camera.make_current.call_deferred()
@@ -80,7 +87,7 @@ func _on_frame() -> void:
 		_shot += 1
 		root.get_texture().get_image().save_png(_out.path_join("f_%04d.png" % _shot))
 	if _frame >= MAX_FRAMES or _runner.is_completed() or _runner.fall_count > 0:
-		print("capture_motion : %d images, terminé=%s, chutes=%d, morts=%d" % [_shot, _runner.is_completed(), _runner.fall_count, _runner.death_count])
+		print("capture_motion : %d images, terminé=%s, chutes=%d, morts=%d, captures=%d" % [_shot, _runner.is_completed(), _runner.fall_count, _runner.death_count, _director.captures if _director != null else 0])
 		quit()
 
 

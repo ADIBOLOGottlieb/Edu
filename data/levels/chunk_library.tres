@@ -130,8 +130,8 @@ script = ExtResource("2_daevl")
 kind = &"crusher"
 rect = Rect2(720, -340, 80, 60)
 path_to = Vector2(0, 80)
-period = 2.8
-active_ratio = 0.45
+period = 2.0
+active_ratio = 0.4
 
 [sub_resource type="Resource" id="Resource_ca331"]
 script = ExtResource("1_gtesx")
@@ -184,10 +184,10 @@ tags = Array[StringName]([&"gap", &"drop", &"roll"])
 [sub_resource type="Resource" id="Resource_1d445"]
 script = ExtResource("2_daevl")
 kind = &"crusher"
-rect = Rect2(790, -150, 80, 60)
+rect = Rect2(950, -150, 80, 60)
 path_to = Vector2(0, 90)
-period = 2.6
-active_ratio = 0.45
+period = 2.0
+active_ratio = 0.4
 
 [sub_resource type="Resource" id="Resource_j35w0"]
 script = ExtResource("1_gtesx")
@@ -284,8 +284,8 @@ script = ExtResource("2_daevl")
 kind = &"crusher"
 rect = Rect2(900, -40, 80, 60)
 path_to = Vector2(0, 80)
-period = 2.6
-active_ratio = 0.45
+period = 2.0
+active_ratio = 0.4
 
 [sub_resource type="Resource" id="Resource_kenrg"]
 script = ExtResource("1_gtesx")

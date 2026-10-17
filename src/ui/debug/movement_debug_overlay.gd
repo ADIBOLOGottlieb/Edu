@@ -8,6 +8,10 @@ extends CanvasLayer
 var _label: Label
 
 
+## Panneau masqué au départ (niveaux joueur) ; F3 l'affiche.
+@export var start_hidden: bool = false
+
+
 func _ready() -> void:
 	layer = 40
 	_label = Label.new()
@@ -19,6 +23,7 @@ func _ready() -> void:
 	panel.set_content_margin_all(8.0)
 	_label.add_theme_stylebox_override(&"normal", panel)
 	add_child(_label)
+	_label.visible = not start_hidden
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
