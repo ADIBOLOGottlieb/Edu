@@ -16,6 +16,7 @@ const PURSUER_TUNING_PATH: String = "res://data/tuning/pursuer_move.tres"
 const LOME_THEME_PATH: String = "res://data/cities/lome_theme.tres"
 const LOME_PATH: String = "res://data/cities/lome.tres"
 const WORLD_PATH: String = "res://data/world/world_map.tres"
+const EQUIPMENT_PATH: String = "res://data/equipment/catalog.tres"
 ## Hauteur des immeubles sous leur toit : la rue est loin en dessous.
 const BUILDING_DEPTH: float = 1400.0
 ## Épaisseur d'une poutre (grue, passerelle).
@@ -34,6 +35,7 @@ func _init() -> void:
 	_save(_lome_theme(), LOME_THEME_PATH, force)
 	_save(_lome_city(load(LOME_THEME_PATH) as CityTheme), LOME_PATH, force)
 	_save(_world_map(load(LOME_PATH) as CityDefinition), WORLD_PATH, force)
+	_save(_equipment_catalog(), EQUIPMENT_PATH, force)
 	quit()
 
 
@@ -537,3 +539,53 @@ func _world_map(lome: CityDefinition) -> WorldMap:
 		_world_city(&"tokyo", "Tokyo", "Japon", 139.69, 35.69),
 	] as Array[WorldCity]
 	return world
+
+
+func _equipment(
+	id: StringName, display_name: String, description: String, category: EquipmentData.Category,
+	duration: float, stack_rule: EquipmentData.StackRule, icon: StringName,
+	power: float = 1.0, charges: int = 0, incompatible: Array[StringName] = []
+) -> EquipmentData:
+	var item: EquipmentData = EquipmentData.new()
+	item.id = id
+	item.display_name = display_name
+	item.description = description
+	item.category = category
+	item.duration = duration
+	item.stack_rule = stack_rule
+	item.icon = icon
+	item.power = power
+	item.charges = charges
+	item.incompatible_with = incompatible
+	return item
+
+
+## Dix équipements (ARCHITECTURE §7.2) adaptés au jeu sans combat (ADR-047) :
+## effets de parkour et d'évasion réels, aucune violence.
+func _equipment_catalog() -> EquipmentCatalog:
+	var catalog: EquipmentCatalog = EquipmentCatalog.new()
+	catalog.items = [
+		_equipment(&"gilet", "Gilet renforcé", "Survit à un piège mortel.",
+			EquipmentData.Category.DEFENSE, 20.0, EquipmentData.StackRule.REFRESH, &"vest", 1.0, 1),
+		_equipment(&"bouclier", "Bouclier", "Se dégage de deux prises du vigile.",
+			EquipmentData.Category.DEFENSE, 15.0, EquipmentData.StackRule.REPLACE, &"shield", 1.0, 2),
+		_equipment(&"gants", "Gants d'adhérence", "Escalade 60 % plus longue.",
+			EquipmentData.Category.MOBILITY, 12.0, EquipmentData.StackRule.REPLACE, &"glove", 1.6),
+		_equipment(&"accelerateur", "Accélérateur", "Vitesse maximale ×1,25.",
+			EquipmentData.Category.MOBILITY, 10.0, EquipmentData.StackRule.REPLACE, &"bolt", 1.25, 0,
+			[&"cachette"] as Array[StringName]),
+		_equipment(&"impulsion", "Impulsion", "Repousse le vigile, qui trébuche.",
+			EquipmentData.Category.RANGED, 0.6, EquipmentData.StackRule.REJECT, &"wave", 260.0),
+		_equipment(&"leurre", "Leurre", "Le vigile suit le leurre pendant 4 s.",
+			EquipmentData.Category.RANGED, 4.0, EquipmentData.StackRule.REJECT, &"decoy"),
+		_equipment(&"camouflage", "Camouflage", "Le vigile perd ta trace (sauf au contact).",
+			EquipmentData.Category.STEALTH, 8.0, EquipmentData.StackRule.REFRESH, &"cloak"),
+		_equipment(&"cachette", "Cachette mobile", "Invisible tant que tu restes immobile.",
+			EquipmentData.Category.STEALTH, 10.0, EquipmentData.StackRule.REPLACE, &"box", 1.0, 0,
+			[&"accelerateur"] as Array[StringName]),
+		_equipment(&"piratage", "Kit de piratage", "Coupe les pièges proches pendant 8 s.",
+			EquipmentData.Category.TECH, 8.0, EquipmentData.StackRule.REFRESH, &"chip", 900.0),
+		_equipment(&"surcharge", "Surcharge", "Vide 60 % de la jauge de capture.",
+			EquipmentData.Category.UTILITY, 0.3, EquipmentData.StackRule.REFRESH, &"battery", 0.6),
+	] as Array[EquipmentData]
+	return catalog

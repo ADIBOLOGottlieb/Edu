@@ -80,3 +80,23 @@ func test_route_session_records_the_finish_and_describes_the_result() -> void:
 	assert_eq(int(result["next_route_index"]), 2)
 	assert_eq(str(result["route_name"]), city.routes[1].display_name)
 	assert_true(_profile.progression.is_route_unlocked(city, 2), "parcours suivant debloque")
+
+
+func test_inventory_starter_kit_and_survives_a_reload_from_disk() -> void:
+	var inventory_service: InventoryServiceNode = get_node("/root/InventoryService") as InventoryServiceNode
+	inventory_service.reload()
+	for id: StringName in InventoryServiceNode.STARTER_KIT:
+		assert_eq(inventory_service.inventory.quantity(id), 1, "kit de départ : %s" % id)
+	inventory_service.inventory.remove(inventory_service.inventory.find(&"surcharge"))
+	inventory_service.inventory.try_add(&"gilet", false)
+	await wait_process_frames(2)
+	_save.reload()
+	inventory_service.reload()
+	assert_eq(inventory_service.inventory.quantity(&"gilet"), 1)
+	assert_eq(inventory_service.inventory.quantity(&"surcharge"), 0, "objet utilisé, pas de nouveau kit")
+	assert_eq(inventory_service.inventory.quantity(&"accelerateur"), 1)
+	_save.reload()
+	for file: String in DirAccess.get_files_at(DIR):
+		DirAccess.remove_absolute(DIR.path_join(file))
+	_save.reload()
+	inventory_service.reload()

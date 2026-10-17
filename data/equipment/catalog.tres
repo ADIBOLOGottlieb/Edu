@@ -1,0 +1,110 @@
+[gd_resource type="Resource" script_class="EquipmentCatalog" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/equipment_data.gd" id="1_6xaj5"]
+[ext_resource type="Script" path="res://src/data_types/equipment_catalog.gd" id="2_3o58r"]
+
+[sub_resource type="Resource" id="Resource_346wx"]
+script = ExtResource("1_6xaj5")
+id = &"gilet"
+display_name = "Gilet renforcé"
+description = "Survit à un piège mortel."
+category = 0
+duration = 20.0
+charges = 1
+icon = &"vest"
+
+[sub_resource type="Resource" id="Resource_b7hg2"]
+script = ExtResource("1_6xaj5")
+id = &"bouclier"
+display_name = "Bouclier"
+description = "Se dégage de deux prises du vigile."
+category = 0
+duration = 15.0
+stack_rule = 1
+charges = 2
+icon = &"shield"
+
+[sub_resource type="Resource" id="Resource_s4wwo"]
+script = ExtResource("1_6xaj5")
+id = &"gants"
+display_name = "Gants d'adhérence"
+description = "Escalade 60 % plus longue."
+category = 3
+duration = 12.0
+stack_rule = 1
+power = 1.6
+icon = &"glove"
+
+[sub_resource type="Resource" id="Resource_xr66s"]
+script = ExtResource("1_6xaj5")
+id = &"accelerateur"
+display_name = "Accélérateur"
+description = "Vitesse maximale ×1,25."
+category = 3
+stack_rule = 1
+incompatible_with = Array[StringName]([&"cachette"])
+power = 1.25
+icon = &"bolt"
+
+[sub_resource type="Resource" id="Resource_3ubns"]
+script = ExtResource("1_6xaj5")
+id = &"impulsion"
+display_name = "Impulsion"
+description = "Repousse le vigile, qui trébuche."
+category = 2
+duration = 0.6
+stack_rule = 2
+power = 260.0
+icon = &"wave"
+
+[sub_resource type="Resource" id="Resource_13dbj"]
+script = ExtResource("1_6xaj5")
+id = &"leurre"
+display_name = "Leurre"
+description = "Le vigile suit le leurre pendant 4 s."
+category = 2
+duration = 4.0
+stack_rule = 2
+icon = &"decoy"
+
+[sub_resource type="Resource" id="Resource_o5yvu"]
+script = ExtResource("1_6xaj5")
+id = &"camouflage"
+display_name = "Camouflage"
+description = "Le vigile perd ta trace (sauf au contact)."
+category = 4
+duration = 8.0
+icon = &"cloak"
+
+[sub_resource type="Resource" id="Resource_p241r"]
+script = ExtResource("1_6xaj5")
+id = &"cachette"
+display_name = "Cachette mobile"
+description = "Invisible tant que tu restes immobile."
+category = 4
+stack_rule = 1
+incompatible_with = Array[StringName]([&"accelerateur"])
+icon = &"box"
+
+[sub_resource type="Resource" id="Resource_w8txw"]
+script = ExtResource("1_6xaj5")
+id = &"piratage"
+display_name = "Kit de piratage"
+description = "Coupe les pièges proches pendant 8 s."
+category = 5
+duration = 8.0
+power = 900.0
+icon = &"chip"
+
+[sub_resource type="Resource" id="Resource_otef3"]
+script = ExtResource("1_6xaj5")
+id = &"surcharge"
+display_name = "Surcharge"
+description = "Vide 60 % de la jauge de capture."
+duration = 0.3
+power = 0.6
+icon = &"battery"
+
+[resource]
+script = ExtResource("2_3o58r")
+items = Array[ExtResource("1_6xaj5")]([SubResource("Resource_346wx"), SubResource("Resource_b7hg2"), SubResource("Resource_s4wwo"), SubResource("Resource_xr66s"), SubResource("Resource_3ubns"), SubResource("Resource_13dbj"), SubResource("Resource_o5yvu"), SubResource("Resource_p241r"), SubResource("Resource_w8txw"), SubResource("Resource_otef3")])
