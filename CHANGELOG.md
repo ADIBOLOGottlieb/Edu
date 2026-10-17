@@ -4,6 +4,25 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M3b (2/3) Figures de parkour
+- 9 figures choisies selon le contexte à l'entrée d'un état (`Figure.choose`), signal `figure_started(nom)` :
+  - **Tic-tac** (nouveau mouvement) : vite contre un mur de 50 à 150 px, appui du pied et passage par-dessus sans s'accrocher (une fois par phase aérienne, comme la course murale).
+  - **Kong vault** (sprint, obstacle ≥ 30 px) : plongeon plus rapide (+10 %) et plus bas ; **speed vault** ; **lazy vault** (sous 380 px/s).
+  - **Salto avant** : saut en sprint au bord du vide. **Wall flip** : salto arrière en se repoussant d'un mur. **Vrille** : au double saut.
+  - **Cat leap** : arrivée accroché au rebord avec de l'élan. **Roulade** : vraie rotation complète.
+- Animations **par images clés** (`FigureAnimation`, `data/animations/player_figures.tres`), synchronisées sur la physique : durée calculée sur le temps de vol réel (`Figure.expected_duration`).
+- Rotation du corps entier autour des hanches et vrille (`AnimClip.rotation`, `AnimClip.spin`) ; retour à la verticale par le plus court chemin à la fin d'une figure.
+- Capteurs : hauteur du haut du mur, bord du vide ; contexte : élan horizontal de la phase aérienne.
+- `tools/capture_figures.gd` : planche de contrôle (une ligne par figure, 4 images).
+
+### Vérifié — M3b (2/3)
+- **162/162 tests verts** (237 s), dont 7 tests d'intégration qui déclenchent chaque figure avec le vrai corps et vérifient la rotation réelle du salto et le retour à la verticale.
+- Les 24 tronçons et 3 courses aléatoires (~800 m) restent traversés sans chute ; les figures y apparaissent naturellement (kong, salto, tic-tac, roulades).
+- Planche des 9 figures contrôlée visuellement.
+
+### Limites connues — M3b (2/3)
+- Speed vault et lazy vault restent peu lisibles avec le squelette provisoire (pas de corps de profil) : à reprendre avec la nouvelle silhouette (étape 3/3).
+
 ### Ajouté — M3b (1/3) Parcours complexes et progressifs sur les toits
 - **Altitude variable** : chaque tronçon a un toit de sortie à `exit_y` ; les tronçons s'empilent en hauteur (on monte et on redescend de toit en toit, la rue est 1400 px plus bas). Le séquenceur garde l'altitude dans une bande.
 - **24 tronçons sur 5 paliers** (0 initiation → 4 expert) : sauts entre toits, escaliers de toits, descentes avec roulade, escalade de façades, champs d'obstacles, sauts de précision sur piliers étroits, glissade puis saut, double route (passerelles hautes / obstacles bas), poutres de grue au-dessus du vide, enchaînements tunnel → descente → escalade, « gauntlet » à 4 mouvements.

@@ -27,6 +27,14 @@ var wall_ahead: bool = false
 var obstacle_height: float = 0.0
 ## Rebord saisissable à portée de mains.
 var ledge_available: bool = false
+## Hauteur du haut du mur devant, au-dessus des pieds (px) ; 0 si inconnue ou trop haute.
+var wall_top_height: float = 0.0
+## Au sol : plus de sol juste devant les pieds (bord du vide).
+var edge_ahead: bool = false
+## Figure choisie pour l'état en cours d'entrée (Figure.Kind), lue par LocomotionMotor.
+var figure: int = 0
+## Vitesse horizontale maximale depuis le décollage (élan d'arrivée sur un mur).
+var air_speed_x: float = 0.0
 
 # Ressources aériennes, rechargées au sol.
 var can_double_jump: bool = false

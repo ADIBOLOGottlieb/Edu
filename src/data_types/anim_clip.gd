@@ -18,3 +18,7 @@ extends Resource
 @export_range(0.0, 1.0) var knee_bend: float = 0.15
 ## Cycles par seconde à la vitesse de course (mis à l'échelle par la vitesse réelle).
 @export var cycle_hz: float = 0.0
+## Rotation du corps entier autour des hanches (radians, positif = vers l'avant) : saltos.
+@export var rotation: float = 0.0
+## Vrille autour de l'axe vertical (radians) : rendue par un écrasement horizontal.
+@export var spin: float = 0.0

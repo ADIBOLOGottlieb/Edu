@@ -4,6 +4,7 @@ extends RefCounted
 ##
 ## M1 : Idle, Run, Sprint, Jump, Fall, Landing, Slide.
 ## M2 : DoubleJump, Roll, Vault, WallRun, WallClimb, LedgeHang.
+## M3b : tic-tac (VAULT depuis les airs).
 ## Chaque jalon suivant ajoute ses propres lignes ici, avec les tests associés.
 ## La table dit ce qui est *possible* ; les conditions (capacité débloquée,
 ## capteurs, minuteries) sont vérifiées par MovementDecider.
@@ -44,6 +45,7 @@ const TRANSITIONS: Dictionary[int, Array] = {
 		PlayerState.State.WALL_RUN,
 		PlayerState.State.WALL_CLIMB,
 		PlayerState.State.LEDGE_HANG,
+		PlayerState.State.VAULT,
 	],
 	PlayerState.State.DOUBLE_JUMP:
 	[
@@ -51,6 +53,7 @@ const TRANSITIONS: Dictionary[int, Array] = {
 		PlayerState.State.LANDING,
 		PlayerState.State.WALL_CLIMB,
 		PlayerState.State.LEDGE_HANG,
+		PlayerState.State.VAULT,
 	],
 	PlayerState.State.FALL:
 	[
@@ -58,6 +61,7 @@ const TRANSITIONS: Dictionary[int, Array] = {
 		PlayerState.State.DOUBLE_JUMP,
 		PlayerState.State.WALL_CLIMB,
 		PlayerState.State.LEDGE_HANG,
+		PlayerState.State.VAULT,
 	],
 	PlayerState.State.LANDING:
 	[

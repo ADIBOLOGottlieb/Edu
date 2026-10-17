@@ -35,10 +35,20 @@ static func on_enter(
 			velocity.x = roll_dir * maxf(absf(velocity.x), tuning.run_speed)
 		PlayerState.State.VAULT:
 			# Impulsion juste suffisante pour passer l'obstacle mesuré, plus une marge.
-			velocity.x = forward * maxf(absf(velocity.x), tuning.vault_min_speed)
-			velocity.y = -sqrt(
-				2.0 * tuning.gravity_down * (ctx.obstacle_height + tuning.vault_clearance)
-			)
+			# Kong : plongeon plus rapide et plus bas. Tic-tac : appui du pied pour
+			# passer un mur bas (hauteur du mur au lieu de celle de l'obstacle).
+			var height: float = ctx.obstacle_height
+			var clearance: float = tuning.vault_clearance
+			var speed: float = maxf(absf(velocity.x), tuning.vault_min_speed)
+			match ctx.figure:
+				Figure.Kind.TIC_TAC:
+					height = ctx.wall_top_height
+					clearance = tuning.tic_tac_clearance
+				Figure.Kind.KONG_VAULT:
+					speed *= tuning.kong_boost
+					clearance = tuning.kong_clearance
+			velocity.x = forward * speed
+			velocity.y = -sqrt(2.0 * tuning.gravity_down * (height + clearance))
 		PlayerState.State.WALL_RUN:
 			# L'élan horizontal est converti en montée le long du mur.
 			velocity.y = -maxf(absf(velocity.x) * tuning.wall_run_conversion, tuning.wall_run_min_up)

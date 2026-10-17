@@ -12,7 +12,7 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 | M1 Mouvement de base | Idle, Run, Sprint, Jump, Fall, Landing, Slide ; clavier + tactile ; bac à sable | terminé : 65/65 tests verts, captures contrôlées ; non testé sur Android |
 | M2 Parkour avancé | Vault, WallRun, WallClimb, LedgeHang, Roll, DoubleJump (capacité à débloquer) | terminé : 108/108 tests verts, captures contrôlées ; non testé sur Android |
 | M3 Niveau à défilement | tronçons en données, parcours fixe / aléatoire, caméra, arrivée, profilage | terminé : 133/133 tests, 60 FPS sur PC ; non mesuré sur Android |
-| M3b Parcours, figures, silhouette | (1/3) toits à altitude variable, 24 tronçons sur 5 paliers, pilote automatique | parcours : terminé, 140/140 tests ; figures et silhouette : à faire |
+| M3b Parcours, figures, silhouette | (1/3) toits à altitude variable, 24 tronçons sur 5 paliers, pilote automatique ; (2/3) 9 figures de parkour | parcours et figures : terminés, 162/162 tests ; silhouette : à faire |
 | M4 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.

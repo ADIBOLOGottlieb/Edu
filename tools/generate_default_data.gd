@@ -10,6 +10,7 @@ extends SceneTree
 const TUNING_PATH: String = "res://data/tuning/player_move.tres"
 const ANIMS_PATH: String = "res://data/animations/player_anims.tres"
 const LIBRARY_PATH: String = "res://data/levels/chunk_library.tres"
+const FIGURES_PATH: String = "res://data/animations/player_figures.tres"
 ## Hauteur des immeubles sous leur toit : la rue est loin en dessous.
 const BUILDING_DEPTH: float = 1400.0
 ## Épaisseur d'une poutre (grue, passerelle).
@@ -21,7 +22,88 @@ func _init() -> void:
 	_save(MoveTuning.new(), TUNING_PATH, force)
 	_save(_player_animations(), ANIMS_PATH, force)
 	_save(_chunk_library(), LIBRARY_PATH, force)
+	_save(_figure_library(), FIGURES_PATH, force)
 	quit()
+
+
+func _figure(times: Array[float], poses: Array[Dictionary]) -> FigureAnimation:
+	var animation: FigureAnimation = FigureAnimation.new()
+	animation.times = PackedFloat32Array(times)
+	var clips: Array[AnimClip] = []
+	for pose: Dictionary in poses:
+		clips.append(_clip(pose))
+	animation.poses = clips
+	return animation
+
+
+## Figures de parkour par images clés (radians ; rotation positive = vers
+## l'avant ; arm_base 0 = bras le long du corps, π/2 = devant, π = en l'air).
+## Un salto fait un tour complet (±2π) pour finir debout.
+func _figure_library() -> FigureLibrary:
+	var library: FigureLibrary = FigureLibrary.new()
+	library.animations = {
+		# Speed vault : le corps passe de profil, jambes groupées sur le côté, une main posée.
+		&"speed_vault": _figure([0.0, 0.4, 0.75, 1.0], [
+			{"lean": 0.3, "crouch": 0.2, "leg_base": 0.4, "arm_base": 0.8, "knee_bend": 0.6},
+			{"lean": -0.2, "crouch": 0.3, "leg_base": 1.4, "arm_base": 0.3, "knee_bend": 0.4},
+			{"lean": 0.1, "crouch": 0.15, "leg_base": 0.9, "arm_base": 1.5, "knee_bend": 0.3},
+			{"lean": 0.25, "leg_base": 0.2, "arm_base": 0.3, "knee_bend": 0.4},
+		]),
+		# Kong vault : plongeon horizontal mains en avant, jambes ramenées entre les bras.
+		&"kong_vault": _figure([0.0, 0.35, 0.6, 1.0], [
+			{"lean": 0.6, "crouch": 0.2, "leg_base": -0.3, "arm_base": 1.6, "knee_bend": 0.2},
+			{"lean": 1.25, "crouch": 0.15, "leg_base": -0.6, "arm_base": 1.25, "knee_bend": 0.3},
+			{"lean": 0.8, "crouch": 0.35, "leg_base": 1.1, "arm_base": 0.6, "knee_bend": 1.0},
+			{"lean": 0.3, "leg_base": 0.5, "arm_base": 0.9, "knee_bend": 0.5},
+		]),
+		# Lazy vault : passage lent, buste en arrière, jambes tendues devant.
+		&"lazy_vault": _figure([0.0, 0.5, 1.0], [
+			{"lean": 0.1, "leg_base": 0.2, "arm_base": 0.4, "knee_bend": 0.3},
+			{"lean": -0.35, "crouch": 0.15, "leg_base": 1.2, "arm_base": 0.2, "knee_bend": 0.15},
+			{"lean": 0.1, "leg_base": 0.3, "arm_base": 0.4, "knee_bend": 0.3},
+		]),
+		# Tic-tac : pied planté sur le mur, poussée, genoux groupés au-dessus du sommet.
+		&"tic_tac": _figure([0.0, 0.3, 0.7, 1.0], [
+			{"lean": 0.2, "crouch": 0.25, "leg_base": 1.35, "arm_base": 1.0, "knee_bend": 0.95},
+			{"lean": 0.1, "leg_base": 1.0, "arm_base": 2.5, "knee_bend": 0.2},
+			{"lean": 0.35, "crouch": 0.3, "leg_base": 0.95, "arm_base": 1.3, "knee_bend": 0.95},
+			{"lean": 0.2, "leg_base": 0.4, "arm_base": 0.6, "knee_bend": 0.5},
+		]),
+		# Wall flip : salto arrière en se repoussant du mur (un tour vers l'arrière).
+		&"wall_flip": _figure([0.0, 0.2, 0.6, 0.85, 1.0], [
+			{"lean": -0.3, "leg_base": 0.8, "arm_base": 2.6, "knee_bend": 0.7, "rotation": 0.0},
+			{"crouch": 0.3, "leg_base": 1.25, "arm_base": 1.6, "knee_bend": 1.1, "rotation": -1.2},
+			{"crouch": 0.35, "leg_base": 1.35, "arm_base": 1.4, "knee_bend": 1.2, "rotation": -4.5},
+			{"leg_base": 0.4, "arm_base": 2.0, "knee_bend": 0.5, "rotation": -6.0},
+			{"leg_base": 0.3, "arm_base": 0.8, "knee_bend": 0.4, "rotation": -TAU},
+		]),
+		# Salto avant : bras lancés, groupé, ouverture avant la réception.
+		&"front_flip": _figure([0.0, 0.15, 0.7, 0.9, 1.0], [
+			{"lean": 0.3, "leg_base": 0.3, "arm_base": 2.8, "knee_bend": 0.3, "rotation": 0.0},
+			{"crouch": 0.3, "leg_base": 1.3, "arm_base": 1.4, "knee_bend": 1.2, "rotation": 0.8},
+			{"crouch": 0.35, "leg_base": 1.4, "arm_base": 1.3, "knee_bend": 1.25, "rotation": 5.2},
+			{"leg_base": 0.5, "arm_base": 2.2, "knee_bend": 0.5, "rotation": 6.1},
+			{"leg_base": 0.4, "arm_base": 1.2, "knee_bend": 0.4, "rotation": TAU},
+		]),
+		# Vrille : salto avant avec un tour complet sur soi-même.
+		&"corkscrew": _figure([0.0, 0.5, 1.0], [
+			{"lean": 0.2, "leg_base": 0.3, "arm_base": 2.9, "knee_bend": 0.3, "rotation": 0.0, "spin": 0.0},
+			{"crouch": 0.3, "leg_base": 1.2, "arm_base": 1.2, "knee_bend": 1.1, "rotation": PI, "spin": PI},
+			{"leg_base": 0.4, "arm_base": 1.6, "knee_bend": 0.4, "rotation": TAU, "spin": TAU},
+		]),
+		# Cat leap : arrivée accroché au rebord, pieds amortissant contre le mur.
+		&"cat_leap": _figure([0.0, 1.0], [
+			{"lean": 0.3, "crouch": 0.4, "leg_base": 1.5, "arm_base": 2.9, "knee_bend": 1.2},
+			{"lean": 0.2, "crouch": 0.35, "leg_base": 1.3, "arm_base": 2.95, "knee_bend": 1.0},
+		]),
+		# Roulade : tour complet vers l'avant, groupé.
+		&"parkour_roll": _figure([0.0, 0.5, 1.0], [
+			{"lean": 0.8, "crouch": 0.6, "leg_base": 1.3, "arm_base": 1.4, "knee_bend": 1.1, "rotation": 0.0},
+			{"lean": 0.9, "crouch": 0.7, "leg_base": 1.6, "arm_base": 1.3, "knee_bend": 1.3, "rotation": PI},
+			{"lean": 0.3, "crouch": 0.3, "leg_base": 0.4, "arm_base": 0.5, "knee_bend": 0.5, "rotation": TAU},
+		]),
+	}
+	return library
 
 
 ## Immeuble dont le toit est à la hauteur `top` (négatif = plus haut que l'entrée).
