@@ -4,6 +4,14 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M3c Coureur 3D : escalade, glissade, saut athlétique
+- **Le joueur utilise maintenant la silhouette 3D** (`ModelVisual` dans `player.tscn`) ; l'ancien dessin par code reste dans la scène, masqué (`tools/capture_motion.gd --model2d` pour comparer).
+- **Clips de parkour capturés** de la bibliothèque Quaternius 2 (CC0), reciblés sur le mannequin par `tools/build_parkour_anims.gd` → `parkour_anims.res` (164 Ko) : glissade (entrée, boucle, sortie), hissage par-dessus un obstacle, saut athlétique (« ninja jump »), réception accroupie, projection en arrière.
+- **Glissade réelle** sous les obstacles bas ; **escalade** : course au mur, bras qui se tendent vers les prises en alternance, suspension les deux mains au rebord, puis hissage ; franchissements joués avec le clip de hissage.
+- Tests : `test_runner_model_visual` (glissade capturée, gestes d'escalade) ; **175/175**.
+- Proposition « tour du monde » (villes, monuments, décor urbain, pièces, skins, énergie, idées) : [docs/PROPOSITION_TOUR_DU_MONDE.md](docs/PROPOSITION_TOUR_DU_MONDE.md), **à valider**.
+
+
 ### Ajouté — Prototype : silhouette 3D par capture de mouvement
 - `RunnerModelVisual` : mannequin humain 3D (Quaternius *Universal Animation Library*, **CC0**) rendu en noir uni dans un `SubViewport`, caméra orthographique de profil, affiché comme un sprite 2D. Animations capturées (repos, jogging, sprint, appel, suspension, réception, roulade, accroupi) fondues au changement d'état ; cadence de course calée sur la vitesse réelle ; saltos par rotation autour des hanches (`FigureAnimation.rotation`).
 - Pas encore branché sur `player.tscn` : activé par `tools/capture_motion.gd -- <dossier> --model3d` pour comparaison.
