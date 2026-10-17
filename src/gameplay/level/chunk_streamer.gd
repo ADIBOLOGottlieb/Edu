@@ -98,7 +98,9 @@ func _spawn_next() -> void:
 func _take_from_pool(layout: ChunkLayout) -> LevelChunk:
 	var pooled: Array = _pool.get(layout.id, [])
 	if not pooled.is_empty():
-		return pooled.pop_back() as LevelChunk
+		var reused: LevelChunk = pooled.pop_back() as LevelChunk
+		reused.reset_hazards()
+		return reused
 	var chunk: LevelChunk = LevelChunk.new()
 	chunk.build(layout, theme)
 	created_count += 1

@@ -16,7 +16,8 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 | M3c Coureur 3D | mannequin humain + capture de mouvement (Quaternius, CC0) : course, sprint, saut athlétique, glissade, escalade, hissage, roulade | terminé, 175/175 tests ; branche `m3c/silhouette-3d` |
 | Proposition « tour du monde » | villes et monuments, décor urbain, pièces, skins, énergie : [docs/PROPOSITION_TOUR_DU_MONDE.md](docs/PROPOSITION_TOUR_DU_MONDE.md) | validée (Lomé ville de départ, énergie 1 point / 72 min) |
 | M3d Décor urbain + Lomé | objets urbains réels par type de bloc, arrière-plan en couches, Lomé (5 parcours, monument, cathédrale, palmiers) | terminé, 205/205 tests ; branche `m3d/decor-lome` |
-| M4 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
+| M4 (pièges) | pics, scies, écraseurs, flammes, plateformes fragiles ; mort et réapparition ; animations AnimationTree (course à la vraie cadence, sauts synchronisés) | terminé ; branche `m4/dangers-ennemis` (pièces et ennemis retirés à la demande) |
+| M5 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.
 

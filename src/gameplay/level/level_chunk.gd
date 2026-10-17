@@ -12,7 +12,11 @@ var index: int = -1
 ## dessiné comme un objet urbain (PropPainter), toujours en un seul _draw.
 var theme: CityTheme
 
+## Groupe des pièges actifs (lu par l'autopilote pour les éviter).
+const HAZARD_GROUP: StringName = &"hazards"
+
 var _shapes: Array[PropShape] = []
+var _hazards: Array[Hazard] = []
 
 
 func build(source: ChunkLayout, city_theme: CityTheme = null) -> void:
@@ -20,6 +24,11 @@ func build(source: ChunkLayout, city_theme: CityTheme = null) -> void:
 	theme = city_theme
 	for rect: Rect2 in source.blocks:
 		add_child(LevelGeometry.make_block(rect, LevelGeometry.INK, false))
+	for spec: HazardSpec in source.hazards:
+		var hazard: Hazard = Hazard.create(spec, theme)
+		hazard.add_to_group(HAZARD_GROUP)
+		add_child(hazard)
+		_hazards.append(hazard)
 	_shapes.clear()
 	if theme != null:
 		# Objets urbains de la ville, calculés une fois : la collision reste le rectangle.
@@ -28,6 +37,17 @@ func build(source: ChunkLayout, city_theme: CityTheme = null) -> void:
 			var variant: int = BlockKind.variant(source.id, i)
 			_shapes.append_array(PropPainter.shapes_for(source.blocks[i], kinds[i], variant, theme))
 	queue_redraw()
+
+
+## Pièges du tronçon (pour les tests et l'autopilote).
+func hazards() -> Array[Hazard]:
+	return _hazards
+
+
+## Remet les pièges dans leur état de départ (tronçon réutilisé depuis la réserve).
+func reset_hazards() -> void:
+	for hazard: Hazard in _hazards:
+		hazard.reset()
 
 
 ## Nombre de polygones de décor du tronçon (0 sans ville), pour les tests et le profilage.

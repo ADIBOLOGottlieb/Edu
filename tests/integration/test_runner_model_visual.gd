@@ -1,6 +1,6 @@
 extends GutTest
-## Prototype de silhouette 3D : le mannequin joue l'animation capturée qui
-## correspond à l'état réel du corps.
+## Silhouette 3D : l'AnimationTree suit l'état réel du corps (locomotion mélangée
+## selon la vitesse, poses aériennes selon la vitesse verticale, glissade, escalade).
 
 const PLAYER_SCENE: PackedScene = preload("res://src/gameplay/actors/player/player.tscn")
 
@@ -33,40 +33,57 @@ func _run_until(condition: Callable, max_frames: int) -> void:
 			return
 
 
-func test_model_has_the_captured_clips() -> void:
+func test_derived_clips_exist() -> void:
 	var player: AnimationPlayer = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	assert_not_null(player)
-	for clip: StringName in [&"Idle", &"Jog_Fwd", &"Sprint", &"Roll", &"parkour/NinjaJump_Start", &"parkour/Slide", &"parkour/ClimbUp"]:
+	for clip: StringName in [
+		&"Idle", &"Jog_Fwd", &"Sprint", &"parkour/Slide", &"gen/air_push", &"gen/air_apex",
+		&"gen/air_reach", &"gen/land", &"gen/vault", &"gen/roll",
+	]:
 		assert_true(player.has_animation(clip), "clip %s" % clip)
 
 
-func test_standing_still_plays_idle() -> void:
+func test_resample_keeps_length_and_freezes_poses() -> void:
+	var player: AnimationPlayer = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var source: Animation = player.get_animation(&"Roll")
+	assert_almost_eq(RunnerModelVisual.resample(source, 0.0, -2.0, 2.0).length, source.length / 2.0, 0.01)
+	assert_lt(RunnerModelVisual.resample(source, 0.5, -1.0).length, 0.05, "pose figée")
+
+
+func test_standing_still_is_locomotion_at_rest() -> void:
 	await wait_process_frames(2)
-	assert_eq(_model.current_clip(), &"Idle")
+	assert_eq(_model.current_clip(), &"loco")
+	assert_almost_eq(_model.loco_blend(), 0.0, 0.05)
 
 
-func test_running_plays_the_jog_cycle() -> void:
+func test_sprinting_blends_to_the_sprint_cycle() -> void:
 	_ctrl.move_axis = 1.0
-	await _run_until(func() -> bool: return _body.current_state() == PlayerState.State.RUN, 60)
+	_ctrl.sprint_held = true
+	await _run_until(func() -> bool: return _body.current_state() == PlayerState.State.SPRINT, 120)
+	await wait_physics_frames(30)
 	await wait_process_frames(2)
-	assert_eq(_model.current_clip(), &"Jog_Fwd")
+	assert_eq(_model.current_clip(), &"loco")
+	assert_gt(_model.loco_blend(), 0.95, "cycle de sprint")
 
 
-func test_jumping_starts_with_the_take_off_clip() -> void:
+func test_air_pose_follows_vertical_speed() -> void:
 	_ctrl.jump_held = true
 	_ctrl.press_jump()
 	await _run_until(func() -> bool: return _body.current_state() == PlayerState.State.JUMP, 30)
-	await wait_process_frames(1)
-	assert_eq(_model.current_clip(), &"parkour/NinjaJump_Start")
+	await wait_process_frames(2)
+	assert_eq(_model.current_clip(), &"air")
+	assert_lt(_model.air_blend(), 0.35, "pose d'appel / de montée")
+	await _run_until(func() -> bool: return _body.velocity.y > 400.0, 120)
+	await wait_process_frames(4)
+	assert_gt(_model.air_blend(), 0.65, "pose de descente")
 
 
-func test_sliding_under_an_obstacle_plays_the_slide() -> void:
+func test_sliding_plays_the_captured_slide() -> void:
 	_ctrl.move_axis = 1.0
 	await _run_until(func() -> bool: return _body.current_state() == PlayerState.State.RUN, 60)
 	_ctrl.press_slide()
 	await _run_until(func() -> bool: return _body.current_state() == PlayerState.State.SLIDE, 30)
 	await wait_process_frames(2)
-	assert_true(String(_model.current_clip()).begins_with("parkour/Slide"), "glissade capturée : %s" % _model.current_clip())
+	assert_true(String(_model.current_clip()).begins_with("slide"), "glissade : %s" % _model.current_clip())
 
 
 func test_climbing_a_wall_raises_the_arms() -> void:
@@ -77,4 +94,5 @@ func test_climbing_a_wall_raises_the_arms() -> void:
 	await _run_until(func() -> bool: return _body.current_state() == PlayerState.State.WALL_CLIMB, 200)
 	assert_eq(_body.current_state(), PlayerState.State.WALL_CLIMB, "le corps escalade le mur")
 	await wait_process_frames(10)
+	assert_eq(_model.current_clip(), &"climb")
 	assert_gt(_model.arm_weight(), 0.5, "les bras font les gestes d'escalade")

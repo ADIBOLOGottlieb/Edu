@@ -14,6 +14,12 @@ signal jump_started(kind: StringName)
 signal landed(impact_speed: float)
 ## Une figure de parkour commence (Figure.name_of : &"kong_vault", &"front_flip"…).
 signal figure_started(figure_name: StringName)
+## Mort sur un piège : cause = &"spikes", &"saw", &"crusher", &"flame"… Le niveau
+## replace ensuite le corps (LevelRunner → revive).
+signal died(cause: StringName)
+
+## Invulnérabilité après une réapparition (s) : pas de mort en boucle sur un piège.
+const INVULNERABLE_AFTER_REVIVE: float = 1.2
 
 @export var tuning: MoveTuning
 @export var standing_shape: CollisionShape2D
@@ -51,6 +57,8 @@ var _air_lock_left: float = 0.0
 var _air_speed_x: float = 0.0
 var _figure_time: float = 0.0
 var _figure_duration: float = 0.0
+var _dead: bool = false
+var _invulnerable_left: float = 0.0
 
 
 func _ready() -> void:
@@ -77,6 +85,37 @@ func figure_progress() -> float:
 	return clampf(_figure_time / _figure_duration, 0.0, 1.0)
 
 
+func is_dead() -> bool:
+	return _dead
+
+
+## Faux pendant la mort et l'invulnérabilité qui suit une réapparition.
+func can_be_hurt() -> bool:
+	return not _dead and _invulnerable_left <= 0.0
+
+
+## Tue le corps (sans effet s'il ne peut pas être blessé). Retourne vrai s'il meurt.
+func kill(cause: StringName) -> bool:
+	if not can_be_hurt():
+		return false
+	_dead = true
+	velocity = Vector2.ZERO
+	figure = Figure.Kind.NONE
+	fsm.force(PlayerState.State.DEATH)
+	died.emit(cause)
+	return true
+
+
+## Réapparition (point de contrôle) : debout, immobile, brièvement invulnérable.
+func revive(at: Vector2) -> void:
+	global_position = at
+	velocity = Vector2.ZERO
+	_dead = false
+	_invulnerable_left = INVULNERABLE_AFTER_REVIVE
+	figure = Figure.Kind.NONE
+	fsm.force(PlayerState.State.IDLE)
+
+
 func _find_controller() -> Controller:
 	for child: Node in get_children():
 		if child is Controller:
@@ -85,6 +124,10 @@ func _find_controller() -> Controller:
 
 
 func _physics_process(delta: float) -> void:
+	_invulnerable_left = maxf(0.0, _invulnerable_left - delta)
+	if _dead:
+		# Mort : immobile jusqu'à la réapparition (le visuel joue la chute).
+		return
 	intent.clear()
 	if _controller != null:
 		_controller.fill(intent)

@@ -80,7 +80,7 @@ func _on_frame() -> void:
 		_shot += 1
 		root.get_texture().get_image().save_png(_out.path_join("f_%04d.png" % _shot))
 	if _frame >= MAX_FRAMES or _runner.is_completed() or _runner.fall_count > 0:
-		print("capture_motion : %d images, terminé=%s, chutes=%d" % [_shot, _runner.is_completed(), _runner.fall_count])
+		print("capture_motion : %d images, terminé=%s, chutes=%d, morts=%d" % [_shot, _runner.is_completed(), _runner.fall_count, _runner.death_count])
 		quit()
 
 

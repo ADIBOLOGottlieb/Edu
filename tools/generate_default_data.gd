@@ -317,7 +317,78 @@ func _chunk_library() -> ChunkLibrary:
 			_beam(1160, 140, -120), _roof(1460, 540, -40),
 		], 4, [&"vault", &"gap", &"slide", &"precision"], -40.0),
 	]
+	_add_hazards(library)
 	return library
+
+
+# --- Pièges (style Ninja Arashi) -----------------------------------------------------
+
+func _hazard(
+	kind: StringName, rect: Rect2, path_to: Vector2 = Vector2.ZERO,
+	period: float = 0.0, phase: float = 0.0, active_ratio: float = 0.5
+) -> HazardSpec:
+	var spec: HazardSpec = HazardSpec.new()
+	spec.kind = kind
+	spec.rect = rect
+	spec.path_to = path_to
+	spec.period = period
+	spec.phase = phase
+	spec.active_ratio = active_ratio
+	return spec
+
+
+## Pics posés sur une surface dont le dessus est à `top`.
+func _spikes(x: float, width: float, top: float = 0.0) -> HazardSpec:
+	return _hazard(&"spikes", Rect2(x, top - 16.0, width, 16.0))
+
+
+## Jet de flammes vertical depuis le sol (`top`), intermittent.
+func _flame(x: float, period: float, phase: float = 0.0, top: float = 0.0) -> HazardSpec:
+	return _hazard(&"flame", Rect2(x, top - 120.0, 22.0, 120.0), Vector2.ZERO, period, phase, 0.4)
+
+
+## Écraseur qui s'abat jusqu'au toit `top` (bloc de 60 px, course de `drop`).
+func _crusher(x: float, period: float, top: float = 0.0, drop: float = 90.0, phase: float = 0.0) -> HazardSpec:
+	return _hazard(&"crusher", Rect2(x, top - drop - 60.0, 80.0, 60.0), Vector2(0.0, drop), period, phase, 0.45)
+
+
+## Scie mobile (diamètre 44 px) de `from` vers `from + path`.
+func _saw(from: Vector2, path: Vector2, period: float, phase: float = 0.0) -> HazardSpec:
+	return _hazard(&"saw", Rect2(from, Vector2(44.0, 44.0)), path, period, phase)
+
+
+## Pièges par tronçon, du palier 1 au palier 4 (le palier 0 reste une initiation
+## sans piège). Les 140 premiers px de chaque tronçon restent sûrs (réapparition).
+## Le pilote automatique doit tous les franchir (tests de jouabilité).
+func _add_hazards(library: ChunkLibrary) -> void:
+	var hazards: Dictionary[StringName, Array] = {
+		# Palier 1 : pics à sauter, première flamme rythmée.
+		&"small_gap": [_spikes(800, 50)],
+		&"step_platform": [_flame(780, 2.0)],
+		&"stairs_up": [_spikes(660, 64, -110)],
+		&"drop_down": [_spikes(935, 45, 140)],
+		# Palier 2 : scie, écraseur, flammes désynchronisées.
+		&"wall_ledge": [_saw(Vector2(900, -150), Vector2(0, 106), 2.2)],
+		&"tunnel_then_vault": [_spikes(680, 60)],
+		&"roof_climb": [_crusher(720, 2.8, -200, 80.0)],
+		&"vent_field": [_flame(455, 1.8, 0.0), _flame(715, 1.8, 0.5)],
+		&"gap_drop_roll": [_spikes(985, 55, 240)],
+		# Palier 3 : enchaînements précis.
+		&"high_wall": [_crusher(790, 2.6)],
+		&"gap_then_wall": [_spikes(1210, 50)],
+		&"upper_route": [_spikes(1260, 60)],
+		&"wall_gap_wall": [_spikes(700, 50, -180)],
+		# Palier 4 : expert.
+		&"skyline_run": [_saw(Vector2(1080, -420), Vector2(0, 100), 2.2)],
+		&"tunnel_drop_climb": [_crusher(900, 2.6, 100.0, 80.0)],
+		&"rooftop_gauntlet": [_flame(1900, 1.8, 0.0, -40.0)],
+	}
+	for layout: ChunkLayout in library.layouts:
+		if hazards.has(layout.id):
+			var specs: Array[HazardSpec] = []
+			for spec: Variant in hazards[layout.id]:
+				specs.append(spec as HazardSpec)
+			layout.hazards = specs
 
 
 func _save(resource: Resource, path: String, force: bool) -> void:

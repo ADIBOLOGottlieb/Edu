@@ -1,137 +1,218 @@
 [gd_resource type="Resource" script_class="ChunkLibrary" format=3]
 
-[ext_resource type="Script" path="res://src/data_types/chunk_layout.gd" id="1_2lj7y"]
-[ext_resource type="Script" path="res://src/data_types/chunk_library.gd" id="2_gtesx"]
+[ext_resource type="Script" path="res://src/data_types/chunk_layout.gd" id="1_gtesx"]
+[ext_resource type="Script" path="res://src/data_types/hazard_spec.gd" id="2_daevl"]
+[ext_resource type="Script" path="res://src/data_types/chunk_library.gd" id="3_233bh"]
 
-[sub_resource type="Resource" id="Resource_daevl"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_3ktfu"]
+script = ExtResource("1_gtesx")
 id = &"flat_run"
 blocks = Array[Rect2]([Rect2(0, 0, 800, 1400)])
 
-[sub_resource type="Resource" id="Resource_233bh"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_wo18g"]
+script = ExtResource("1_gtesx")
 id = &"vault_pair"
 width = 900.0
 blocks = Array[Rect2]([Rect2(0, 0, 900, 1400), Rect2(300, -40, 100, 40), Rect2(620, -36, 90, 36)])
 tags = Array[StringName]([&"vault"])
 
-[sub_resource type="Resource" id="Resource_3ktfu"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_781si"]
+script = ExtResource("1_gtesx")
 id = &"low_tunnel"
 width = 1000.0
 blocks = Array[Rect2]([Rect2(0, 0, 1000, 1400), Rect2(380, -420, 380, 372)])
 tags = Array[StringName]([&"slide"])
 
-[sub_resource type="Resource" id="Resource_wo18g"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_m1lqw"]
+script = ExtResource("2_daevl")
+rect = Rect2(800, -16, 50, 16)
+
+[sub_resource type="Resource" id="Resource_i6f5i"]
+script = ExtResource("1_gtesx")
 id = &"small_gap"
 width = 900.0
 blocks = Array[Rect2]([Rect2(0, 0, 360, 1400), Rect2(520, 0, 380, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_m1lqw")])
 difficulty = 1
 tags = Array[StringName]([&"gap"])
 
-[sub_resource type="Resource" id="Resource_781si"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_afuko"]
+script = ExtResource("2_daevl")
+kind = &"flame"
+rect = Rect2(780, -120, 22, 120)
+period = 2.0
+active_ratio = 0.4
+
+[sub_resource type="Resource" id="Resource_db182"]
+script = ExtResource("1_gtesx")
 id = &"step_platform"
 width = 1000.0
 blocks = Array[Rect2]([Rect2(0, 0, 1000, 1400), Rect2(360, -100, 300, 100)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_afuko")])
 difficulty = 1
 tags = Array[StringName]([&"jump", &"wall"])
 
-[sub_resource type="Resource" id="Resource_m1lqw"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_a6x8w"]
+script = ExtResource("1_gtesx")
 id = &"roof_hop"
 width = 1100.0
 blocks = Array[Rect2]([Rect2(0, 0, 320, 1400), Rect2(460, 0, 280, 1400), Rect2(880, 0, 220, 1400)])
 difficulty = 1
 tags = Array[StringName]([&"gap"])
 
-[sub_resource type="Resource" id="Resource_i6f5i"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_rs1tq"]
+script = ExtResource("2_daevl")
+rect = Rect2(660, -126, 64, 16)
+
+[sub_resource type="Resource" id="Resource_5pxby"]
+script = ExtResource("1_gtesx")
 id = &"stairs_up"
 width = 1000.0
 exit_y = -110.0
 blocks = Array[Rect2]([Rect2(0, 0, 380, 1400), Rect2(500, -110, 500, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_rs1tq")])
 difficulty = 1
 tags = Array[StringName]([&"gap", &"climb"])
 
-[sub_resource type="Resource" id="Resource_afuko"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_vot05"]
+script = ExtResource("2_daevl")
+rect = Rect2(935, 124, 45, 16)
+
+[sub_resource type="Resource" id="Resource_5qivd"]
+script = ExtResource("1_gtesx")
 id = &"drop_down"
 width = 1000.0
 exit_y = 140.0
 blocks = Array[Rect2]([Rect2(0, 0, 420, 1400), Rect2(560, 140, 440, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_vot05")])
 difficulty = 1
 tags = Array[StringName]([&"gap", &"drop"])
 
-[sub_resource type="Resource" id="Resource_db182"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_ouryy"]
+script = ExtResource("2_daevl")
+kind = &"saw"
+rect = Rect2(900, -150, 44, 44)
+path_to = Vector2(0, 106)
+period = 2.2
+
+[sub_resource type="Resource" id="Resource_d76qh"]
+script = ExtResource("1_gtesx")
 id = &"wall_ledge"
 width = 1000.0
 blocks = Array[Rect2]([Rect2(0, 0, 1000, 1400), Rect2(460, -220, 90, 220)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_ouryy")])
 difficulty = 2
 tags = Array[StringName]([&"wall"])
 
-[sub_resource type="Resource" id="Resource_a6x8w"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_8t5de"]
+script = ExtResource("2_daevl")
+rect = Rect2(680, -16, 60, 16)
+
+[sub_resource type="Resource" id="Resource_heumk"]
+script = ExtResource("1_gtesx")
 id = &"tunnel_then_vault"
 width = 1100.0
 blocks = Array[Rect2]([Rect2(0, 0, 1100, 1400), Rect2(240, -420, 320, 372), Rect2(820, -40, 100, 40)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_8t5de")])
 difficulty = 2
 tags = Array[StringName]([&"slide", &"vault"])
 
-[sub_resource type="Resource" id="Resource_rs1tq"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_e5dnj"]
+script = ExtResource("1_gtesx")
 id = &"double_gap"
 width = 1200.0
 blocks = Array[Rect2]([Rect2(0, 0, 320, 1400), Rect2(480, 0, 240, 1400), Rect2(880, 0, 320, 1400)])
 difficulty = 2
 tags = Array[StringName]([&"gap"])
 
-[sub_resource type="Resource" id="Resource_5pxby"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_ox4uo"]
+script = ExtResource("2_daevl")
+kind = &"crusher"
+rect = Rect2(720, -340, 80, 60)
+path_to = Vector2(0, 80)
+period = 2.8
+active_ratio = 0.45
+
+[sub_resource type="Resource" id="Resource_ca331"]
+script = ExtResource("1_gtesx")
 id = &"roof_climb"
 width = 1000.0
 exit_y = -200.0
 blocks = Array[Rect2]([Rect2(0, 0, 500, 1400), Rect2(500, -200, 500, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_ox4uo")])
 difficulty = 2
 tags = Array[StringName]([&"wall", &"climb"])
 
-[sub_resource type="Resource" id="Resource_vot05"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_utjrr"]
+script = ExtResource("2_daevl")
+kind = &"flame"
+rect = Rect2(455, -120, 22, 120)
+period = 1.8
+active_ratio = 0.4
+
+[sub_resource type="Resource" id="Resource_lwr30"]
+script = ExtResource("2_daevl")
+kind = &"flame"
+rect = Rect2(715, -120, 22, 120)
+period = 1.8
+phase = 0.5
+active_ratio = 0.4
+
+[sub_resource type="Resource" id="Resource_7xsmy"]
+script = ExtResource("1_gtesx")
 id = &"vent_field"
 width = 1200.0
 blocks = Array[Rect2]([Rect2(0, 0, 1200, 1400), Rect2(300, -40, 80, 40), Rect2(560, -44, 70, 44), Rect2(820, -40, 90, 40)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_utjrr"), SubResource("Resource_lwr30")])
 difficulty = 2
 tags = Array[StringName]([&"vault"])
 
-[sub_resource type="Resource" id="Resource_5qivd"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_35gsd"]
+script = ExtResource("2_daevl")
+rect = Rect2(985, 224, 55, 16)
+
+[sub_resource type="Resource" id="Resource_mpwby"]
+script = ExtResource("1_gtesx")
 id = &"gap_drop_roll"
 width = 1100.0
 exit_y = 240.0
 blocks = Array[Rect2]([Rect2(0, 0, 400, 1400), Rect2(580, 240, 520, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_35gsd")])
 difficulty = 2
 tags = Array[StringName]([&"gap", &"drop", &"roll"])
 
-[sub_resource type="Resource" id="Resource_ouryy"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_1d445"]
+script = ExtResource("2_daevl")
+kind = &"crusher"
+rect = Rect2(790, -150, 80, 60)
+path_to = Vector2(0, 90)
+period = 2.6
+active_ratio = 0.45
+
+[sub_resource type="Resource" id="Resource_j35w0"]
+script = ExtResource("1_gtesx")
 id = &"high_wall"
 width = 1100.0
 blocks = Array[Rect2]([Rect2(0, 0, 1100, 1400), Rect2(520, -260, 100, 260)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_1d445")])
 difficulty = 3
 tags = Array[StringName]([&"wall"])
 
-[sub_resource type="Resource" id="Resource_d76qh"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_pk0v2"]
+script = ExtResource("2_daevl")
+rect = Rect2(1210, -16, 50, 16)
+
+[sub_resource type="Resource" id="Resource_lfs4o"]
+script = ExtResource("1_gtesx")
 id = &"gap_then_wall"
 width = 1300.0
 blocks = Array[Rect2]([Rect2(0, 0, 380, 1400), Rect2(540, 0, 760, 1400), Rect2(900, -200, 90, 200)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_pk0v2")])
 difficulty = 3
 tags = Array[StringName]([&"gap", &"wall"])
 
-[sub_resource type="Resource" id="Resource_8t5de"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_wiki8"]
+script = ExtResource("1_gtesx")
 id = &"precision_hops"
 width = 1300.0
 exit_y = -60.0
@@ -139,65 +220,100 @@ blocks = Array[Rect2]([Rect2(0, 0, 300, 1400), Rect2(470, -40, 90, 1400), Rect2(
 difficulty = 3
 tags = Array[StringName]([&"gap", &"precision"])
 
-[sub_resource type="Resource" id="Resource_heumk"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_6gi0g"]
+script = ExtResource("1_gtesx")
 id = &"slide_gap"
 width = 1200.0
 blocks = Array[Rect2]([Rect2(0, 0, 520, 1400), Rect2(240, -420, 240, 372), Rect2(680, 0, 520, 1400)])
 difficulty = 3
 tags = Array[StringName]([&"slide", &"gap"])
 
-[sub_resource type="Resource" id="Resource_e5dnj"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_ux0rt"]
+script = ExtResource("2_daevl")
+rect = Rect2(1260, -16, 60, 16)
+
+[sub_resource type="Resource" id="Resource_rrwmc"]
+script = ExtResource("1_gtesx")
 id = &"upper_route"
 width = 1400.0
 blocks = Array[Rect2]([Rect2(0, 0, 1400, 1400), Rect2(500, -40, 90, 40), Rect2(950, -40, 90, 40), Rect2(380, -130, 220, 16), Rect2(700, -170, 220, 16), Rect2(1020, -130, 200, 16)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_ux0rt")])
 difficulty = 3
 tags = Array[StringName]([&"vault", &"route"])
 
-[sub_resource type="Resource" id="Resource_ox4uo"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_wxdt5"]
+script = ExtResource("2_daevl")
+rect = Rect2(700, -196, 50, 16)
+
+[sub_resource type="Resource" id="Resource_6bp6m"]
+script = ExtResource("1_gtesx")
 id = &"wall_gap_wall"
 width = 1500.0
 blocks = Array[Rect2]([Rect2(0, 0, 400, 1400), Rect2(540, -180, 300, 1400), Rect2(1000, 0, 500, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_wxdt5")])
 difficulty = 3
 tags = Array[StringName]([&"gap", &"wall", &"drop"])
 
-[sub_resource type="Resource" id="Resource_ca331"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_n2fcw"]
+script = ExtResource("2_daevl")
+kind = &"saw"
+rect = Rect2(1080, -420, 44, 44)
+path_to = Vector2(0, 100)
+period = 2.2
+
+[sub_resource type="Resource" id="Resource_wrasw"]
+script = ExtResource("1_gtesx")
 id = &"skyline_run"
 width = 1800.0
 exit_y = -100.0
 blocks = Array[Rect2]([Rect2(0, 0, 380, 1400), Rect2(560, -60, 300, 1400), Rect2(860, -260, 360, 1400), Rect2(1400, -100, 400, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_n2fcw")])
 difficulty = 4
 tags = Array[StringName]([&"gap", &"wall", &"drop"])
 
-[sub_resource type="Resource" id="Resource_utjrr"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_nk50h"]
+script = ExtResource("1_gtesx")
 id = &"crane_line"
 width = 1600.0
 blocks = Array[Rect2]([Rect2(0, 0, 300, 1400), Rect2(460, -60, 140, 16), Rect2(760, -100, 140, 16), Rect2(1060, -60, 140, 16), Rect2(1340, 0, 260, 1400)])
 difficulty = 4
 tags = Array[StringName]([&"gap", &"precision"])
 
-[sub_resource type="Resource" id="Resource_lwr30"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_kuu8a"]
+script = ExtResource("2_daevl")
+kind = &"crusher"
+rect = Rect2(900, -40, 80, 60)
+path_to = Vector2(0, 80)
+period = 2.6
+active_ratio = 0.45
+
+[sub_resource type="Resource" id="Resource_kenrg"]
+script = ExtResource("1_gtesx")
 id = &"tunnel_drop_climb"
 width = 1600.0
 exit_y = -150.0
 blocks = Array[Rect2]([Rect2(0, 0, 600, 1400), Rect2(200, -420, 300, 372), Rect2(760, 100, 400, 1400), Rect2(1160, -150, 440, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_kuu8a")])
 difficulty = 4
 tags = Array[StringName]([&"slide", &"drop", &"wall"])
 
-[sub_resource type="Resource" id="Resource_7xsmy"]
-script = ExtResource("1_2lj7y")
+[sub_resource type="Resource" id="Resource_jfhgd"]
+script = ExtResource("2_daevl")
+kind = &"flame"
+rect = Rect2(1900, -160, 22, 120)
+period = 1.8
+active_ratio = 0.4
+
+[sub_resource type="Resource" id="Resource_qtuke"]
+script = ExtResource("1_gtesx")
 id = &"rooftop_gauntlet"
 width = 2000.0
 exit_y = -40.0
 blocks = Array[Rect2]([Rect2(0, 0, 420, 1400), Rect2(180, -40, 80, 40), Rect2(600, -40, 400, 1400), Rect2(780, -460, 180, 372), Rect2(1160, -120, 140, 16), Rect2(1460, -40, 540, 1400)])
+hazards = Array[ExtResource("2_daevl")]([SubResource("Resource_jfhgd")])
 difficulty = 4
 tags = Array[StringName]([&"vault", &"gap", &"slide", &"precision"])
 
 [resource]
-script = ExtResource("2_gtesx")
-layouts = Array[ExtResource("1_2lj7y")]([SubResource("Resource_daevl"), SubResource("Resource_233bh"), SubResource("Resource_3ktfu"), SubResource("Resource_wo18g"), SubResource("Resource_781si"), SubResource("Resource_m1lqw"), SubResource("Resource_i6f5i"), SubResource("Resource_afuko"), SubResource("Resource_db182"), SubResource("Resource_a6x8w"), SubResource("Resource_rs1tq"), SubResource("Resource_5pxby"), SubResource("Resource_vot05"), SubResource("Resource_5qivd"), SubResource("Resource_ouryy"), SubResource("Resource_d76qh"), SubResource("Resource_8t5de"), SubResource("Resource_heumk"), SubResource("Resource_e5dnj"), SubResource("Resource_ox4uo"), SubResource("Resource_ca331"), SubResource("Resource_utjrr"), SubResource("Resource_lwr30"), SubResource("Resource_7xsmy")])
+script = ExtResource("3_233bh")
+layouts = Array[ExtResource("1_gtesx")]([SubResource("Resource_3ktfu"), SubResource("Resource_wo18g"), SubResource("Resource_781si"), SubResource("Resource_i6f5i"), SubResource("Resource_db182"), SubResource("Resource_a6x8w"), SubResource("Resource_5pxby"), SubResource("Resource_5qivd"), SubResource("Resource_d76qh"), SubResource("Resource_heumk"), SubResource("Resource_e5dnj"), SubResource("Resource_ca331"), SubResource("Resource_7xsmy"), SubResource("Resource_mpwby"), SubResource("Resource_j35w0"), SubResource("Resource_lfs4o"), SubResource("Resource_wiki8"), SubResource("Resource_6gi0g"), SubResource("Resource_rrwmc"), SubResource("Resource_6bp6m"), SubResource("Resource_wrasw"), SubResource("Resource_nk50h"), SubResource("Resource_kenrg"), SubResource("Resource_qtuke")])

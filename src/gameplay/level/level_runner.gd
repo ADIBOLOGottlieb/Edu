@@ -8,8 +8,12 @@ signal level_completed()
 ## Chute sous le niveau. En M3 le coureur est replacé au début du tronçon ;
 ## la défaite et la capture arrivent au jalon M6.
 signal player_fell(at_x: float)
+## Mort du joueur sur un piège ; il réapparaît au début du tronçon après DEATH_PAUSE.
+signal player_died(cause: StringName)
 
 const PIXELS_PER_METER: float = 40.0
+## Pause entre la mort et la réapparition (s) : le temps de voir la chute.
+const DEATH_PAUSE: float = 0.8
 
 @export var library: ChunkLibrary
 @export var mode: ChunkSequencer.Mode = ChunkSequencer.Mode.RANDOM
@@ -33,8 +37,11 @@ var seed_used: int = 0
 ## Abscisse la plus avancée atteinte par le joueur.
 var furthest_x: float = 0.0
 var fall_count: int = 0
+## Morts sur un piège (les chutes sont comptées à part dans fall_count).
+var death_count: int = 0
 
 var _completed: bool = false
+var _respawn_left: float = 0.0
 
 @onready var streamer: ChunkStreamer = $Streamer
 
@@ -56,7 +63,19 @@ func _ready() -> void:
 		var profile: ProfileServiceNode = get_node_or_null(^"/root/ProfileService") as ProfileServiceNode
 		if profile != null:
 			player.abilities = profile.abilities
+		player.died.connect(_on_player_died)
 	streamer.update(_target_x())
+
+
+## Toutes les morts : pièges et chutes (énergie, M9).
+func total_deaths() -> int:
+	return death_count + fall_count
+
+
+func _on_player_died(cause: StringName) -> void:
+	death_count += 1
+	_respawn_left = DEATH_PAUSE
+	player_died.emit(cause)
 
 
 ## Parcours de ville joué, ou null (course libre ou parcours de test).
@@ -76,15 +95,26 @@ func _target_x() -> float:
 	return follow_target.global_position.x if follow_target != null else 0.0
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	streamer.update(_target_x())
 	if player == null:
 		return
-	furthest_x = maxf(furthest_x, player.global_position.x)
 	var chunk: LevelChunk = streamer.chunk_at(player.global_position.x)
+	if player.is_dead():
+		_respawn_left -= delta
+		if _respawn_left <= 0.0:
+			player.revive(_checkpoint(chunk))
+		return
+	furthest_x = maxf(furthest_x, player.global_position.x)
 	var floor_limit: float = chunk.deepest_y() if chunk != null else streamer.end_y()
 	if player.global_position.y > floor_limit + kill_depth:
 		_respawn(chunk)
+
+
+## Point de réapparition : début du tronçon (point de contrôle à chaque tronçon).
+func _checkpoint(chunk: LevelChunk) -> Vector2:
+	var start: Vector2 = chunk.position if chunk != null else Vector2(0.0, streamer.end_y())
+	return start + Vector2(respawn_offset_x, -2.0)
 
 
 func _respawn(chunk: LevelChunk) -> void:

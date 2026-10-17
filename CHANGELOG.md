@@ -4,6 +4,26 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M4 (pièges) Difficulté style Ninja Arashi
+- **5 pièges** (`Hazard`, données `HazardSpec` dans `ChunkLayout.hazards`) dessinés en silhouette avec touches chaudes : **pics**, **scie** circulaire mobile (rail visible), **écraseur** (tremble 0,3 s puis s'abat ; solide, on peut s'y tenir), **jet de flammes** au sol ou mural (étincelles 0,35 s avant l'allumage), **plateforme fragile** (tremble 0,5 s, s'effondre, revient après 3 s). Pièges rythmés, annoncés, déterministes.
+- **Mort et réapparition** : `RunnerBody.kill(cause)` / `revive(at)`, signal `died` ; le niveau compte la mort, rejoue la chute 0,8 s puis replace le coureur au début du tronçon, invulnérable 1,2 s (`LevelRunner.death_count`, `total_deaths()`).
+- **Pièges placés** dans les tronçons du palier 1 au palier 4 (palier 0 sans piège) : le décor et les parcours de Lomé sont inchangés, les pièges s'y ajoutent.
+- **Pilote automatique** : saute les pics, prédit la zone mortelle des pièges rythmés sur leur cycle (`Hazard.danger_rect_at`) et attend le bon moment pour passer.
+- `CollisionLayers` : couches de collision nommées.
+
+### Modifié — Animations du coureur 3D (retour utilisateur : « course au ralenti »)
+- **AnimationTree** (machine à états, fondus enchaînés) à la place des clips joués un par un.
+- **Course** : repos, footing et sprint mélangés et synchronisés selon la vitesse au sol ; cadence accélérée avec la vitesse (jusqu'à ≈ 5 foulées/s). Mesure : à 480 px/s le coureur va à ≈ 11,7 m/s, alors que le clip de sprint couvre 3 à 5 m/s — d'où l'effet de ralenti et les pieds qui glissaient.
+- **Sauts** : cinq poses capturées (appel jambe tendue, genou haut, sommet, descente, préparation de la réception) mélangées selon la **vitesse verticale réelle** : la pose suit la trajectoire physique ; réception accroupie raccourcie.
+- Clips dérivés (poses figées, extraits accélérés) générés au chargement (`RunnerModelVisual.resample`).
+
+### Vérifié — M4 (pièges)
+- **228/228 tests verts** (380 s) : 20 de pièges, 3 de mort/réapparition, 7 du visuel 3D ; **jouabilité : le pilote traverse les 24 tronçons, une course aléatoire et les 5 parcours de Lomé avec pièges, sans mort ni chute** (chaque piège est franchissable avec le bon timing).
+
+### Retiré du périmètre (demande de l'utilisateur)
+- Pièces et ennemis : travail interrompu à la demande (« ajoute juste le piège »), mis de côté hors du dépôt.
+
+
 ### Ajouté — M3d Décor urbain réaliste et Lomé
 - **Objets urbains réels au premier plan** (silhouettes noires, touches de couleur chaude) à la place des rectangles : `BlockKind` déduit le type de chaque bloc de sa forme (immeuble, pilier, petit obstacle, mur, plateforme, plafond, poutre ; forçable par `ChunkLayout.kinds`), `PropPainter` le dessine selon le style de la ville. Moderne : bureaux, immeubles, entrepôt, climatiseurs, caisses, châteaux d'eau, cages d'escalier, conteneurs, enseignes suspendues, passerelles, poutrelles, flèches de grue. **Lomé** : maisons-boutiques à toit de tôle et enseignes peintes, balcons, claustras, étal de marché au pagne wax, bidons jaunes, pneus, zémidjan, poteaux électriques, réservoir d'eau, bâche de marché, enseigne de coiffeur.
 - La collision reste le rectangle testé : le décor ne change rien au jeu (les 24 tronçons restent jouables, tests inchangés).

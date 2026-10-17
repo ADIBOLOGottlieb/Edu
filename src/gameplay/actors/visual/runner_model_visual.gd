@@ -5,12 +5,16 @@ extends Node2D
 ## profil, puis affiché comme un sprite 2D.
 ##
 ## Comme RunnerVisual, ce nœud lit l'état du RunnerBody et ne le modifie jamais.
-## - Les animations capturées se fondent les unes dans les autres au changement d'état.
-## - Course et sprint suivent la vitesse réelle (pas de pieds qui glissent).
-## - Escalade et suspension : les clips capturés n'existent pas ; les bras sont posés
-##   par-dessus l'animation (un bras se tend vers le haut pendant que l'autre tire,
-##   puis les deux mains au rebord).
-## - Saltos et vrilles : rotation des FigureAnimation autour des hanches.
+## Animation par AnimationTree (machine à états, fondus enchaînés) :
+## - « loco » : repos, footing et sprint mélangés et synchronisés selon la vitesse
+##   au sol, cadence accélérée avec la vitesse réelle (11 m/s en sprint : sans cela
+##   la course paraît au ralenti et les pieds glissent) ;
+## - « air » : cinq poses capturées (appel, montée genou haut, sommet, descente,
+##   préparation de la réception) mélangées selon la vitesse verticale réelle, donc
+##   synchronisées avec la physique du saut ;
+## - réception, roulade, glissade, hissage, escalade, suspension, chute ;
+## - escalade et suspension : bras posés par-dessus l'animation ;
+## - saltos et vrilles : rotation des FigureAnimation autour des hanches.
 ## Repère : pieds en (0, 0), avant vers +x.
 
 const MODEL_SCENE: String = "res://assets/characters/quaternius/mannequin_anims.glb"
@@ -25,49 +29,51 @@ const CAMERA_TARGET_M: float = 1.3
 const SCREEN_HEIGHT_PX: float = 74.0
 const MODEL_HEIGHT_M: float = 1.8
 const HIP_HEIGHT_M: float = 0.95
-## Durée des fondus entre animations (s).
-const BLEND_TIME: float = 0.16
-## Vitesse (px/s) à laquelle les cycles de course sont joués à vitesse normale.
-const JOG_REFERENCE_SPEED: float = 300.0
-const SPRINT_REFERENCE_SPEED: float = 470.0
+## Images par seconde des clips dérivés (poses, extraits accélérés).
+const RESAMPLE_FPS: float = 30.0
+
+## Locomotion : vitesse au sol (px/s) des points du mélange repos → footing → sprint.
+const JOG_SPEED: float = 140.0
+const SPRINT_SPEED: float = 300.0
+## Au-delà de SPRINT_SPEED la cadence suit la vitesse, jusqu'à ce plafond
+## (≈ 5 foulées/s, cadence d'un vrai sprint).
+const MAX_CADENCE_SCALE: float = 1.65
+## Vitesse verticale (px/s) qui correspond aux poses extrêmes du saut.
+const AIR_SPEED_REF: float = 650.0
+const AIR_RESPONSE: float = 16.0
 ## Cadence des bras pendant l'escalade (cycles par seconde).
 const CLIMB_ARM_HZ: float = 1.6
-
-## État → animation en boucle (ou finale). Les entrées sont jouées d'abord (INTROS).
-const CLIPS: Dictionary[PlayerState.State, StringName] = {
-	PlayerState.State.IDLE: &"Idle",
-	PlayerState.State.RUN: &"Jog_Fwd",
-	PlayerState.State.SPRINT: &"Sprint",
-	PlayerState.State.JUMP: &"parkour/NinjaJump_Idle",
-	PlayerState.State.DOUBLE_JUMP: &"parkour/NinjaJump_Idle",
-	PlayerState.State.FALL: &"parkour/NinjaJump_Idle",
-	PlayerState.State.LANDING: &"parkour/NinjaJump_Land",
-	PlayerState.State.ROLL: &"Roll",
-	PlayerState.State.SLIDE: &"parkour/Slide",
-	PlayerState.State.VAULT: &"parkour/ClimbUp",
-	PlayerState.State.WALL_RUN: &"Sprint",
-	PlayerState.State.WALL_CLIMB: &"Jog_Fwd",
-	PlayerState.State.LEDGE_HANG: &"Jump",
-	PlayerState.State.HIT: &"parkour/Hit_Knockback",
-	PlayerState.State.STAGGER: &"parkour/Hit_Knockback",
-	PlayerState.State.DEATH: &"Death01",
-}
-## Clip d'entrée joué jusqu'au bout avant la boucle de l'état.
-const INTROS: Dictionary[PlayerState.State, StringName] = {
-	PlayerState.State.JUMP: &"parkour/NinjaJump_Start",
-	PlayerState.State.DOUBLE_JUMP: &"parkour/NinjaJump_Start",
-	PlayerState.State.SLIDE: &"parkour/Slide_Start",
-}
-## Vitesse de lecture des clips plus lents que la physique du jeu.
-const CLIP_SPEED: Dictionary[StringName, float] = {
-	&"parkour/NinjaJump_Start": 2.4,
-	&"parkour/NinjaJump_Land": 2.6,
-	&"parkour/Slide_Start": 2.2,
-	&"parkour/ClimbUp": 1.6,
-	&"Roll": 1.7,
-}
-## Hissage après une suspension : le clip ClimbUp est joué pendant cette durée (s).
+## Hissage après une suspension : durée pendant laquelle on joue « vault ».
 const MANTLE_TIME: float = 0.45
+
+## État du corps → état de l'animation.
+const STATES: Dictionary[PlayerState.State, StringName] = {
+	PlayerState.State.IDLE: &"loco",
+	PlayerState.State.RUN: &"loco",
+	PlayerState.State.SPRINT: &"loco",
+	PlayerState.State.WALL_RUN: &"loco",
+	PlayerState.State.JUMP: &"air",
+	PlayerState.State.DOUBLE_JUMP: &"air",
+	PlayerState.State.FALL: &"air",
+	PlayerState.State.LANDING: &"land",
+	PlayerState.State.ROLL: &"roll",
+	PlayerState.State.SLIDE: &"slide_start",
+	PlayerState.State.VAULT: &"vault",
+	PlayerState.State.WALL_CLIMB: &"climb",
+	PlayerState.State.LEDGE_HANG: &"hang",
+	PlayerState.State.HIT: &"hit",
+	PlayerState.State.STAGGER: &"hit",
+	PlayerState.State.DEATH: &"death",
+}
+## Fondu (s) pour entrer dans chaque état : court pour l'air et la réception (réactif).
+const XFADE: Dictionary[StringName, float] = {
+	&"air": 0.08,
+	&"land": 0.05,
+	&"loco": 0.16,
+	&"slide_start": 0.08,
+	&"roll": 0.06,
+	&"vault": 0.08,
+}
 
 @export var figure_library: FigureLibrary
 @export var ink: Color = Color(0.04, 0.04, 0.05)
@@ -78,11 +84,14 @@ var _pivot: Node3D
 var _model: Node3D
 var _skeleton: Skeleton3D
 var _player: AnimationPlayer
+var _tree: AnimationTree
+var _playback: AnimationNodeStateMachinePlayback
 var _sprite: Sprite2D
-var _current: StringName = &""
+var _current: StringName = &"loco"
 var _state: PlayerState.State = PlayerState.State.IDLE
-var _intro_done: bool = true
 var _mantle_left: float = 0.0
+var _air_u: float = 0.5
+var _loco_blend: float = 0.0
 var _rotation: float = 0.0
 ## Orientation lissée (rad autour de Y) pour un demi-tour sans saut d'image.
 var _yaw: float = PI * 0.5
@@ -94,19 +103,33 @@ var _climb_phase: float = 0.0
 func _ready() -> void:
 	_body = get_parent() as RunnerBody
 	_build_viewport()
+	_build_tree()
 	if _body != null:
 		_body.state_changed.connect(_on_state_changed)
+		_body.jump_started.connect(func(_kind: StringName) -> void: _air_u = 0.0)
 
 
-## Animation en cours (lecture seule, pour les tests).
+## État d'animation en cours (« loco », « air », « slide »…), pour les tests.
 func current_clip() -> StringName:
 	return _current
+
+
+## Mélange de locomotion (0 = repos, 1 = sprint), pour les tests.
+func loco_blend() -> float:
+	return _loco_blend
+
+
+## Position dans le mélange aérien (0 = appel, 0,5 = sommet, 1 = réception), pour les tests.
+func air_blend() -> float:
+	return _air_u
 
 
 ## Poids des gestes d'escalade sur les bras (lecture seule, pour les tests).
 func arm_weight() -> float:
 	return _arm_weight
 
+
+# --- Construction ---------------------------------------------------------------------
 
 func _build_viewport() -> void:
 	_viewport = SubViewport.new()
@@ -134,11 +157,8 @@ func _build_viewport() -> void:
 	_pivot.add_child(_model)
 	_apply_ink(_model)
 	_skeleton = _model.find_child("Skeleton3D", true, false) as Skeleton3D
-	# Les boucles (« _Loop ») sont reconnues à l'import, qui retire ce suffixe.
 	_player = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	_player.add_animation_library(&"parkour", load(PARKOUR_LIBRARY) as AnimationLibrary)
-	# Avancée manuelle : les gestes de bras sont posés juste après l'animation.
-	_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 
 	_sprite = Sprite2D.new()
 	_sprite.texture = _viewport.get_texture()
@@ -160,8 +180,130 @@ func _apply_ink(node: Node) -> void:
 		(mesh as MeshInstance3D).material_override = material
 
 
+## Clips dérivés (poses figées, extraits accélérés) dans la bibliothèque « gen ».
+func _build_clips() -> void:
+	var gen: AnimationLibrary = AnimationLibrary.new()
+	var start: Animation = _player.get_animation(&"parkour/NinjaJump_Start")
+	var fall: Animation = _player.get_animation(&"Jump_Start")
+	var land: Animation = _player.get_animation(&"parkour/NinjaJump_Land")
+	# Poses aériennes (fractions de clip choisies sur la planche des captures).
+	gen.add_animation(&"air_push", resample(start, start.length * 1.0 / 9.0, -1.0))
+	gen.add_animation(&"air_knee", resample(start, start.length * 2.0 / 9.0, -1.0))
+	gen.add_animation(&"air_apex", resample(start, start.length * 4.0 / 9.0, -1.0))
+	gen.add_animation(&"air_down", resample(fall, fall.length * 5.0 / 9.0, -1.0))
+	gen.add_animation(&"air_reach", resample(fall, fall.length * 7.0 / 9.0, -1.0))
+	# Réception : accroupissement profond puis relèvement, accéléré.
+	gen.add_animation(&"land", resample(land, land.length * 1.0 / 9.0, land.length * 6.0 / 9.0, 2.4))
+	gen.add_animation(&"slide_start", resample(_player.get_animation(&"parkour/Slide_Start"), 0.0, -2.0, 2.2))
+	gen.add_animation(&"vault", resample(_player.get_animation(&"parkour/ClimbUp"), 0.0, -2.0, 1.6))
+	gen.add_animation(&"roll", resample(_player.get_animation(&"Roll"), 0.0, -2.0, 1.7))
+	_player.add_animation_library(&"gen", gen)
+
+
+func _build_tree() -> void:
+	_build_clips()
+	var machine: AnimationNodeStateMachine = AnimationNodeStateMachine.new()
+
+	var loco: AnimationNodeBlendTree = AnimationNodeBlendTree.new()
+	var loco_space: AnimationNodeBlendSpace1D = AnimationNodeBlendSpace1D.new()
+	loco_space.sync = true
+	loco_space.add_blend_point(_anim(&"Idle"), 0.0, -1, &"idle")
+	loco_space.add_blend_point(_anim(&"Jog_Fwd"), JOG_SPEED / SPRINT_SPEED, -1, &"jog")
+	loco_space.add_blend_point(_anim(&"Sprint"), 1.0, -1, &"sprint")
+	loco.add_node(&"space", loco_space)
+	loco.add_node(&"cadence", AnimationNodeTimeScale.new())
+	loco.connect_node(&"cadence", 0, &"space")
+	loco.connect_node(&"output", 0, &"cadence")
+	machine.add_node(&"loco", loco)
+
+	var air: AnimationNodeBlendSpace1D = AnimationNodeBlendSpace1D.new()
+	var poses: Array[StringName] = [&"air_push", &"air_knee", &"air_apex", &"air_down", &"air_reach"]
+	for i: int in poses.size():
+		air.add_blend_point(_anim(StringName("gen/" + String(poses[i]))), float(i) / float(poses.size() - 1), -1, poses[i])
+	machine.add_node(&"air", air)
+
+	machine.add_node(&"land", _anim(&"gen/land"))
+	machine.add_node(&"roll", _anim(&"gen/roll"))
+	machine.add_node(&"slide_start", _anim(&"gen/slide_start"))
+	machine.add_node(&"slide", _anim(&"parkour/Slide"))
+	machine.add_node(&"vault", _anim(&"gen/vault"))
+	machine.add_node(&"climb", _anim(&"Jog_Fwd"))
+	machine.add_node(&"hang", _anim(&"Jump"))
+	machine.add_node(&"hit", _anim(&"parkour/Hit_Knockback"))
+	machine.add_node(&"death", _anim(&"Death01"))
+
+	var names: Array[StringName] = [
+		&"loco", &"air", &"land", &"roll", &"slide_start", &"slide", &"vault", &"climb", &"hang", &"hit", &"death",
+	]
+	for from: StringName in names:
+		for to: StringName in names:
+			if from != to:
+				machine.add_transition(from, to, _transition(XFADE.get(to, 0.12)))
+	# Entrée de glissade, puis boucle de glissade quand elle est finie.
+	machine.remove_transition(&"slide_start", &"slide")
+	var into_slide: AnimationNodeStateMachineTransition = _transition(0.1)
+	into_slide.switch_mode = AnimationNodeStateMachineTransition.SWITCH_MODE_AT_END
+	into_slide.advance_mode = AnimationNodeStateMachineTransition.ADVANCE_MODE_AUTO
+	machine.add_transition(&"slide_start", &"slide", into_slide)
+	var begin: AnimationNodeStateMachineTransition = _transition(0.0)
+	begin.advance_mode = AnimationNodeStateMachineTransition.ADVANCE_MODE_AUTO
+	machine.add_transition(&"Start", &"loco", begin)
+
+	_tree = AnimationTree.new()
+	_tree.tree_root = machine
+	_model.add_child(_tree)
+	_tree.anim_player = _tree.get_path_to(_player)
+	# Avancée manuelle : les gestes de bras sont posés juste après l'animation.
+	_tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	_tree.active = true
+	_playback = _tree.get(&"parameters/playback") as AnimationNodeStateMachinePlayback
+	_playback.start(&"loco")
+
+
+static func _anim(clip: StringName) -> AnimationNodeAnimation:
+	var node: AnimationNodeAnimation = AnimationNodeAnimation.new()
+	node.animation = clip
+	return node
+
+
+static func _transition(xfade: float) -> AnimationNodeStateMachineTransition:
+	var transition: AnimationNodeStateMachineTransition = AnimationNodeStateMachineTransition.new()
+	transition.xfade_time = xfade
+	transition.switch_mode = AnimationNodeStateMachineTransition.SWITCH_MODE_IMMEDIATE
+	return transition
+
+
+## Extrait de `source` entre t0 et t1 rejoué `speed` fois plus vite, rééchantillonné
+## à RESAMPLE_FPS. t1 < 0 : jusqu'à la fin (-2) ou pose figée en t0 (-1).
+static func resample(source: Animation, t0: float, t1: float, speed: float = 1.0) -> Animation:
+	var end: float = t0 if t1 == -1.0 else (source.length if t1 < 0.0 else t1)
+	var duration: float = maxf((end - t0) / speed, 1.0 / RESAMPLE_FPS)
+	var steps: int = maxi(1, int(ceilf(duration * RESAMPLE_FPS)))
+	var out: Animation = Animation.new()
+	out.length = duration
+	for track: int in source.get_track_count():
+		var type: Animation.TrackType = source.track_get_type(track)
+		if type != Animation.TYPE_POSITION_3D and type != Animation.TYPE_ROTATION_3D and type != Animation.TYPE_SCALE_3D:
+			continue
+		var copy: int = out.add_track(type)
+		out.track_set_path(copy, source.track_get_path(track))
+		for k: int in steps + 1:
+			var u: float = float(k) / float(steps)
+			var at: float = duration * u
+			var from: float = lerpf(t0, end, u)
+			match type:
+				Animation.TYPE_POSITION_3D:
+					out.position_track_insert_key(copy, at, source.position_track_interpolate(track, from))
+				Animation.TYPE_ROTATION_3D:
+					out.rotation_track_insert_key(copy, at, source.rotation_track_interpolate(track, from))
+				Animation.TYPE_SCALE_3D:
+					out.scale_track_insert_key(copy, at, source.scale_track_interpolate(track, from))
+	return out
+
+
+# --- Mise à jour ---------------------------------------------------------------------
+
 func _on_state_changed(from: PlayerState.State, to: PlayerState.State) -> void:
-	_intro_done = not INTROS.has(to)
 	# Hissage : de la suspension, le corps repart vers le haut par-dessus le rebord.
 	if from == PlayerState.State.LEDGE_HANG and to == PlayerState.State.JUMP:
 		_mantle_left = MANTLE_TIME
@@ -169,43 +311,42 @@ func _on_state_changed(from: PlayerState.State, to: PlayerState.State) -> void:
 		_mantle_left = 0.0
 
 
-func _play(clip: StringName, blend: float = BLEND_TIME) -> void:
-	if _player == null or not _player.has_animation(clip):
-		return
-	_player.play(clip, blend, CLIP_SPEED.get(clip, 1.0))
-	_current = clip
-
-
-func _clip_for(state: PlayerState.State) -> StringName:
+func _target_state() -> StringName:
 	if _mantle_left > 0.0:
-		return &"parkour/ClimbUp"
-	if not _intro_done and INTROS.has(state):
-		var intro: StringName = INTROS[state]
-		if _current != intro or _player.is_playing():
-			return intro
-		_intro_done = true
-	return CLIPS.get(state, &"parkour/NinjaJump_Idle")
+		return &"vault"
+	var target: StringName = STATES.get(_state, &"air")
+	# La glissade continue dans sa boucle une fois l'entrée jouée.
+	if target == &"slide_start" and _playback.get_current_node() == &"slide":
+		return &"slide"
+	return target
 
 
 func _process(delta: float) -> void:
-	if _body == null or _player == null:
+	if _body == null or _tree == null:
 		return
 	_state = _body.current_state()
 	_mantle_left = maxf(0.0, _mantle_left - delta)
-	var clip: StringName = _clip_for(_state)
-	if clip != _current:
-		_play(clip)
-	# Les cycles de course suivent la vitesse réelle.
+	var target: StringName = _target_state()
+	if target != _current:
+		_playback.travel(target)
+		_current = target
+	elif target == &"slide_start" and _playback.get_current_node() == &"slide":
+		_current = &"slide"
+
+	# Locomotion : mélange et cadence selon la vitesse au sol.
 	var speed: float = absf(_body.velocity.x)
-	match clip:
-		&"Jog_Fwd":
-			var climbing: bool = _state == PlayerState.State.WALL_CLIMB
-			_player.speed_scale = 1.3 if climbing else clampf(speed / JOG_REFERENCE_SPEED, 0.6, 1.6)
-		&"Sprint":
-			_player.speed_scale = clampf(maxf(speed, absf(_body.velocity.y)) / SPRINT_REFERENCE_SPEED, 0.7, 1.5)
-		_:
-			_player.speed_scale = 1.0
-	_player.advance(delta)
+	if _state == PlayerState.State.WALL_RUN:
+		speed = maxf(speed, absf(_body.velocity.y))
+	_loco_blend = clampf(speed / SPRINT_SPEED, 0.0, 1.0)
+	_tree.set(&"parameters/loco/space/blend_position", _loco_blend)
+	_tree.set(&"parameters/loco/cadence/scale", clampf(speed / SPRINT_SPEED, 1.0, MAX_CADENCE_SCALE))
+
+	# Air : pose selon la vitesse verticale (montée → sommet → descente).
+	var air_target: float = 0.5 + 0.5 * clampf(_body.velocity.y / AIR_SPEED_REF, -1.0, 1.0)
+	_air_u = move_toward(_air_u, air_target, delta * AIR_RESPONSE * maxf(0.2, absf(air_target - _air_u)))
+	_tree.set(&"parameters/air/blend_position", _air_u)
+
+	_tree.advance(delta)
 	_apply_arm_gestures(delta)
 	_update_orientation(delta)
 

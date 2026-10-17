@@ -16,6 +16,9 @@ extends Resource
 ## Type d'objet urbain de chaque bloc (BlockKind.Kind), pour le décor seulement ;
 ## absent ou -1 = déduit de la forme (BlockKind.classify).
 @export var kinds: Array[int] = []
+## Pièges style Ninja Arashi (pics, scies, écraseurs, flammes, plateformes fragiles).
+## Coordonnées locales ; voir HazardSpec.
+@export var hazards: Array[HazardSpec] = []
 ## 0 = initiation … 4 = expert. Le séquenceur aléatoire augmente la difficulté avec la distance.
 @export_range(0, 4) var difficulty: int = 0
 ## Mouvements sollicités (&"vault", &"slide", &"gap", &"wall", &"precision"…), pour l'équilibrage.

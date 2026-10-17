@@ -50,6 +50,7 @@ func _build(
 	_body.position = Vector2(60, -2)
 	_body.state_changed.connect(_record_state)
 	_runner.player = _body
+	_body.died.connect(func(cause: StringName) -> void: _trail.append("MORT:%s@%d" % [cause, int(_body.global_position.x)]))
 
 	root.add_child(_runner)
 	root.add_child(_body)
@@ -58,7 +59,7 @@ func _build(
 
 func _record_state(_from: PlayerState.State, to: PlayerState.State) -> void:
 	_trail.append("%s@%d" % [PlayerState.name_of(to), int(_body.global_position.x)])
-	if _trail.size() > 30:
+	if _trail.size() > 80:
 		_trail.pop_front()
 
 
@@ -70,6 +71,7 @@ func test_autopilot_crosses_every_chunk_without_falling(chunk_id: Variant = use_
 			break
 	var context: String = "%s : %s" % [chunk_id, " ".join(_trail)]
 	assert_eq(_runner.fall_count, 0, "chute — " + context)
+	assert_eq(_runner.death_count, 0, "mort sur un piège — " + context)
 	assert_true(_runner.is_completed(), "arrivée non atteinte — " + context)
 
 
@@ -100,4 +102,5 @@ func test_autopilot_finishes_every_lome_route(route_index: Variant = use_paramet
 			break
 	var context: String = "%s : %s" % [route.display_name, " ".join(_trail)]
 	assert_eq(_runner.fall_count, 0, "chute — " + context)
+	assert_eq(_runner.death_count, 0, "mort sur un piège — " + context)
 	assert_true(_runner.is_completed(), "arrivée non atteinte — " + context)
