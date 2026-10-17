@@ -13,6 +13,7 @@ var sfx_slider: HSlider
 var opacity_slider: HSlider
 var scale_slider: HSlider
 var vibrations_toggle: CheckButton
+var fps_toggle: CheckButton
 var quality_option: OptionButton
 var language_option: OptionButton
 
@@ -55,6 +56,11 @@ func _build() -> void:
 	vibrations_toggle.button_pressed = settings.vibrations
 	vibrations_toggle.custom_minimum_size = Vector2(0.0, MenuStyle.TOUCH * 0.8)
 	_row(right, "Vibrations", vibrations_toggle)
+	fps_toggle = CheckButton.new()
+	fps_toggle.name = "Fps"
+	fps_toggle.button_pressed = settings.show_fps
+	fps_toggle.custom_minimum_size = Vector2(0.0, MenuStyle.TOUCH * 0.8)
+	_row(right, "Afficher les FPS", fps_toggle)
 	quality_option = _option(QUALITY_NAMES, GameSettings.QUALITIES.find(settings.quality))
 	quality_option.name = "Quality"
 	_row(right, "Qualité graphique", quality_option)
@@ -65,6 +71,7 @@ func _build() -> void:
 	for slider: HSlider in [music_slider, sfx_slider, opacity_slider, scale_slider]:
 		slider.value_changed.connect(_on_slider_changed.bind(slider))
 	vibrations_toggle.toggled.connect(func(_on: bool) -> void: apply_changes())
+	fps_toggle.toggled.connect(func(_on: bool) -> void: apply_changes())
 	quality_option.item_selected.connect(func(_index: int) -> void: apply_changes())
 	language_option.item_selected.connect(func(_index: int) -> void: apply_changes())
 	if not MainMenu.is_mobile():
@@ -87,6 +94,7 @@ func apply_changes() -> void:
 	s.touch_opacity = opacity_slider.value
 	s.touch_scale = scale_slider.value
 	s.vibrations = vibrations_toggle.button_pressed
+	s.show_fps = fps_toggle.button_pressed
 	s.quality = GameSettings.QUALITIES[clampi(quality_option.selected, 0, GameSettings.QUALITIES.size() - 1)]
 	s.language = GameSettings.LANGUAGES[clampi(language_option.selected, 0, GameSettings.LANGUAGES.size() - 1)]
 	service.save()

@@ -4,6 +4,12 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Modifié — Fluidité sur téléphone (retour : « le jeu donne l'impression de ramer »)
+- **Interpolation physique** (physique à 60 Hz, affichage fluide sur les écrans 90/120 Hz), remise à zéro aux réapparitions.
+- Silhouettes 3D : **sans anticrénelage** (inutile, l'image est réduite), résolution selon la **qualité graphique** (160 / 208 / 256 px ; « moyenne » par défaut sur téléphone), **aucun rendu ni animation hors écran** (vigile au loin).
+- Réglage **« Afficher les FPS »** (compteur en haut à gauche).
+- APK **0.0.2 en version release** (plus rapide que la version de débogage), 54 Mo.
+
 ### Ajouté — Export Android (APK de test)
 - Préréglage d'export Android (`export_presets.cfg`), icône de l'application (`assets/icon/icon.png`, `tools/make_icon.gd`) ; APK de débogage signé de 59 Mo construit et vérifié (apksigner, aapt2 : paquet `com.adibologottlieb.edu`, cible Android 16 / API 36, arm64-v8a + armeabi-v7a). Non encore testé sur un téléphone.
 

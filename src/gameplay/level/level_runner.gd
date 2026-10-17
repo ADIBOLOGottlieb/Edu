@@ -131,6 +131,7 @@ func _respawn(chunk: LevelChunk) -> void:
 	var start: Vector2 = chunk.position if chunk != null else Vector2(0.0, streamer.end_y())
 	player.global_position = start + Vector2(respawn_offset_x, -2.0)
 	player.velocity = Vector2.ZERO
+	player.reset_physics_interpolation()
 
 
 func _on_sequence_finished(end_x: float) -> void:

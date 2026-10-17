@@ -114,6 +114,8 @@ func revive(at: Vector2) -> void:
 	_invulnerable_left = INVULNERABLE_AFTER_REVIVE
 	figure = Figure.Kind.NONE
 	fsm.force(PlayerState.State.IDLE)
+	# Réapparition : pas d'interpolation depuis la position de la mort.
+	reset_physics_interpolation()
 
 
 func _find_controller() -> Controller:

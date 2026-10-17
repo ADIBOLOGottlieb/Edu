@@ -21,7 +21,9 @@ const MODEL_SCENE: String = "res://assets/characters/quaternius/mannequin_anims.
 ## Clips de parkour de la bibliothèque 2, reciblés (tools/build_parkour_anims.gd).
 const PARKOUR_LIBRARY: String = "res://assets/characters/quaternius/parkour_anims.res"
 ## Résolution du rendu (carré) et étendue verticale vue par la caméra (m).
-const VIEWPORT_SIZE: int = 320
+## Résolution du rendu 3D (carré) selon la qualité graphique : le sprite est réduit
+## à l'écran, donc pas besoin d'anticrénelage ni de grande résolution sur mobile.
+const VIEWPORT_SIZES: Dictionary[StringName, int] = {&"low": 160, &"medium": 208, &"high": 256}
 const VIEW_HEIGHT_M: float = 3.2
 ## Hauteur du point visé par la caméra au-dessus des pieds (m).
 const CAMERA_TARGET_M: float = 1.3
@@ -97,6 +99,9 @@ const BEAM_TILT: float = 0.32
 @export var accent: Color = Color(1.0, 0.72, 0.30)
 
 var _body: RunnerBody
+var _viewport_px: int = 256
+## Faux quand la silhouette est hors écran : ni rendu 3D ni animation (vigile au loin).
+var _on_screen: bool = true
 var _viewport: SubViewport
 var _pivot: Node3D
 var _model: Node3D
@@ -159,11 +164,14 @@ func torch_beam() -> Polygon2D:
 # --- Construction ---------------------------------------------------------------------
 
 func _build_viewport() -> void:
+	var settings_service: SettingsServiceNode = get_node_or_null(^"/root/SettingsService") as SettingsServiceNode
+	if settings_service != null:
+		_viewport_px = VIEWPORT_SIZES.get(settings_service.settings.quality, 256)
 	_viewport = SubViewport.new()
-	_viewport.size = Vector2i(VIEWPORT_SIZE, VIEWPORT_SIZE)
+	_viewport.size = Vector2i(_viewport_px, _viewport_px)
 	_viewport.transparent_bg = true
 	_viewport.own_world_3d = true
-	_viewport.msaa_3d = Viewport.MSAA_4X
+	_viewport.msaa_3d = Viewport.MSAA_DISABLED
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(_viewport)
 
@@ -194,12 +202,18 @@ func _build_viewport() -> void:
 	_sprite = Sprite2D.new()
 	_sprite.texture = _viewport.get_texture()
 	_sprite.centered = false
-	var pixels_per_m: float = float(VIEWPORT_SIZE) / VIEW_HEIGHT_M
-	var feet_px: float = float(VIEWPORT_SIZE) * 0.5 + CAMERA_TARGET_M * pixels_per_m
-	_sprite.offset = Vector2(-float(VIEWPORT_SIZE) * 0.5, -feet_px)
+	var pixels_per_m: float = float(_viewport_px) / VIEW_HEIGHT_M
+	var feet_px: float = float(_viewport_px) * 0.5 + CAMERA_TARGET_M * pixels_per_m
+	_sprite.offset = Vector2(-float(_viewport_px) * 0.5, -feet_px)
 	var screen_scale: float = SCREEN_HEIGHT_PX / (MODEL_HEIGHT_M * pixels_per_m)
 	_sprite.scale = Vector2(screen_scale, screen_scale)
 	add_child(_sprite)
+	# Hors écran : plus de rendu 3D ni d'animation (coût nul pour un vigile au loin).
+	var notifier: VisibleOnScreenNotifier2D = VisibleOnScreenNotifier2D.new()
+	notifier.rect = Rect2(-60.0, -SCREEN_HEIGHT_PX - 30.0, 120.0, SCREEN_HEIGHT_PX + 40.0)
+	notifier.screen_entered.connect(_set_on_screen.bind(true))
+	notifier.screen_exited.connect(_set_on_screen.bind(false))
+	add_child(notifier)
 	if guard_gear:
 		_build_beam()
 
@@ -442,8 +456,17 @@ func _target_state() -> StringName:
 	return target
 
 
+## Rendu et animation seulement à l'écran.
+func _set_on_screen(on: bool) -> void:
+	_on_screen = on
+	if _viewport != null:
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+
+
 func _process(delta: float) -> void:
 	if _body == null or _tree == null:
+		return
+	if not _on_screen:
 		return
 	_state = _body.current_state()
 	_mantle_left = maxf(0.0, _mantle_left - delta)
