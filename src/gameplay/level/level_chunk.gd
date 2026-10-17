@@ -8,20 +8,42 @@ extends Node2D
 var layout: ChunkLayout
 ## Rang du tronçon dans le parcours (0 = premier).
 var index: int = -1
+## Ambiance de la ville (null = aplats noirs, comme avant M3d) ; sinon chaque bloc est
+## dessiné comme un objet urbain (PropPainter), toujours en un seul _draw.
+var theme: CityTheme
+
+var _shapes: Array[PropShape] = []
 
 
-func build(source: ChunkLayout) -> void:
+func build(source: ChunkLayout, city_theme: CityTheme = null) -> void:
 	layout = source
+	theme = city_theme
 	for rect: Rect2 in source.blocks:
 		add_child(LevelGeometry.make_block(rect, LevelGeometry.INK, false))
+	_shapes.clear()
+	if theme != null:
+		# Objets urbains de la ville, calculés une fois : la collision reste le rectangle.
+		var kinds: Array[BlockKind.Kind] = BlockKind.kinds_of(source)
+		for i: int in source.blocks.size():
+			var variant: int = BlockKind.variant(source.id, i)
+			_shapes.append_array(PropPainter.shapes_for(source.blocks[i], kinds[i], variant, theme))
 	queue_redraw()
+
+
+## Nombre de polygones de décor du tronçon (0 sans ville), pour les tests et le profilage.
+func prop_shape_count() -> int:
+	return _shapes.size()
 
 
 func _draw() -> void:
 	if layout == null:
 		return
-	for rect: Rect2 in layout.blocks:
-		draw_rect(rect, LevelGeometry.INK)
+	if _shapes.is_empty():
+		for rect: Rect2 in layout.blocks:
+			draw_rect(rect, LevelGeometry.INK)
+		return
+	for shape: PropShape in _shapes:
+		draw_colored_polygon(shape.points, shape.color)
 
 
 func end_x() -> float:

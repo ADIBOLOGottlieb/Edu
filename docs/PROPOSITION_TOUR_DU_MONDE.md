@@ -1,6 +1,6 @@
 # Proposition — EDU, le tour du monde en parkour
 
-Statut : **proposition à valider** (2026-10-17). Rien de ce document n'est implémenté,
+Statut : **validée** le 2026-10-17 (Lomé ville de départ, énergie 1 point / 72 min). M3d réalisé. Rien de ce document n'est implémenté,
 sauf mention contraire. Il reprend l'idée de l'utilisateur, l'adapte au jeu et la
 découpe en jalons.
 

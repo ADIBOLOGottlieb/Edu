@@ -23,7 +23,10 @@ func _load_chunk_ids() -> Array:
 	return ids
 
 
-func _build(mode: ChunkSequencer.Mode, seed_value: int, order: Array[StringName]) -> void:
+func _build(
+		mode: ChunkSequencer.Mode, seed_value: int, order: Array[StringName],
+		city: CityDefinition = null, route_index: int = 0
+) -> void:
 	_trail.clear()
 	var root: Node2D = Node2D.new()
 	_runner = LevelRunner.new()
@@ -31,6 +34,8 @@ func _build(mode: ChunkSequencer.Mode, seed_value: int, order: Array[StringName]
 	_runner.mode = mode
 	_runner.seed_value = seed_value
 	_runner.ordered_ids = order
+	_runner.city = city
+	_runner.route_index = route_index
 	var streamer: ChunkStreamer = ChunkStreamer.new()
 	streamer.name = "Streamer"
 	_runner.add_child(streamer)
@@ -80,3 +85,19 @@ func test_autopilot_survives_a_random_course_with_rising_difficulty() -> void:
 	assert_not_null(reached)
 	assert_gte(reached.index, ENDLESS_CHUNKS, "course interrompue — " + " ".join(_trail))
 	assert_gte(_runner.sequencer.max_difficulty(), 3, "la difficulté a bien augmenté")
+
+
+const LOME_PATH: String = "res://data/cities/lome.tres"
+var _lome_routes: Array = range((load(LOME_PATH) as CityDefinition).routes.size())
+
+
+func test_autopilot_finishes_every_lome_route(route_index: Variant = use_parameters(_lome_routes)) -> void:
+	_build(ChunkSequencer.Mode.ORDERED, 1, [] as Array[StringName], load(LOME_PATH) as CityDefinition, int(route_index))
+	var route: CityRoute = _runner.current_route()
+	for i: int in MAX_FRAMES_PER_CHUNK * route.chunk_ids.size():
+		await wait_physics_frames(1)
+		if _runner.is_completed() or _runner.fall_count > 0:
+			break
+	var context: String = "%s : %s" % [route.display_name, " ".join(_trail)]
+	assert_eq(_runner.fall_count, 0, "chute — " + context)
+	assert_true(_runner.is_completed(), "arrivée non atteinte — " + context)

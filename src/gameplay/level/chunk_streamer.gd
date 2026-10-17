@@ -19,6 +19,8 @@ signal sequence_finished(end_x: float)
 @export var max_pool_per_layout: int = 2
 
 var sequencer: ChunkSequencer
+## Ambiance de la ville : objets urbains dessinés sur les blocs (null = aplats).
+var theme: CityTheme
 ## Nombre de tronçons construits (hors réutilisation) : mesure l'efficacité de la réserve.
 var created_count: int = 0
 
@@ -98,7 +100,7 @@ func _take_from_pool(layout: ChunkLayout) -> LevelChunk:
 	if not pooled.is_empty():
 		return pooled.pop_back() as LevelChunk
 	var chunk: LevelChunk = LevelChunk.new()
-	chunk.build(layout)
+	chunk.build(layout, theme)
 	created_count += 1
 	return chunk
 

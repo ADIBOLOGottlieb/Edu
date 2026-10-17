@@ -23,6 +23,10 @@ const PIXELS_PER_METER: float = 40.0
 ## Chute dans la rue : plus bas que le toit le plus bas du tronçon + cette profondeur.
 @export var kill_depth: float = 600.0
 @export var respawn_offset_x: float = 60.0
+## Ville jouée : si elle est donnée, son parcours n° route_index remplace mode et
+## ordered_ids, et son ambiance habille les tronçons (objets urbains).
+@export var city: CityDefinition
+@export var route_index: int = 0
 
 var sequencer: ChunkSequencer
 var seed_used: int = 0
@@ -37,6 +41,12 @@ var _completed: bool = false
 
 func _ready() -> void:
 	seed_used = seed_value if seed_value != 0 else randi_range(1, 2147483646)
+	var route: CityRoute = current_route()
+	if route != null:
+		mode = ChunkSequencer.Mode.ORDERED
+		ordered_ids = route.chunk_ids
+	if city != null:
+		streamer.theme = city.theme
 	sequencer = ChunkSequencer.new(library, mode, seed_used, ordered_ids)
 	streamer.sequencer = sequencer
 	streamer.sequence_finished.connect(_on_sequence_finished)
@@ -47,6 +57,11 @@ func _ready() -> void:
 		if profile != null:
 			player.abilities = profile.abilities
 	streamer.update(_target_x())
+
+
+## Parcours de ville joué, ou null (course libre ou parcours de test).
+func current_route() -> CityRoute:
+	return city.route(route_index) if city != null else null
 
 
 func distance_meters() -> float:

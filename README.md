@@ -14,7 +14,8 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 | M3 Niveau à défilement | tronçons en données, parcours fixe / aléatoire, caméra, arrivée, profilage | terminé : 133/133 tests, 60 FPS sur PC ; non mesuré sur Android |
 | M3b Parcours, figures, silhouette | (1/3) toits à altitude variable, 24 tronçons sur 5 paliers, pilote automatique ; (2/3) 9 figures de parkour ; (3/3) silhouette humaine fidèle à la référence, foulée humaine, gestuelle fluide | terminé, 169/169 tests |
 | M3c Coureur 3D | mannequin humain + capture de mouvement (Quaternius, CC0) : course, sprint, saut athlétique, glissade, escalade, hissage, roulade | terminé, 175/175 tests ; branche `m3c/silhouette-3d` |
-| Proposition « tour du monde » | villes et monuments, décor urbain, pièces, skins, énergie : [docs/PROPOSITION_TOUR_DU_MONDE.md](docs/PROPOSITION_TOUR_DU_MONDE.md) | à valider |
+| Proposition « tour du monde » | villes et monuments, décor urbain, pièces, skins, énergie : [docs/PROPOSITION_TOUR_DU_MONDE.md](docs/PROPOSITION_TOUR_DU_MONDE.md) | validée (Lomé ville de départ, énergie 1 point / 72 min) |
+| M3d Décor urbain + Lomé | objets urbains réels par type de bloc, arrière-plan en couches, Lomé (5 parcours, monument, cathédrale, palmiers) | terminé, 205/205 tests ; branche `m3d/decor-lome` |
 | M4 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.

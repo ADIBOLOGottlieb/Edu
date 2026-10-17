@@ -4,6 +4,20 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M3d Décor urbain réaliste et Lomé
+- **Objets urbains réels au premier plan** (silhouettes noires, touches de couleur chaude) à la place des rectangles : `BlockKind` déduit le type de chaque bloc de sa forme (immeuble, pilier, petit obstacle, mur, plateforme, plafond, poutre ; forçable par `ChunkLayout.kinds`), `PropPainter` le dessine selon le style de la ville. Moderne : bureaux, immeubles, entrepôt, climatiseurs, caisses, châteaux d'eau, cages d'escalier, conteneurs, enseignes suspendues, passerelles, poutrelles, flèches de grue. **Lomé** : maisons-boutiques à toit de tôle et enseignes peintes, balcons, claustras, étal de marché au pagne wax, bidons jaunes, pneus, zémidjan, poteaux électriques, réservoir d'eau, bâche de marché, enseigne de coiffeur.
+- La collision reste le rectangle testé : le décor ne change rien au jeu (les 24 tronçons restent jouables, tests inchangés).
+- **Arrière-plan en couches** (`CityBackdrop` + `CityTheme`) : ciel dégradé et soleil, horizon lointain avec les repères de la ville, quartiers intermédiaires (toits de tôle, réservoirs, paraboles, palmiers, minaret, clocher), rue proche (palmiers, poteaux et câbles, réverbères, panneaux). Un seul dessin par couche (mobile).
+- **Lomé, ville de départ** : `data/cities/lome.tres` (5 parcours : Grand Marché, Boulevard du 13-Janvier, Quartier Bè, Cathédrale, Place de l'Indépendance) et `lome_theme.tres` (heure dorée sur le golfe de Guinée) ; évocations stylisées originales du Monument de l'Indépendance, de la cathédrale à deux flèches, d'une tour d'hôtel, de la plage et des cocotiers. Scène `scenes/levels/lome_run.tscn`, accessible depuis l'écran de démarrage.
+- `LevelRunner.city` / `route_index` ; `tools/capture_motion.gd --city=lome --route=N` ; `tools/capture_props.gd`, `tools/capture_backdrop.gd` (planches de contrôle).
+- Tests : `test_block_kind` (8), `test_prop_painter` (9 : limites, validité, couverture ≥ 85 %, bord de course plein, budget de polygones), `test_city_backdrop` (12), jouabilité des **5 parcours de Lomé** par le pilote automatique ; **205/205**.
+
+### Limites connues — M3d
+- Performances Android non mesurées (silhouette 3D + décor détaillé).
+- Grandes enseignes orange très présentes à l'écran : à doser au prochain réglage artistique.
+- Les monuments sont des évocations : vérification juridique à faire avant la sortie (proposition §8).
+
+
 ### Ajouté — M3c Coureur 3D : escalade, glissade, saut athlétique
 - **Le joueur utilise maintenant la silhouette 3D** (`ModelVisual` dans `player.tscn`) ; l'ancien dessin par code reste dans la scène, masqué (`tools/capture_motion.gd --model2d` pour comparer).
 - **Clips de parkour capturés** de la bibliothèque Quaternius 2 (CC0), reciblés sur le mannequin par `tools/build_parkour_anims.gd` → `parkour_anims.res` (164 Ko) : glissade (entrée, boucle, sortie), hissage par-dessus un obstacle, saut athlétique (« ninja jump »), réception accroupie, projection en arrière.

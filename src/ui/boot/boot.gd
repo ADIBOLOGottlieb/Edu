@@ -6,6 +6,7 @@ const BACKGROUND: Color = Color(0.93, 0.93, 0.91)
 const INK: Color = Color(0.05, 0.05, 0.06)
 ## Libellé → scène.
 const DESTINATIONS: Array[Array] = [
+	["Lomé : Grand Marché", "res://scenes/levels/lome_run.tscn"],
 	["Parcours fixe (avec arrivée)", "res://scenes/levels/fixed_run.tscn"],
 	["Course infinie (aléatoire)", "res://scenes/levels/endless_run.tscn"],
 	["Bac à sable : mouvement", "res://scenes/sandbox/movement_sandbox.tscn"],

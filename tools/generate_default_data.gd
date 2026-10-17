@@ -12,6 +12,8 @@ const ANIMS_PATH: String = "res://data/animations/player_anims.tres"
 const LIBRARY_PATH: String = "res://data/levels/chunk_library.tres"
 const FIGURES_PATH: String = "res://data/animations/player_figures.tres"
 const STYLE_PATH: String = "res://data/animations/protagonist_style.tres"
+const LOME_THEME_PATH: String = "res://data/cities/lome_theme.tres"
+const LOME_PATH: String = "res://data/cities/lome.tres"
 ## Hauteur des immeubles sous leur toit : la rue est loin en dessous.
 const BUILDING_DEPTH: float = 1400.0
 ## Épaisseur d'une poutre (grue, passerelle).
@@ -26,7 +28,73 @@ func _init() -> void:
 	_save(_figure_library(), FIGURES_PATH, force)
 	# Valeurs par défaut du script = silhouette du protagoniste (sweat, cargo, baskets).
 	_save(SilhouetteStyle.new(), STYLE_PATH, force)
+	_save(_lome_theme(), LOME_THEME_PATH, force)
+	_save(_lome_city(load(LOME_THEME_PATH) as CityTheme), LOME_PATH, force)
 	quit()
+
+
+# --- Villes (docs/PROPOSITION_TOUR_DU_MONDE.md) ----------------------------------------
+
+## Lomé, ville de départ : fin d'après-midi dorée sur le golfe de Guinée.
+func _lome_theme() -> CityTheme:
+	var theme: CityTheme = CityTheme.new()
+	theme.id = &"lome"
+	theme.display_name = "Lomé"
+	theme.sky_top = Color(0.33, 0.48, 0.66)
+	theme.sky_horizon = Color(0.99, 0.77, 0.50)
+	theme.sun_position = Vector2(0.78, 0.66)
+	theme.sun_radius = 46.0
+	theme.sun_color = Color(1.0, 0.88, 0.62)
+	theme.far_color = Color(0.82, 0.62, 0.52)
+	theme.mid_color = Color(0.53, 0.38, 0.37)
+	theme.near_color = Color(0.27, 0.20, 0.22)
+	theme.ink = Color(0.04, 0.035, 0.045)
+	theme.accent = Color(1.0, 0.72, 0.30)
+	theme.prop_style = &"lome"
+	theme.tin_roofs = true
+	theme.palm_trees = true
+	theme.satellite_dishes = true
+	theme.power_lines = true
+	theme.monument = &"lome_independence"
+	theme.landmarks = [&"cathedral", &"hotel_tower", &"beach_palms"] as Array[StringName]
+	theme.seed_value = 228
+	return theme
+
+
+func _route(id: StringName, display_name: String, difficulty: int, chunks: Array[StringName]) -> CityRoute:
+	var route: CityRoute = CityRoute.new()
+	route.id = id
+	route.display_name = display_name
+	route.difficulty = difficulty
+	route.chunk_ids = chunks
+	return route
+
+
+## Cinq parcours du plus facile au plus dur, faits des tronçons existants.
+func _lome_city(theme: CityTheme) -> CityDefinition:
+	var city: CityDefinition = CityDefinition.new()
+	city.id = &"lome"
+	city.display_name = "Lomé"
+	city.country = "Togo"
+	city.theme = theme
+	city.routes = [
+		_route(&"lome_grand_marche", "Grand Marché", 0, [
+			&"flat_run", &"vault_pair", &"low_tunnel", &"small_gap", &"step_platform", &"flat_run",
+		] as Array[StringName]),
+		_route(&"lome_boulevard", "Boulevard du 13-Janvier", 1, [
+			&"flat_run", &"roof_hop", &"stairs_up", &"vent_field", &"drop_down", &"tunnel_then_vault", &"flat_run",
+		] as Array[StringName]),
+		_route(&"lome_be", "Quartier Bè", 2, [
+			&"flat_run", &"double_gap", &"wall_ledge", &"roof_climb", &"gap_drop_roll", &"slide_gap", &"flat_run",
+		] as Array[StringName]),
+		_route(&"lome_cathedrale", "Cathédrale", 3, [
+			&"flat_run", &"high_wall", &"precision_hops", &"upper_route", &"gap_then_wall", &"wall_gap_wall", &"flat_run",
+		] as Array[StringName]),
+		_route(&"lome_independance", "Place de l'Indépendance", 4, [
+			&"flat_run", &"skyline_run", &"crane_line", &"tunnel_drop_climb", &"rooftop_gauntlet", &"flat_run",
+		] as Array[StringName]),
+	] as Array[CityRoute]
+	return city
 
 
 func _figure(times: Array[float], poses: Array[Dictionary]) -> FigureAnimation:
