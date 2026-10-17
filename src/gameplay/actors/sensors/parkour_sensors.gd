@@ -22,6 +22,15 @@ var obstacle_height: float = 0.0
 var ledge_available: bool = false
 ## Position y du haut du rebord détecté (globale).
 var ledge_top_y: float = 0.0
+## Hauteur du haut du mur devant au-dessus des pieds ; 0 si au-delà de TOP_SCAN_HEIGHT.
+var wall_top_height: float = 0.0
+## Au sol : plus de sol juste devant les pieds.
+var edge_ahead: bool = false
+
+## Hauteur maximale à laquelle on cherche le haut d'un mur (tic-tac).
+const TOP_SCAN_HEIGHT: float = 160.0
+## Distance devant le corps où l'on vérifie qu'il reste du sol.
+const EDGE_LOOKAHEAD: float = 12.0
 
 
 func reset() -> void:
@@ -30,6 +39,8 @@ func reset() -> void:
 	obstacle_height = 0.0
 	ledge_available = false
 	ledge_top_y = 0.0
+	wall_top_height = 0.0
+	edge_ahead = false
 
 
 func scan(body: CharacterBody2D, facing: int, tuning: MoveTuning, half_width: float) -> void:
@@ -48,6 +59,20 @@ func scan(body: CharacterBody2D, facing: int, tuning: MoveTuning, half_width: fl
 	if not chest.is_empty() and absf((chest["normal"] as Vector2).x) >= WALL_NORMAL_MIN:
 		wall_ahead = true
 		wall_x = (chest["position"] as Vector2).x
+		# Haut du mur : rayon vers le bas juste derrière la face. S'il part de
+		# l'intérieur d'un mur plus haut, il ne touche rien (mur trop haut).
+		var top_x: float = wall_x + forward * 6.0
+		var top: Dictionary = _ray(
+			space, Vector2(top_x, origin.y - TOP_SCAN_HEIGHT), Vector2(top_x, origin.y + CHEST_Y), mask, exclude
+		)
+		if not top.is_empty():
+			wall_top_height = origin.y - (top["position"] as Vector2).y
+
+	if body.is_on_floor():
+		var edge_x: float = origin.x + forward * (half_width + EDGE_LOOKAHEAD)
+		edge_ahead = _ray(
+			space, Vector2(edge_x, origin.y - 4.0), Vector2(edge_x, origin.y + 40.0), mask, exclude
+		).is_empty()
 
 	# Obstacle bas : touché au genou, libre au-dessus de la hauteur maximale de franchissement.
 	var vault_reach: float = half_width + tuning.vault_reach

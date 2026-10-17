@@ -1,0 +1,47 @@
+[gd_resource type="Resource" script_class="CityDefinition" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/city_route.gd" id="1_krsdp"]
+[ext_resource type="Script" path="res://src/data_types/city_definition.gd" id="2_f4cqe"]
+[ext_resource type="Resource" path="res://data/cities/lome_theme.tres" id="3_qkbms"]
+
+[sub_resource type="Resource" id="Resource_58ken"]
+script = ExtResource("1_krsdp")
+id = &"lome_grand_marche"
+display_name = "Grand Marché"
+chunk_ids = Array[StringName]([&"flat_run", &"vault_pair", &"low_tunnel", &"small_gap", &"step_platform", &"flat_run"])
+
+[sub_resource type="Resource" id="Resource_fawi0"]
+script = ExtResource("1_krsdp")
+id = &"lome_boulevard"
+display_name = "Boulevard du 13-Janvier"
+difficulty = 1
+chunk_ids = Array[StringName]([&"flat_run", &"roof_hop", &"stairs_up", &"vent_field", &"drop_down", &"tunnel_then_vault", &"flat_run"])
+
+[sub_resource type="Resource" id="Resource_anm3d"]
+script = ExtResource("1_krsdp")
+id = &"lome_be"
+display_name = "Quartier Bè"
+difficulty = 2
+chunk_ids = Array[StringName]([&"flat_run", &"double_gap", &"wall_ledge", &"roof_climb", &"gap_drop_roll", &"slide_gap", &"flat_run"])
+
+[sub_resource type="Resource" id="Resource_5xyvo"]
+script = ExtResource("1_krsdp")
+id = &"lome_cathedrale"
+display_name = "Cathédrale"
+difficulty = 3
+chunk_ids = Array[StringName]([&"flat_run", &"high_wall", &"precision_hops", &"upper_route", &"gap_then_wall", &"wall_gap_wall", &"flat_run"])
+
+[sub_resource type="Resource" id="Resource_3ajoo"]
+script = ExtResource("1_krsdp")
+id = &"lome_independance"
+display_name = "Place de l'Indépendance"
+difficulty = 4
+chunk_ids = Array[StringName]([&"flat_run", &"skyline_run", &"crane_line", &"tunnel_drop_climb", &"rooftop_gauntlet", &"flat_run"])
+
+[resource]
+script = ExtResource("2_f4cqe")
+id = &"lome"
+display_name = "Lomé"
+country = "Togo"
+theme = ExtResource("3_qkbms")
+routes = Array[ExtResource("1_krsdp")]([SubResource("Resource_58ken"), SubResource("Resource_fawi0"), SubResource("Resource_anm3d"), SubResource("Resource_5xyvo"), SubResource("Resource_3ajoo")])

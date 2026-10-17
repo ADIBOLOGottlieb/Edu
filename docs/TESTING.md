@@ -62,6 +62,31 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gtest=res://tests/unit/tes
 
 > Note : `wait_physics_frames(1)` de GUT peut laisser passer plus d'un tick de physique. Les tests d'intégration déclenchent donc leurs appuis d'après l'état du corps, jamais d'après un numéro de frame.
 
+## Tests du jalon M3 (niveau à défilement)
+
+| Fichier | Vérifie |
+|---|---|
+| `unit/test_chunk_sequencer.gd` | ordre fixe puis fin ; départ sûr ; même graine = même parcours ; jamais deux fois le même tronçon de suite ; difficulté croissante ; poids nul jamais tiré ; bibliothèque vide sans plantage |
+| `unit/test_level_validator.gd` | sol d'entrée/sortie, trou trop large, mur trop haut, plafond trop bas, obstacle en zone de réapparition, bloc hors tronçon ; **chaque tronçon livré est valide** et chaque difficulté est représentée |
+| `integration/test_chunk_streamer.gd` | tronçons bout à bout ; niveau toujours prêt devant ; 200 tronçons avec nœuds et réserve bornés ; tronçons recyclés hors de l'arbre ; fin de séquence unique |
+| `integration/test_level_runner.gd` | arrivée atteinte une seule fois, arrêt au mur de fin ; chute dans un trou → replacé au début du tronçon, sur le sol |
+| `integration/test_runner_camera.gd` | avance devant la cible ; recul jamais au-delà de la borne |
+
+## Tests de jouabilité (M3b)
+
+`tests/playtest/test_chunk_playability.gd` : le `AutopilotController` traverse chaque tronçon de `data/levels/chunk_library.tres` (encadré de deux toits plats), puis une course aléatoire de 15 tronçons, avec le vrai moteur physique. Aucune chute, arrivée atteinte. **Durée : environ 3 minutes** (physique en temps réel) — la suite complète prend ~4 minutes.
+
+Après avoir modifié un tronçon, toujours lancer ce test : le validateur (calculs prudents) ne remplace pas une traversée réelle.
+
+## Profilage
+
+```
+godot --path . -s tools/profile_run.gd -- 60
+godot --path . -s tools/profile_run.gd -- 60 C:/chemin/absolu/captures
+```
+
+Fait défiler la course infinie à vitesse de sprint (coureur désactivé) et affiche FPS moyen / 1 % bas / minimum, appels de dessin, nœuds et objets. La variante avec dossier enregistre une capture à mi-parcours : la sauvegarde PNG provoque elle-même un à-coup, ne pas l'utiliser pour mesurer les FPS.
+
 ## Bac à sable (vérification manuelle)
 
 ```

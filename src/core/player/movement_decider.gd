@@ -57,6 +57,20 @@ static func wants_vault(intent: IntentFrame, ctx: MovementContext, tuning: MoveT
 	)
 
 
+## Mur bas devant (au-dessus d'un obstacle, en dessous d'une course murale),
+## abordé vite : appui du pied et passage par-dessus. Partage la ressource
+## aérienne de la course murale (une fois par phase aérienne).
+static func wants_tic_tac(intent: IntentFrame, ctx: MovementContext, tuning: MoveTuning) -> bool:
+	return (
+		ctx.wall_ahead
+		and ctx.can_wall_run
+		and pushing_forward(intent, ctx)
+		and absf(ctx.velocity.x) >= tuning.tic_tac_min_speed
+		and ctx.wall_top_height > tuning.vault_max_height
+		and ctx.wall_top_height <= tuning.tic_tac_max_height
+	)
+
+
 ## Mur devant, en courant vers lui assez vite, une fois par phase aérienne.
 static func wants_wall_run(intent: IntentFrame, ctx: MovementContext, tuning: MoveTuning) -> bool:
 	return (
@@ -161,7 +175,7 @@ static func next_state(
 		PlayerState.State.JUMP, PlayerState.State.DOUBLE_JUMP:
 			return _from_rising(state, intent, ctx, tuning)
 		PlayerState.State.FALL:
-			return _from_fall(intent, ctx)
+			return _from_fall(intent, ctx, tuning)
 		PlayerState.State.LANDING:
 			return _from_landing(intent, ctx, tuning)
 		PlayerState.State.SLIDE, PlayerState.State.ROLL:
@@ -196,7 +210,7 @@ static func _from_ground(
 		return PlayerState.State.JUMP
 	if not ctx.on_floor and ctx.coyote_left <= 0.0:
 		return PlayerState.State.FALL
-	if wants_vault(intent, ctx, tuning):
+	if wants_vault(intent, ctx, tuning) or wants_tic_tac(intent, ctx, tuning):
 		return PlayerState.State.VAULT
 	if wants_wall_run(intent, ctx, tuning):
 		return PlayerState.State.WALL_RUN
@@ -208,6 +222,9 @@ static func _from_ground(
 static func _from_rising(
 	state: PlayerState.State, intent: IntentFrame, ctx: MovementContext, tuning: MoveTuning
 ) -> PlayerState.State:
+	# Vite contre un mur bas : tic-tac plutôt que s'accrocher.
+	if wants_tic_tac(intent, ctx, tuning):
+		return PlayerState.State.VAULT
 	if wants_ledge(ctx):
 		return PlayerState.State.LEDGE_HANG
 	if state == PlayerState.State.JUMP:
@@ -224,9 +241,13 @@ static func _from_rising(
 	return state
 
 
-static func _from_fall(intent: IntentFrame, ctx: MovementContext) -> PlayerState.State:
+static func _from_fall(
+	intent: IntentFrame, ctx: MovementContext, tuning: MoveTuning
+) -> PlayerState.State:
 	if ctx.on_floor:
 		return PlayerState.State.LANDING
+	if wants_tic_tac(intent, ctx, tuning):
+		return PlayerState.State.VAULT
 	if wants_ledge(ctx):
 		return PlayerState.State.LEDGE_HANG
 	if wants_double_jump(ctx):

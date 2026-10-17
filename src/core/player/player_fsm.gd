@@ -44,5 +44,17 @@ func request(to: PlayerState.State) -> bool:
 	return true
 
 
+## Transition imposée par le système (mort, réapparition), hors table de règles :
+## aucun état de jeu ne peut refuser la mort.
+func force(to: PlayerState.State) -> void:
+	if to == current:
+		return
+	var from: PlayerState.State = current
+	current = to
+	ticks_in_state = 0
+	exit_allowed = false
+	state_changed.emit(from, to)
+
+
 func tick() -> void:
 	ticks_in_state += 1

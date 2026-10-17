@@ -1,0 +1,43 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://src/gameplay/level/level_runner.gd" id="1_runner"]
+[ext_resource type="Script" path="res://src/gameplay/level/chunk_streamer.gd" id="2_streamer"]
+[ext_resource type="Resource" path="res://data/levels/chunk_library.tres" id="3_library"]
+[ext_resource type="PackedScene" path="res://src/gameplay/actors/player/player.tscn" id="4_player"]
+[ext_resource type="Script" path="res://src/gameplay/level/runner_camera.gd" id="5_camera"]
+[ext_resource type="Script" path="res://src/gameplay/level/city_backdrop.gd" id="6_backdrop"]
+[ext_resource type="Script" path="res://src/ui/debug/movement_debug_overlay.gd" id="7_movement"]
+[ext_resource type="Script" path="res://src/ui/debug/level_debug_overlay.gd" id="8_level"]
+[ext_resource type="Script" path="res://src/ui/touch_controls/touch_controls.gd" id="9_touch"]
+
+[node name="EndlessRun" type="Node2D"]
+
+[node name="Backdrop" type="Node2D" parent="."]
+script = ExtResource("6_backdrop")
+
+[node name="LevelRunner" type="Node2D" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("1_runner")
+library = ExtResource("3_library")
+mode = 1
+player = NodePath("../Player")
+
+[node name="Streamer" type="Node2D" parent="LevelRunner"]
+script = ExtResource("2_streamer")
+
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector2(60, -2)
+
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("5_camera")
+target = NodePath("../Player")
+
+[node name="MovementOverlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("body")]
+script = ExtResource("7_movement")
+body = NodePath("../Player")
+
+[node name="LevelOverlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("runner")]
+script = ExtResource("8_level")
+runner = NodePath("../LevelRunner")
+
+[node name="TouchControls" type="CanvasLayer" parent="."]
+script = ExtResource("9_touch")

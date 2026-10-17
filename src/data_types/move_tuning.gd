@@ -82,6 +82,24 @@ extends Resource
 ## Après un saut mural, le contrôle aérien est ignoré ce temps-là.
 @export var wall_jump_control_lock: float = 0.18
 
+@export_group("Figures")
+## Tic-tac : appui du pied sur un mur bas et passage par-dessus d'un seul élan.
+@export var tic_tac_min_speed: float = 300.0
+## Hauteur max (au-dessus des pieds) d'un mur franchi en tic-tac ; au-delà : course murale.
+@export var tic_tac_max_height: float = 150.0
+@export var tic_tac_clearance: float = 18.0
+## Kong vault : plongeon sur l'obstacle, plus bas et plus rapide, à pleine vitesse.
+@export var kong_min_speed: float = 440.0
+@export var kong_min_height: float = 30.0
+@export var kong_boost: float = 1.1
+@export var kong_clearance: float = 8.0
+## Lazy vault : franchissement lent, en dessous de cette vitesse.
+@export var lazy_vault_max_speed: float = 380.0
+## Salto avant : saut en sprint au bord du vide.
+@export var front_flip_min_speed: float = 440.0
+## Cat leap : arrivée accroché au rebord avec cet élan horizontal minimal.
+@export var cat_leap_min_speed: float = 200.0
+
 @export_group("Rebord")
 ## Distance verticale entre le haut du rebord et les pieds en suspension.
 @export var ledge_hang_offset: float = 76.0

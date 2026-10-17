@@ -12,6 +12,14 @@ signal state_changed(from: PlayerState.State, to: PlayerState.State)
 ## &"ledge" (se hisser depuis un rebord).
 signal jump_started(kind: StringName)
 signal landed(impact_speed: float)
+## Une figure de parkour commence (Figure.name_of : &"kong_vault", &"front_flip"…).
+signal figure_started(figure_name: StringName)
+## Mort sur un piège : cause = &"spikes", &"saw", &"crusher", &"flame"… Le niveau
+## replace ensuite le corps (LevelRunner → revive).
+signal died(cause: StringName)
+
+## Invulnérabilité après une réapparition (s) : pas de mort en boucle sur un piège.
+const INVULNERABLE_AFTER_REVIVE: float = 1.2
 
 @export var tuning: MoveTuning
 @export var standing_shape: CollisionShape2D
@@ -28,6 +36,8 @@ var facing: int = 1
 ## Capacités débloquées. Le joueur reçoit celles de ProfileService ; un
 ## poursuivant garde son propre jeu.
 var abilities: AbilitySet = AbilitySet.new()
+## Figure en cours (Figure.Kind.NONE sinon). Lue par RunnerVisual.
+var figure: Figure.Kind = Figure.Kind.NONE
 
 var _controller: Controller
 var _ctx: MovementContext = MovementContext.new()
@@ -44,6 +54,11 @@ var _wall_run_used: bool = false
 var _wall_climb_left: float = 0.0
 var _ledge_cooldown_left: float = 0.0
 var _air_lock_left: float = 0.0
+var _air_speed_x: float = 0.0
+var _figure_time: float = 0.0
+var _figure_duration: float = 0.0
+var _dead: bool = false
+var _invulnerable_left: float = 0.0
 
 
 func _ready() -> void:
@@ -62,6 +77,45 @@ func current_state_name() -> StringName:
 	return PlayerState.name_of(fsm.current)
 
 
+## Avancement de la figure en cours (0 → 1), d'après le temps écoulé et la
+## durée prévue par la physique au départ de la figure.
+func figure_progress() -> float:
+	if figure == Figure.Kind.NONE or _figure_duration <= 0.0:
+		return 0.0
+	return clampf(_figure_time / _figure_duration, 0.0, 1.0)
+
+
+func is_dead() -> bool:
+	return _dead
+
+
+## Faux pendant la mort et l'invulnérabilité qui suit une réapparition.
+func can_be_hurt() -> bool:
+	return not _dead and _invulnerable_left <= 0.0
+
+
+## Tue le corps (sans effet s'il ne peut pas être blessé). Retourne vrai s'il meurt.
+func kill(cause: StringName) -> bool:
+	if not can_be_hurt():
+		return false
+	_dead = true
+	velocity = Vector2.ZERO
+	figure = Figure.Kind.NONE
+	fsm.force(PlayerState.State.DEATH)
+	died.emit(cause)
+	return true
+
+
+## Réapparition (point de contrôle) : debout, immobile, brièvement invulnérable.
+func revive(at: Vector2) -> void:
+	global_position = at
+	velocity = Vector2.ZERO
+	_dead = false
+	_invulnerable_left = INVULNERABLE_AFTER_REVIVE
+	figure = Figure.Kind.NONE
+	fsm.force(PlayerState.State.IDLE)
+
+
 func _find_controller() -> Controller:
 	for child: Node in get_children():
 		if child is Controller:
@@ -70,6 +124,10 @@ func _find_controller() -> Controller:
 
 
 func _physics_process(delta: float) -> void:
+	_invulnerable_left = maxf(0.0, _invulnerable_left - delta)
+	if _dead:
+		# Mort : immobile jusqu'à la réapparition (le visuel joue la chute).
+		return
 	intent.clear()
 	if _controller != null:
 		_controller.fill(intent)
@@ -87,6 +145,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if fsm.current == PlayerState.State.WALL_CLIMB:
 		_wall_climb_left = maxf(0.0, _wall_climb_left - delta)
+	if figure != Figure.Kind.NONE:
+		_figure_time += delta
 	fsm.tick()
 
 
@@ -106,8 +166,10 @@ func _update_timers(delta: float) -> void:
 		_double_jump_used = false
 		_wall_run_used = false
 		_wall_climb_left = tuning.wall_climb_max_time
+		_air_speed_x = 0.0
 	else:
 		_coyote_left = maxf(0.0, _coyote_left - delta)
+		_air_speed_x = maxf(_air_speed_x, absf(velocity.x))
 
 	_ledge_cooldown_left = maxf(0.0, _ledge_cooldown_left - delta)
 	_air_lock_left = maxf(0.0, _air_lock_left - delta)
@@ -128,6 +190,9 @@ func _fill_context() -> void:
 	_ctx.wall_ahead = _sensors.wall_ahead
 	_ctx.obstacle_height = _sensors.obstacle_height
 	_ctx.ledge_available = _sensors.ledge_available
+	_ctx.wall_top_height = _sensors.wall_top_height
+	_ctx.edge_ahead = _sensors.edge_ahead
+	_ctx.air_speed_x = _air_speed_x
 
 	_ctx.can_double_jump = abilities.has(AbilitySet.DOUBLE_JUMP) and not _double_jump_used
 	_ctx.can_wall_run = not _wall_run_used
@@ -181,8 +246,25 @@ func _snap_to_ledge() -> void:
 	velocity = Vector2.ZERO
 
 
+## Démarre la figure choisie, ou prolonge / termine la figure en cours.
+func _update_figure(chosen: Figure.Kind, to: PlayerState.State) -> void:
+	if chosen != Figure.Kind.NONE:
+		figure = chosen
+		_figure_time = 0.0
+		_figure_duration = Figure.expected_duration(chosen, velocity, tuning)
+		figure_started.emit(Figure.name_of(chosen))
+	elif figure != Figure.Kind.NONE and not Figure.carries_into(figure, to):
+		figure = Figure.Kind.NONE
+
+
 func _on_fsm_state_changed(from: PlayerState.State, to: PlayerState.State) -> void:
+	# La figure est choisie avant l'impulsion : certaines la modifient (kong, tic-tac).
+	var chosen: Figure.Kind = Figure.choose(from, to, _ctx, tuning)
+	_ctx.figure = chosen
 	velocity = LocomotionMotor.on_enter(from, to, velocity, _ctx, tuning)
+	_update_figure(chosen, to)
+	if chosen == Figure.Kind.TIC_TAC:
+		_wall_run_used = true
 	_apply_collision_for(to)
 	if from == PlayerState.State.LEDGE_HANG:
 		_ledge_cooldown_left = tuning.ledge_regrab_cooldown
