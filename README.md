@@ -70,3 +70,10 @@ Parkour (aucune touche supplémentaire, pensé pour le tactile) :
 - **Double saut** : Saut en l'air, si la capacité est débloquée (F4 dans le bac à sable).
 
 Les touches correspondent à des positions physiques : sur un clavier AZERTY, « A » est la touche Q et « W » la touche Z.
+
+## Tester sur Android (APK de test)
+- Préréglage d'export : `export_presets.cfg` (« Android », paquet `com.adibologottlieb.edu`, arm64-v8a + armeabi-v7a, plein écran). Les tests, outils et sources inutilisées ne sont pas embarqués.
+- Prérequis locaux : modèles d'export Godot 4.7.2 (fichier officiel `Godot_v4.7.2-stable_export_templates.tpz`, SHA-512 vérifié), SDK Android, JDK 17+ et une clé de débogage **hors du dépôt** (chemins dans les réglages de l'éditeur, jamais dans le dépôt).
+- Construire : `godot --headless --path . --export-debug "Android" build/EDU-0.0.1-debug.apk` (dossier `build/` ignoré par Git).
+- Installer : copier l'APK sur le téléphone, autoriser « Installer des applications inconnues » pour le gestionnaire de fichiers, ouvrir l'APK ; ou `adb install -r build/EDU-0.0.1-debug.apk` avec le débogage USB.
+- Icône : `assets/icon/icon.png`, générée par `tools/make_icon.gd`.

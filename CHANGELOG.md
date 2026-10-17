@@ -4,6 +4,9 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — Export Android (APK de test)
+- Préréglage d'export Android (`export_presets.cfg`), icône de l'application (`assets/icon/icon.png`, `tools/make_icon.gd`) ; APK de débogage signé de 59 Mo construit et vérifié (apksigner, aapt2 : paquet `com.adibologottlieb.edu`, cible Android 16 / API 36, arm64-v8a + armeabi-v7a). Non encore testé sur un téléphone.
+
 ### Ajouté — M7 Menus, carte du monde et sauvegarde
 - **Sauvegarde** (`SaveStore`, `SaveSchema`, autoload `SaveService`) : `user://save.json` versionné, écriture **atomique** (save.tmp → relecture → l'ancien devient save.bak → renommage), somme de contrôle SHA-256 (détection de corruption), reprise sur la sauvegarde de secours, **migrations** une par une (v1 → v2), version inconnue refusée sans toucher le fichier, écritures regroupées par image. Aucune donnée de paiement.
 - **Progression** (`Progression`, `ProfileService`) : étoiles par parcours (1 = arrivée, 2 = ≤ 2 morts, 3 = sans mort sous le temps de référence), meilleurs temps, déblocage parcours par parcours et ville par ville ; temps de référence des 5 parcours de Lomé.
