@@ -62,6 +62,42 @@ func test_block_outside_the_chunk_is_reported() -> void:
 	assert_gt(LevelValidator.validate(layout, _tuning).size(), 0)
 
 
+func test_higher_roof_is_reached_by_jump_or_climb_but_not_beyond() -> void:
+	var jump_up: ChunkLayout = _layout(1000, [Rect2(0, 0, 400, 1400), Rect2(500, -100, 500, 1400)])
+	jump_up.exit_y = -100.0
+	assert_eq(LevelValidator.validate(jump_up, _tuning), [] as Array[String], "100 px plus haut, trou de 100")
+	var climb: ChunkLayout = _layout(1000, [Rect2(0, 0, 500, 1400), Rect2(500, -220, 500, 1400)])
+	climb.exit_y = -220.0
+	assert_eq(LevelValidator.validate(climb, _tuning), [] as Array[String], "paroi de 220 px")
+	var too_high: ChunkLayout = _layout(1000, [Rect2(0, 0, 500, 1400), Rect2(500, -400, 500, 1400)])
+	too_high.exit_y = -400.0
+	assert_has(LevelValidator.validate(too_high, _tuning), "aucun chemin franchissable de l'entrée à la sortie")
+
+
+func test_dropping_down_reaches_further_than_a_flat_jump() -> void:
+	var flat_limit: float = LevelValidator.max_gap(_tuning)
+	assert_gt(LevelValidator.jump_reach(-200.0, _tuning), flat_limit)
+	assert_lt(LevelValidator.jump_reach(100.0, _tuning), flat_limit)
+	assert_eq(LevelValidator.jump_reach(500.0, _tuning), -1.0, "hors d'atteinte")
+	var gap: float = flat_limit + 30.0
+	var drop: ChunkLayout = _layout(1000, [Rect2(0, 0, 400, 1400), Rect2(400 + gap, 200, 600 - gap, 1400)])
+	drop.exit_y = 200.0
+	assert_eq(LevelValidator.validate(drop, _tuning), [] as Array[String])
+
+
+func test_thin_beams_over_the_void_are_valid_stepping_stones() -> void:
+	var beams: ChunkLayout = _layout(1000, [
+		Rect2(0, 0, 300, 1400), Rect2(450, -60, 140, 16), Rect2(740, 0, 260, 1400),
+	])
+	assert_eq(LevelValidator.validate(beams, _tuning), [] as Array[String])
+
+
+func test_exit_roof_must_match_exit_height() -> void:
+	var layout: ChunkLayout = _layout(800, [Rect2(0, 0, 800, 1400)])
+	layout.exit_y = -100.0
+	assert_has(LevelValidator.validate(layout, _tuning), "pas de toit à la sortie (y = -100)")
+
+
 func test_shipped_library_is_entirely_valid_for_the_player() -> void:
 	var library: ChunkLibrary = load(LIBRARY_PATH) as ChunkLibrary
 	var tuning: MoveTuning = load(PLAYER_TUNING_PATH) as MoveTuning

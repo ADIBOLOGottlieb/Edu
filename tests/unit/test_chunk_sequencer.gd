@@ -71,6 +71,22 @@ func test_difficulty_ramps_up_with_distance() -> void:
 	assert_eq(sequencer.max_difficulty(), ChunkSequencer.MAX_DIFFICULTY)
 
 
+func test_altitude_stays_within_the_band_when_possible() -> void:
+	var library: ChunkLibrary = _library()
+	var up: ChunkLayout = _layout(&"up", 0)
+	up.exit_y = -300.0
+	var down: ChunkLayout = _layout(&"down", 0)
+	down.exit_y = 200.0
+	library.layouts.append(up)
+	library.layouts.append(down)
+	var sequencer: ChunkSequencer = ChunkSequencer.new(library, ChunkSequencer.Mode.RANDOM, 99)
+	var altitude: float = 0.0
+	for i: int in 300:
+		var layout: ChunkLayout = sequencer.next(altitude)
+		altitude += layout.exit_y
+		assert_between(altitude, sequencer.min_altitude, sequencer.max_altitude, "rang %d" % i)
+
+
 func test_zero_weight_chunks_are_never_picked() -> void:
 	var library: ChunkLibrary = _library()
 	library.layouts.append(_layout(&"disabled", 0, 0.0))

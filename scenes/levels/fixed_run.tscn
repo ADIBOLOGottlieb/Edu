@@ -20,7 +20,7 @@ script = ExtResource("1_runner")
 library = ExtResource("3_library")
 mode = 0
 seed_value = 1
-ordered_ids = Array[StringName]([&"flat_run", &"vault_pair", &"low_tunnel", &"small_gap", &"step_platform", &"wall_ledge", &"flat_run"])
+ordered_ids = Array[StringName]([&"flat_run", &"vault_pair", &"low_tunnel", &"roof_hop", &"stairs_up", &"drop_down", &"roof_climb", &"gap_drop_roll", &"precision_hops", &"skyline_run", &"flat_run"])
 player = NodePath("../Player")
 
 [node name="Streamer" type="Node2D" parent="LevelRunner"]

@@ -72,6 +72,12 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gtest=res://tests/unit/tes
 | `integration/test_level_runner.gd` | arrivée atteinte une seule fois, arrêt au mur de fin ; chute dans un trou → replacé au début du tronçon, sur le sol |
 | `integration/test_runner_camera.gd` | avance devant la cible ; recul jamais au-delà de la borne |
 
+## Tests de jouabilité (M3b)
+
+`tests/playtest/test_chunk_playability.gd` : le `AutopilotController` traverse chaque tronçon de `data/levels/chunk_library.tres` (encadré de deux toits plats), puis une course aléatoire de 15 tronçons, avec le vrai moteur physique. Aucune chute, arrivée atteinte. **Durée : environ 3 minutes** (physique en temps réel) — la suite complète prend ~4 minutes.
+
+Après avoir modifié un tronçon, toujours lancer ce test : le validateur (calculs prudents) ne remplace pas une traversée réelle.
+
 ## Profilage
 
 ```

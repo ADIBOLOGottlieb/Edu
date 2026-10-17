@@ -10,8 +10,10 @@ extends SceneTree
 const TUNING_PATH: String = "res://data/tuning/player_move.tres"
 const ANIMS_PATH: String = "res://data/animations/player_anims.tres"
 const LIBRARY_PATH: String = "res://data/levels/chunk_library.tres"
-## Épaisseur du sol sous y = 0.
-const FLOOR_DEPTH: float = 200.0
+## Hauteur des immeubles sous leur toit : la rue est loin en dessous.
+const BUILDING_DEPTH: float = 1400.0
+## Épaisseur d'une poutre (grue, passerelle).
+const BEAM_THICKNESS: float = 16.0
 
 
 func _init() -> void:
@@ -22,54 +24,114 @@ func _init() -> void:
 	quit()
 
 
-func _floor(x: float, width: float) -> Rect2:
-	return Rect2(x, 0.0, width, FLOOR_DEPTH)
+## Immeuble dont le toit est à la hauteur `top` (négatif = plus haut que l'entrée).
+func _roof(x: float, width: float, top: float = 0.0) -> Rect2:
+	return Rect2(x, top, width, BUILDING_DEPTH)
+
+
+## Obstacle posé sur un toit dont le dessus est à `base`.
+func _box(x: float, width: float, height: float, base: float = 0.0) -> Rect2:
+	return Rect2(x, base - height, width, height)
+
+
+## Plafond de tunnel laissant `clearance` px au-dessus du toit `base`.
+func _ceiling(x: float, width: float, clearance: float, base: float = 0.0) -> Rect2:
+	return Rect2(x, base - 420.0, width, 420.0 - clearance)
+
+
+## Poutre fine au-dessus du vide (pas de paroi pour courir).
+func _beam(x: float, width: float, top: float) -> Rect2:
+	return Rect2(x, top, width, BEAM_THICKNESS)
 
 
 func _chunk(
-	id: StringName, width: float, blocks: Array[Rect2], difficulty: int, tags: Array[StringName]
+	id: StringName,
+	width: float,
+	blocks: Array[Rect2],
+	difficulty: int,
+	tags: Array[StringName],
+	exit_y: float = 0.0
 ) -> ChunkLayout:
 	var layout: ChunkLayout = ChunkLayout.new()
 	layout.id = id
 	layout.width = width
+	layout.exit_y = exit_y
 	layout.blocks = blocks
 	layout.difficulty = difficulty
 	layout.tags = tags
 	return layout
 
 
-## Tronçons du jalon M3. Sol à y = 0 en entrée et en sortie ; les 140 premiers px
-## sont libres (réapparition). LevelValidator vérifie qu'ils sont franchissables.
+## Tronçons sur les toits, en 5 paliers (0 initiation → 4 expert). Le toit
+## d'entrée est à y = 0, celui de sortie à exit_y ; les 140 premiers px sont
+## libres (réapparition). LevelValidator et le test de jouabilité (pilote
+## automatique) vérifient qu'ils sont franchissables.
 func _chunk_library() -> ChunkLibrary:
 	var library: ChunkLibrary = ChunkLibrary.new()
 	library.start_id = &"flat_run"
 	library.layouts = [
-		_chunk(&"flat_run", 800.0, [_floor(0, 800)], 0, []),
+		# --- Palier 0 : initiation ---------------------------------------------------
+		_chunk(&"flat_run", 800.0, [_roof(0, 800)], 0, []),
 		_chunk(&"vault_pair", 900.0, [
-			_floor(0, 900), Rect2(300, -40, 100, 40), Rect2(620, -36, 90, 36),
+			_roof(0, 900), _box(300, 100, 40), _box(620, 90, 36),
 		], 0, [&"vault"]),
 		_chunk(&"low_tunnel", 1000.0, [
-			_floor(0, 1000), Rect2(380, -420, 380, 372),
-		], 1, [&"slide"]),
-		_chunk(&"small_gap", 900.0, [_floor(0, 360), _floor(520, 380)], 1, [&"gap"]),
-		_chunk(&"step_platform", 1000.0, [
-			_floor(0, 1000), Rect2(360, -100, 300, 100),
-		], 1, [&"jump", &"wall"]),
-		_chunk(&"wall_ledge", 1000.0, [
-			_floor(0, 1000), Rect2(460, -220, 90, 220),
-		], 2, [&"wall"]),
+			_roof(0, 1000), _ceiling(380, 380, 48),
+		], 0, [&"slide"]),
+		# --- Palier 1 : premiers sauts entre toits ---------------------------------------
+		_chunk(&"small_gap", 900.0, [_roof(0, 360), _roof(520, 380)], 1, [&"gap"]),
+		_chunk(&"step_platform", 1000.0, [_roof(0, 1000), _box(360, 300, 100)], 1, [&"jump", &"wall"]),
+		_chunk(&"roof_hop", 1100.0, [
+			_roof(0, 320), _roof(460, 280), _roof(880, 220),
+		], 1, [&"gap"]),
+		_chunk(&"stairs_up", 1000.0, [_roof(0, 380), _roof(500, 500, -110)], 1, [&"gap", &"climb"], -110.0),
+		_chunk(&"drop_down", 1000.0, [_roof(0, 420), _roof(560, 440, 140)], 1, [&"gap", &"drop"], 140.0),
+		# --- Palier 2 : murs, enchaînements, dénivelés --------------------------------------
+		_chunk(&"wall_ledge", 1000.0, [_roof(0, 1000), _box(460, 90, 220)], 2, [&"wall"]),
 		_chunk(&"tunnel_then_vault", 1100.0, [
-			_floor(0, 1100), Rect2(240, -420, 320, 372), Rect2(820, -40, 100, 40),
+			_roof(0, 1100), _ceiling(240, 320, 48), _box(820, 100, 40),
 		], 2, [&"slide", &"vault"]),
 		_chunk(&"double_gap", 1200.0, [
-			_floor(0, 320), _floor(480, 240), _floor(880, 320),
+			_roof(0, 320), _roof(480, 240), _roof(880, 320),
 		], 2, [&"gap"]),
-		_chunk(&"high_wall", 1100.0, [
-			_floor(0, 1100), Rect2(520, -260, 100, 260),
-		], 3, [&"wall"]),
+		_chunk(&"roof_climb", 1000.0, [_roof(0, 500), _roof(500, 500, -200)], 2, [&"wall", &"climb"], -200.0),
+		_chunk(&"vent_field", 1200.0, [
+			_roof(0, 1200), _box(300, 80, 40), _box(560, 70, 44), _box(820, 90, 40),
+		], 2, [&"vault"]),
+		_chunk(&"gap_drop_roll", 1100.0, [_roof(0, 400), _roof(580, 520, 240)], 2, [&"gap", &"drop", &"roll"], 240.0),
+		# --- Palier 3 : précision et combinaisons -------------------------------------------
+		_chunk(&"high_wall", 1100.0, [_roof(0, 1100), _box(520, 100, 260)], 3, [&"wall"]),
 		_chunk(&"gap_then_wall", 1300.0, [
-			_floor(0, 380), _floor(540, 760), Rect2(900, -200, 90, 200),
+			_roof(0, 380), _roof(540, 760), _box(900, 90, 200),
 		], 3, [&"gap", &"wall"]),
+		_chunk(&"precision_hops", 1300.0, [
+			_roof(0, 300), _roof(470, 90, -40), _roof(730, 90, -90), _roof(990, 310, -60),
+		], 3, [&"gap", &"precision"], -60.0),
+		_chunk(&"slide_gap", 1200.0, [
+			_roof(0, 520), _ceiling(240, 240, 48), _roof(680, 520),
+		], 3, [&"slide", &"gap"]),
+		_chunk(&"upper_route", 1400.0, [
+			_roof(0, 1400), _box(500, 90, 40), _box(950, 90, 40),
+			_beam(380, 220, -130), _beam(700, 220, -170), _beam(1020, 200, -130),
+		], 3, [&"vault", &"route"]),
+		_chunk(&"wall_gap_wall", 1500.0, [
+			_roof(0, 400), _roof(540, 300, -180), _roof(1000, 500),
+		], 3, [&"gap", &"wall", &"drop"]),
+		# --- Palier 4 : expert ------------------------------------------------------------
+		_chunk(&"skyline_run", 1800.0, [
+			_roof(0, 380), _roof(560, 300, -60), _roof(860, 360, -260), _roof(1400, 400, -100),
+		], 4, [&"gap", &"wall", &"drop"], -100.0),
+		_chunk(&"crane_line", 1600.0, [
+			_roof(0, 300), _beam(460, 140, -60), _beam(760, 140, -100), _beam(1060, 140, -60),
+			_roof(1340, 260),
+		], 4, [&"gap", &"precision"]),
+		_chunk(&"tunnel_drop_climb", 1600.0, [
+			_roof(0, 600), _ceiling(200, 300, 48), _roof(760, 400, 100), _roof(1160, 440, -150),
+		], 4, [&"slide", &"drop", &"wall"], -150.0),
+		_chunk(&"rooftop_gauntlet", 2000.0, [
+			_roof(0, 420), _box(180, 80, 40), _roof(600, 400, -40), _ceiling(780, 180, 48, -40),
+			_beam(1160, 140, -120), _roof(1460, 540, -40),
+		], 4, [&"vault", &"gap", &"slide", &"precision"], -40.0),
 	]
 	return library
 

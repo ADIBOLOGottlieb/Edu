@@ -20,8 +20,8 @@ const PIXELS_PER_METER: float = 40.0
 @export var player: RunnerBody
 ## Nœud suivi par la génération ; le joueur par défaut (un « chariot » pour le profilage).
 @export var follow_target: Node2D
-## En dessous de cette hauteur, le coureur est considéré comme tombé.
-@export var kill_y: float = 700.0
+## Chute dans la rue : plus bas que le toit le plus bas du tronçon + cette profondeur.
+@export var kill_depth: float = 600.0
 @export var respawn_offset_x: float = 60.0
 
 var sequencer: ChunkSequencer
@@ -66,25 +66,27 @@ func _physics_process(_delta: float) -> void:
 	if player == null:
 		return
 	furthest_x = maxf(furthest_x, player.global_position.x)
-	if player.global_position.y > kill_y:
-		_respawn()
+	var chunk: LevelChunk = streamer.chunk_at(player.global_position.x)
+	var floor_limit: float = chunk.deepest_y() if chunk != null else streamer.end_y()
+	if player.global_position.y > floor_limit + kill_depth:
+		_respawn(chunk)
 
 
-func _respawn() -> void:
-	var fell_at: float = player.global_position.x
+func _respawn(chunk: LevelChunk) -> void:
 	fall_count += 1
-	player_fell.emit(fell_at)
-	var chunk: LevelChunk = streamer.chunk_at(fell_at)
-	var start_x: float = chunk.position.x if chunk != null else 0.0
-	player.global_position = Vector2(start_x + respawn_offset_x, -2.0)
+	player_fell.emit(player.global_position.x)
+	var start: Vector2 = chunk.position if chunk != null else Vector2(0.0, streamer.end_y())
+	player.global_position = start + Vector2(respawn_offset_x, -2.0)
 	player.velocity = Vector2.ZERO
 
 
 func _on_sequence_finished(end_x: float) -> void:
-	# Mur de fin et ligne d'arrivée juste avant : le parcours ordonné est fini.
-	add_child(LevelGeometry.make_block(Rect2(end_x, -900.0, 60.0, 1100.0)))
+	# Mur de fin et ligne d'arrivée juste avant, à l'altitude du dernier toit
+	# (le parcours a pu monter ou descendre).
+	var end_y: float = streamer.end_y()
+	add_child(LevelGeometry.make_block(Rect2(end_x, end_y - 900.0, 60.0, 2300.0)))
 	var finish: FinishLine = FinishLine.new()
-	finish.position = Vector2(end_x - 160.0, 0.0)
+	finish.position = Vector2(end_x - 160.0, end_y)
 	finish.crossed.connect(_on_finish_crossed)
 	add_child(finish)
 

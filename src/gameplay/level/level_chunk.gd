@@ -28,5 +28,10 @@ func end_x() -> float:
 	return position.x + layout.width
 
 
+## Haut de la surface la plus basse du tronçon, en coordonnées du monde.
+func deepest_y() -> float:
+	return position.y + layout.deepest_top()
+
+
 func contains_x(x: float) -> bool:
 	return x >= position.x and x < end_x()

@@ -25,8 +25,10 @@ func test_chunks_are_laid_end_to_end_without_gaps_or_overlaps() -> void:
 	assert_gt(chunks.size(), 1)
 	assert_eq(chunks[0].position.x, 0.0)
 	for i: int in range(1, chunks.size()):
-		assert_almost_eq(chunks[i].position.x, chunks[i - 1].end_x(), 0.001)
-		assert_eq(chunks[i].index, chunks[i - 1].index + 1)
+		var previous: LevelChunk = chunks[i - 1]
+		assert_almost_eq(chunks[i].position.x, previous.end_x(), 0.001)
+		assert_almost_eq(chunks[i].position.y, previous.position.y + previous.layout.exit_y, 0.001, "toits raccordés en altitude")
+		assert_eq(chunks[i].index, previous.index + 1)
 
 
 func test_level_is_always_ready_ahead_of_the_target() -> void:

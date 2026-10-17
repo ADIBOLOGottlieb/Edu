@@ -44,7 +44,8 @@ func _generate_buildings() -> Array[Rect2]:
 	while x < span:
 		var width: float = minf(rng.randf_range(70.0, 190.0), span - x)
 		var height: float = rng.randf_range(140.0, 420.0)
-		buildings.append(Rect2(x, -height, width, height))
+		# Les immeubles descendent loin sous l'horizon : pas de vide quand on monte en altitude.
+		buildings.append(Rect2(x, -height, width, height + 2400.0))
 		x += width + rng.randf_range(4.0, 40.0)
 	return buildings
 

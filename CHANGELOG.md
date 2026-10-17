@@ -4,6 +4,26 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M3b (1/3) Parcours complexes et progressifs sur les toits
+- **Altitude variable** : chaque tronçon a un toit de sortie à `exit_y` ; les tronçons s'empilent en hauteur (on monte et on redescend de toit en toit, la rue est 1400 px plus bas). Le séquenceur garde l'altitude dans une bande.
+- **24 tronçons sur 5 paliers** (0 initiation → 4 expert) : sauts entre toits, escaliers de toits, descentes avec roulade, escalade de façades, champs d'obstacles, sauts de précision sur piliers étroits, glissade puis saut, double route (passerelles hautes / obstacles bas), poutres de grue au-dessus du vide, enchaînements tunnel → descente → escalade, « gauntlet » à 4 mouvements.
+- Difficulté croissante : un palier de plus tous les 5 tronçons en course aléatoire ; le parcours fixe monte du palier 0 au palier 4.
+- **Validateur par graphe de franchissement** : surfaces reliées par la vraie trajectoire de saut (montée/descente) ou par l'escalade ; un chemin entrée → sortie doit exister.
+- **Pilote automatique** (`AutopilotController`) : sprint, saut au bord, glissade sous plafond, roulade, saut contre un mur abordé lentement, vitesse réduite avant un atterrissage étroit. Base de l'IA des poursuivants (M5).
+- **Test de jouabilité** : le pilote traverse chacun des 24 tronçons et une course aléatoire de 15 tronçons, sans chute.
+
+### Corrigé — M3b
+- La ligne d'arrivée et le mur de fin étaient placés à l'altitude 0 : sur un parcours terminant plus bas, l'arrivée ne se déclenchait jamais. Ils suivent maintenant l'altitude du dernier toit.
+- Seuil de chute relatif au toit le plus bas du tronçon (et non plus une hauteur fixe).
+
+### Vérifié — M3b (1/3)
+- **140/140 tests verts** (226 s), dont la jouabilité des 24 tronçons.
+- Diagnostic : 3 graines × 30 tronçons aléatoires (≈ 800 m chacune) traversées sans chute, altitude jusqu'à −520 px.
+- 60 FPS (moyen, 1 % bas, minimum) sur 45 s, 8 appels de dessin (PC, Intel UHD).
+
+### Non vérifié — M3b (1/3)
+- Jouabilité **humaine** sur téléphone (le pilote a des réflexes parfaits) : difficulté ressentie à ajuster en session de jeu.
+
 ### Ajouté — M3 Niveau à défilement
 - Tronçons décrits en données (`ChunkLayout`, `ChunkLibrary`, `data/levels/chunk_library.tres`) : 10 tronçons, difficulté 0 à 3.
 - `ChunkSequencer` : parcours ordonné (missions) ou aléatoire à graine (course), sans répétition immédiate, difficulté croissante avec la distance.

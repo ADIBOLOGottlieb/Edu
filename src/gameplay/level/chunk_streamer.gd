@@ -25,6 +25,8 @@ var created_count: int = 0
 var _active: Array[LevelChunk] = []
 var _pool: Dictionary[StringName, Array] = {}
 var _next_x: float = 0.0
+## Altitude du toit d'entrée du prochain tronçon (les tronçons s'empilent en hauteur).
+var _next_y: float = 0.0
 var _next_index: int = 0
 var _finished: bool = false
 
@@ -65,23 +67,29 @@ func end_x() -> float:
 	return _next_x
 
 
+## Altitude du toit de sortie du dernier tronçon généré.
+func end_y() -> float:
+	return _next_y
+
+
 func is_finished() -> bool:
 	return _finished
 
 
 func _spawn_next() -> void:
-	var layout: ChunkLayout = sequencer.next()
+	var layout: ChunkLayout = sequencer.next(_next_y)
 	if layout == null:
 		_finished = true
 		sequence_finished.emit(_next_x)
 		return
 	var chunk: LevelChunk = _take_from_pool(layout)
-	chunk.position = Vector2(_next_x, 0.0)
+	chunk.position = Vector2(_next_x, _next_y)
 	chunk.index = _next_index
 	add_child(chunk)
 	_active.append(chunk)
 	chunk_spawned.emit(_next_index, layout.id)
 	_next_x += layout.width
+	_next_y += layout.exit_y
 	_next_index += 1
 
 

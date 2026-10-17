@@ -5,14 +5,20 @@ extends RefCounted
 ## ORDERED : suit une liste fixe d'identifiants (missions de l'histoire), puis s'arrête.
 ## RANDOM : tirage pondéré à graine (mode course) ; même graine = même parcours,
 ## ce qui rend un bogue reproductible. Pas deux fois le même tronçon de suite ;
-## la difficulté maximale augmente d'un cran tous les ramp_every tronçons.
+## la difficulté maximale augmente d'un palier tous les ramp_every tronçons ;
+## l'altitude reste dans une bande [min_altitude, max_altitude].
 
 enum Mode { ORDERED, RANDOM }
 
-const MAX_DIFFICULTY: int = 3
+## Paliers 0 (initiation) à 4 (expert).
+const MAX_DIFFICULTY: int = 4
 
 var mode: Mode
-var ramp_every: int = 4
+var ramp_every: int = 5
+## Altitude la plus haute autorisée (px, négatif = au-dessus du départ).
+var min_altitude: float = -900.0
+## Altitude la plus basse autorisée.
+var max_altitude: float = 300.0
 var _library: ChunkLibrary
 var _order: Array[StringName] = []
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -39,9 +45,10 @@ func max_difficulty() -> int:
 	return mini(_index / maxi(ramp_every, 1), MAX_DIFFICULTY)
 
 
+## altitude : hauteur du toit d'entrée du prochain tronçon (ignorée en mode ORDERED).
 ## Retourne null quand la séquence est terminée (mode ORDERED) ou impossible.
-func next() -> ChunkLayout:
-	var layout: ChunkLayout = _next_ordered() if mode == Mode.ORDERED else _next_random()
+func next(altitude: float = 0.0) -> ChunkLayout:
+	var layout: ChunkLayout = _next_ordered() if mode == Mode.ORDERED else _next_random(altitude)
 	if layout != null:
 		_index += 1
 		_last_id = layout.id
@@ -57,7 +64,7 @@ func _next_ordered() -> ChunkLayout:
 	return layout
 
 
-func _next_random() -> ChunkLayout:
+func _next_random(altitude: float) -> ChunkLayout:
 	if _library == null or _library.layouts.is_empty():
 		return null
 	if _index == 0:
@@ -66,9 +73,18 @@ func _next_random() -> ChunkLayout:
 			return start
 	var limit: int = max_difficulty()
 	var candidates: Array[ChunkLayout] = []
+	var any_altitude: Array[ChunkLayout] = []
 	for layout: ChunkLayout in _library.layouts:
-		if layout.difficulty <= limit and layout.id != _last_id and layout.weight > 0.0:
+		if layout.difficulty > limit or layout.id == _last_id or layout.weight <= 0.0:
+			continue
+		any_altitude.append(layout)
+		var exit_altitude: float = altitude + layout.exit_y
+		if exit_altitude >= min_altitude and exit_altitude <= max_altitude:
 			candidates.append(layout)
+	if candidates.is_empty():
+		# Aucun tronçon ne garde l'altitude dans la bande : on accepte d'en sortir
+		# plutôt que de bloquer la course.
+		candidates = any_altitude
 	if candidates.is_empty():
 		# Bibliothèque d'un seul tronçon : la répétition est la seule option.
 		return _library.get_layout(_last_id)
