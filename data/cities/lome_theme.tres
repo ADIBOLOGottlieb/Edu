@@ -21,5 +21,5 @@ tin_roofs = true
 palm_trees = true
 power_lines = true
 monument = &"lome_independence"
-landmarks = Array[StringName]([&"cathedral", &"hotel_tower", &"beach_palms"])
+landmarks = Array[StringName]([&"cathedral", &"colombe_paix", &"deux_lions", &"beach_palms", &"palais_lome", &"hotel_tower"])
 seed_value = 228

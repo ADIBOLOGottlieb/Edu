@@ -4,7 +4,8 @@ extends GutTest
 ## plein (le dessous pour un plafond) et tenir le budget de polygones mobile.
 
 const LOME_PATH: String = "res://data/cities/lome_theme.tres"
-const VARIANTS: Array[int] = [0, 1, 2, 3, 7, 1234567]
+## Toutes les variantes de Lomé (jusqu'à 6 par type) plus une grande valeur.
+const VARIANTS: Array[int] = [0, 1, 2, 3, 4, 5, 6, 7, 1234567]
 ## Grille d'échantillonnage pour la couverture d'encre.
 const SAMPLES: int = 40
 const EDGE_SAMPLES: int = 120
@@ -78,6 +79,8 @@ func test_every_polygon_is_valid_and_the_base_is_ink() -> void:
 		if shapes[0].color != _ink(theme):
 			failures.append("%s : la base n'est pas à l'encre" % _label(kind, theme, variant, rect))
 		for shape: PropShape in shapes:
+			if shape.is_text():
+				continue
 			if shape.points.size() < 3 or Geometry2D.triangulate_polygon(shape.points).is_empty():
 				failures.append("%s : polygone invalide" % _label(kind, theme, variant, rect))
 				return
@@ -93,7 +96,8 @@ func test_output_is_deterministic() -> void:
 			failures.append(_label(kind, theme, variant, rect))
 			return
 		for i: int in shapes.size():
-			if again[i].points != shapes[i].points or again[i].color != shapes[i].color:
+			if again[i].points != shapes[i].points or again[i].color != shapes[i].color \
+					or again[i].text != shapes[i].text or again[i].font_size != shapes[i].font_size:
 				failures.append(_label(kind, theme, variant, rect))
 				return
 	)
@@ -107,7 +111,7 @@ func test_ink_covers_the_collision_block() -> void:
 		var inked: Array[PackedVector2Array] = []
 		var boxes: Array[Rect2] = []
 		for shape: PropShape in shapes:
-			if shape.color == ink:
+			if shape.color == ink and not shape.is_text():
 				inked.append(shape.points)
 				boxes.append(_bounds_of(shape.points))
 		var covered: int = 0
@@ -137,6 +141,8 @@ func test_walkable_edge_stays_solid_ink() -> void:
 			var p: Vector2 = Vector2(rect.position.x + rect.size.x * (i + 0.5) / EDGE_SAMPLES, y)
 			# Le polygone dessiné en dernier à cet endroit doit être de l'encre.
 			for s: int in range(shapes.size() - 1, -1, -1):
+				if shapes[s].is_text():
+					continue
 				if Geometry2D.is_point_in_polygon(p, shapes[s].points):
 					if shapes[s].color == ink:
 						solid += 1
@@ -155,6 +161,8 @@ func test_ceiling_bottom_edge_is_straight() -> void:
 			return
 		var lowest: float = -INF
 		for shape: PropShape in shapes:
+			if shape.is_text():
+				continue
 			for p: Vector2 in shape.points:
 				lowest = maxf(lowest, p.y)
 		if absf(lowest - rect.end.y) > 0.01:
@@ -181,6 +189,96 @@ func test_styles_give_different_objects() -> void:
 	assert_ne(_signature(modern), _signature(lome), "Lomé dessine ses propres objets")
 	var other: Array[PropShape] = PropPainter.shapes_for(rect, BlockKind.Kind.LOW_OBSTACLE, 1, CityTheme.new())
 	assert_ne(_signature(modern), _signature(other), "les variantes changent l'objet")
+
+
+func test_sign_text_fits_inside_the_block() -> void:
+	var failures: Array[String] = []
+	var font: Font = ThemeDB.fallback_font
+	_each_case(func(kind: int, theme: CityTheme, variant: int, rect: Rect2, shapes: Array[PropShape]) -> void:
+		var bounds: Rect2 = rect.grow(2.0)
+		for shape: PropShape in shapes:
+			if not shape.is_text():
+				continue
+			var p: Vector2 = shape.points[0]
+			var width: float = font.get_string_size(shape.text, HORIZONTAL_ALIGNMENT_LEFT, -1, shape.font_size).x
+			var box: Rect2 = Rect2(p.x, p.y - font.get_ascent(shape.font_size), shape.max_width,
+					font.get_ascent(shape.font_size) + font.get_descent(shape.font_size))
+			if shape.text.strip_edges().is_empty() or shape.max_width <= 0.0 or width > shape.max_width + 0.5:
+				failures.append("%s : « %s » déborde" % [_label(kind, theme, variant, rect), shape.text])
+			elif shape.font_size < PropPainter.SIGN_FONT_MIN or shape.font_size > 12:
+				failures.append("%s : « %s » en %d px" % [_label(kind, theme, variant, rect), shape.text, shape.font_size])
+			elif not bounds.encloses(box):
+				failures.append("%s : « %s » hors du bloc" % [_label(kind, theme, variant, rect), shape.text])
+	)
+	assert_eq(failures, [] as Array[String], "texte d'enseigne hors du bloc")
+
+
+func test_modern_style_has_no_sign_text() -> void:
+	var texts: Array[String] = []
+	_each_case(func(kind: int, theme: CityTheme, variant: int, rect: Rect2, shapes: Array[PropShape]) -> void:
+		if theme != null and theme.prop_style == &"lome":
+			return
+		for shape: PropShape in shapes:
+			if shape.is_text():
+				texts.append("%s : %s" % [_label(kind, theme, variant, rect), shape.text])
+	)
+	assert_eq(texts, [] as Array[String], "le style moderne reste inchangé")
+
+
+## Textes de Lomé de toutes les variantes 0..n-1 d'un type, à la première taille réelle.
+func _lome_texts(kind: BlockKind.Kind, count: int) -> Array[String]:
+	var lome: CityTheme = load(LOME_PATH) as CityTheme
+	var texts: Array[String] = []
+	for variant: int in count:
+		var lines: PackedStringArray = PackedStringArray()
+		for shape: PropShape in PropPainter.shapes_for(_sizes[kind][0], kind, variant, lome):
+			if shape.is_text():
+				lines.append(shape.text)
+		texts.append(" ".join(lines))
+	return texts
+
+
+func _quartier_in(text: String) -> String:
+	for quartier: String in PropPainter.QUARTIERS:
+		if text.contains(quartier):
+			return quartier
+	return ""
+
+
+func test_lome_has_pharmacies_and_stations_of_each_quartier() -> void:
+	var cases: Array = [
+		[BlockKind.Kind.BUILDING, "PHARMACIE"], [BlockKind.Kind.WALL, "PHARMACIE"],
+		[BlockKind.Kind.CEILING, "PHARMACIE"], [BlockKind.Kind.CEILING, "STATION"],
+		[BlockKind.Kind.WALL, "STATION"], [BlockKind.Kind.PLATFORM, "STATION"],
+	]
+	for entry: Array in cases:
+		var kind: BlockKind.Kind = entry[0]
+		var word: String = entry[1]
+		var found: int = 0
+		var quartiers: Dictionary = {}
+		var texts: Array[String] = _lome_texts(kind, 240)
+		for text: String in texts:
+			if not text.contains(word):
+				continue
+			found += 1
+			var quartier: String = _quartier_in(text)
+			assert_ne(quartier, "", "%s « %s » : quartier de Lomé attendu" % [BlockKind.name_of(kind), text])
+			quartiers[quartier] = true
+		var share: float = float(found) / texts.size()
+		# Bien visibles sans être partout (1 bloc sur 4 à 6).
+		assert_between(share, 0.12, 0.34, "%s %s : %.0f %% des blocs" % [BlockKind.name_of(kind), word, share * 100.0])
+		assert_eq(quartiers.size(), PropPainter.QUARTIERS.size(), "%s %s : tous les quartiers" % [BlockKind.name_of(kind), word])
+
+
+func test_lome_fuel_pump_shows_a_price() -> void:
+	var lome: CityTheme = load(LOME_PATH) as CityTheme
+	var digits: int = 0
+	for variant: int in 10:
+		for shape: PropShape in PropPainter.shapes_for(_sizes[BlockKind.Kind.LOW_OBSTACLE][0],
+				BlockKind.Kind.LOW_OBSTACLE, variant, lome):
+			if shape.is_text() and shape.text.is_valid_int():
+				digits += 1
+	assert_eq(digits, 2, "pompe à essence (1 variante sur 5) avec son prix")
 
 
 func _signature(shapes: Array[PropShape]) -> String:

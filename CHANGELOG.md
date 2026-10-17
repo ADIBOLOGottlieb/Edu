@@ -4,6 +4,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — Lomé : monuments, pharmacies et stations-service
+- **Monuments en arrière-plan** (évocations stylisées originales d'après les photos fournies, non importées) : Monument de l'Indépendance refait (deux dalles perforées, découpe en forme de personnage aux bras levés où passe le ciel, statue à l'étoile), **Colombe de la Paix**, **Deux Lions** (arcs, drapeau du Togo), **Palais de Lomé** (tour à couronne festonnée, arcades, escalier), **cathédrale** affinée. Chacun apparaît dans la première minute et demie de course ; un seul dessin par couche.
+- **Pharmacies** (croix verte lumineuse, enseigne « PHARMACIE DE … ») et **stations-service génériques** (auvent sous lequel on glisse, pompes avec prix, totem de prix, boutique) au premier plan, avec les noms des **quartiers de Lomé** (Bè, Tokoin, Nyékonakpoè, Adidogomé, Agoè, Hédzranawoé, Kodjoviakopé, Amoutivé, Djidjolé, Agbalépédo, Adakpamé, Kégué). Aucune marque réelle.
+- `PropShape` peut être un texte d'enseigne (dessiné avec la police par défaut, réduit pour tenir dans l'enseigne).
+- **239/239 tests verts** (382 s) ; le pilote finit les parcours de Lomé sans mort.
+
+
 ### Ajouté — M4 (pièges) Difficulté style Ninja Arashi
 - **5 pièges** (`Hazard`, données `HazardSpec` dans `ChunkLayout.hazards`) dessinés en silhouette avec touches chaudes : **pics**, **scie** circulaire mobile (rail visible), **écraseur** (tremble 0,3 s puis s'abat ; solide, on peut s'y tenir), **jet de flammes** au sol ou mural (étincelles 0,35 s avant l'allumage), **plateforme fragile** (tremble 0,5 s, s'effondre, revient après 3 s). Pièges rythmés, annoncés, déterministes.
 - **Mort et réapparition** : `RunnerBody.kill(cause)` / `revive(at)`, signal `died` ; le niveau compte la mort, rejoue la chute 0,8 s puis replace le coureur au début du tronçon, invulnérable 1,2 s (`LevelRunner.death_count`, `total_deaths()`).

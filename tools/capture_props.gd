@@ -1,14 +1,18 @@
 extends SceneTree
 ## Planche de contrôle des objets urbains du premier plan (PropPainter) :
-## une ligne par type de bloc, 4 variantes en style moderne puis 4 en style Lomé,
-## à taille réelle, sur le ciel de Lomé, avec un bonhomme de 74 px pour l'échelle.
+## une ligne par type de bloc, 4 variantes en style moderne puis 6 en style Lomé
+## (pharmacies et stations-service comprises), à taille réelle, sur le ciel de
+## Lomé, avec un bonhomme de 74 px pour l'échelle. Les enseignes sont écrites
+## comme dans LevelChunk (draw_string, police par défaut).
 ## Contrôle visuel (nécessite une fenêtre, pas --headless).
 ## Usage : godot --path . --resolution 1280x720 -s tools/capture_props.gd -- <png_absolu> [--crops]
 ## --crops écrit aussi une image par ligne et par style (<png>_<type>_<style>.png).
 
 const LOME_PATH: String = "res://data/cities/lome_theme.tres"
 const CELL_W: int = 560
+## Colonnes : variantes modernes, puis variantes de Lomé.
 const VARIANTS: int = 4
+const LOME_VARIANTS: int = 6
 const FIGURE_HEIGHT: float = 74.0
 
 ## [type, hauteur de cellule, niveau du toit dans la cellule, blocs (un par colonne)]
@@ -45,13 +49,13 @@ func _init() -> void:
 	for row: Array in _rows:
 		height += int(row[1])
 	_viewport = SubViewport.new()
-	_viewport.size = Vector2i(CELL_W * VARIANTS * 2, height)
+	_viewport.size = Vector2i(CELL_W * (VARIANTS + LOME_VARIANTS), height)
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_viewport.transparent_bg = false
 	root.add_child(_viewport)
 	var y: int = 0
 	for row: Array in _rows:
-		for column: int in VARIANTS * 2:
+		for column: int in VARIANTS + LOME_VARIANTS:
 			_add_cell(row, column, y)
 		y += int(row[1])
 	process_frame.connect(_tick)
@@ -63,8 +67,8 @@ func _add_cell(row: Array, column: int, y: int) -> void:
 	var ground: float = float(row[2])
 	var blocks: Array = row[3]
 	var lome: bool = column >= VARIANTS
-	var variant: int = column % VARIANTS
-	var rect: Rect2 = blocks[variant]
+	var variant: int = column - VARIANTS if lome else column
+	var rect: Rect2 = blocks[variant % blocks.size()]
 	var theme: CityTheme = _lome if lome else CityTheme.new()
 	var cell: Control = Control.new()
 	cell.position = Vector2(column * CELL_W, y)
@@ -83,7 +87,13 @@ func _add_cell(row: Array, column: int, y: int) -> void:
 		if kind != BlockKind.Kind.BUILDING:
 			drawer.draw_rect(Rect2(-origin_x, 0, CELL_W, cell_h), theme.ink)
 		for shape: PropShape in shapes:
-			drawer.draw_colored_polygon(shape.points, shape.color)
+			if shape.is_text():
+				var alignment: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER if shape.max_width > 0.0 \
+						else HORIZONTAL_ALIGNMENT_LEFT
+				drawer.draw_string(ThemeDB.fallback_font, shape.points[0], shape.text, alignment,
+						shape.max_width if shape.max_width > 0.0 else -1.0, shape.font_size, shape.color)
+			else:
+				drawer.draw_colored_polygon(shape.points, shape.color)
 		var feet_y: float = rect.position.y if kind == BlockKind.Kind.BUILDING else 0.0
 		_draw_figure(drawer, Vector2(-origin_x + 40.0 if kind != BlockKind.Kind.BUILDING else 60.0, feet_y), theme.ink)
 		drawer.draw_string(ThemeDB.fallback_font, Vector2(-origin_x + 8.0, -ground + 18.0), label,
@@ -132,7 +142,8 @@ func _save() -> void:
 		for row: Array in _rows:
 			var cell_h: int = row[1]
 			for style: int in 2:
-				var crop: Image = image.get_region(Rect2i(style * CELL_W * VARIANTS, y, CELL_W * VARIANTS, cell_h))
+				var columns: int = LOME_VARIANTS if style == 1 else VARIANTS
+				var crop: Image = image.get_region(Rect2i(style * CELL_W * VARIANTS, y, CELL_W * columns, cell_h))
 				crop.save_png("%s_%s_%s.png" % [base, BlockKind.name_of(row[0]), "lome" if style == 1 else "modern"])
 			y += cell_h
 	quit()

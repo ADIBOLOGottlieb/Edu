@@ -1,21 +1,23 @@
 extends SceneTree
 ## Rend le décor de Lomé (CityBackdrop + data/cities/lome_theme.tres) à 1280x720
-## pour plusieurs positions de caméra (départ, plus loin, en altitude, plus bas),
-## avec une bande de toits noirs au premier plan et un coureur factice de 74 px
-## pour l'échelle, puis assemble une planche PNG (et garde chaque vue en _N.png).
+## pour plusieurs positions de caméra (départ, une vue cadrée sur chaque repère,
+## en altitude, plus bas), avec une bande de toits noirs au premier plan et un
+## coureur factice de 74 px pour l'échelle, puis assemble une planche PNG (et
+## garde chaque vue en _N.png).
+## Mode « landmarks » : planche des repères seuls, agrandis, sur fond de ciel.
 ## Contrôle visuel (nécessite une fenêtre, pas --headless).
-## Usage : godot --path . --resolution 1280x720 -s tools/capture_backdrop.gd -- <png_absolu>
+## Usage : godot --path . --resolution 1280x720 -s tools/capture_backdrop.gd -- <png_absolu> [landmarks]
 
 const THEME_PATH: String = "res://data/cities/lome_theme.tres"
+## Repères proposés pour Lomé, ajoutés en mémoire s'ils manquent aux données.
+const LOME_LANDMARKS: Array[StringName] = [
+	&"cathedral", &"colombe_paix", &"deux_lions", &"beach_palms", &"palais_lome", &"hotel_tower",
+]
 const RUNNER_HEIGHT: float = 74.0
-## Centres de caméra (le coureur est 120 px sous le centre, 220 px en retrait).
-const SHOTS: Array[Vector2] = [
-	Vector2(220.0, -120.0),
-	Vector2(3200.0, -120.0),
-	Vector2(7400.0, -160.0),
-	Vector2(14000.0, -120.0),
-	Vector2(5200.0, -720.0),
-	Vector2(10200.0, 180.0),
+const REFERENCE: Vector2 = Vector2(220.0, -120.0)
+const EXTRA_SHOTS: Array[Vector2] = [
+	Vector2(17000.0, -720.0),
+	Vector2(20500.0, 180.0),
 ]
 const THUMB: Vector2i = Vector2i(640, 360)
 
@@ -24,24 +26,61 @@ var _camera: Camera2D
 var _foreground: Foreground
 var _frame: int = 0
 var _shot: int = 0
+var _shots: Array[Vector2] = []
 var _images: Array[Image] = []
+var _sheet_mode: bool = false
 
 
 func _init() -> void:
-	_out = OS.get_cmdline_user_args()[0]
+	var args: PackedStringArray = OS.get_cmdline_user_args()
+	_out = args[0]
+	_sheet_mode = args.size() > 1 and args[1] == "landmarks"
+	var theme: CityTheme = (load(THEME_PATH) as CityTheme).duplicate() as CityTheme
+	for key: StringName in LOME_LANDMARKS:
+		if not theme.landmarks.has(key):
+			theme.landmarks.append(key)
+	if _sheet_mode:
+		_build_sheet(theme)
+	else:
+		_build_scene(theme)
+	process_frame.connect(_tick)
+
+
+func _build_scene(theme: CityTheme) -> void:
 	var world: Node2D = Node2D.new()
 	var backdrop: CityBackdrop = CityBackdrop.new()
-	backdrop.theme = load(THEME_PATH) as CityTheme
+	backdrop.theme = theme
 	world.add_child(backdrop)
+	_shots = _frame_landmarks(backdrop)
 	_foreground = Foreground.new()
-	_foreground.ink = backdrop.theme.ink
-	_foreground.shots = SHOTS
+	_foreground.ink = theme.ink
+	_foreground.shots = _shots
 	world.add_child(_foreground)
 	_camera = Camera2D.new()
 	world.add_child(_camera)
 	root.add_child(world)
-	_camera.global_position = SHOTS[0]
-	process_frame.connect(_tick)
+	_camera.global_position = _shots[0]
+
+
+## Départ, puis une caméra par repère qui le place au milieu de l'écran, puis
+## les vues en altitude et en contrebas.
+func _frame_landmarks(backdrop: CityBackdrop) -> Array[Vector2]:
+	var shots: Array[Vector2] = [REFERENCE]
+	var layers: Array[Vector3] = [
+		Vector3(CityBackdrop.FAR_SPAN, backdrop.far_scroll.x, LandmarkPainter.Layer.FAR),
+		Vector3(CityBackdrop.MID_SPAN, backdrop.mid_scroll.x, LandmarkPainter.Layer.MID),
+	]
+	var half_view: float = 640.0
+	for l: Vector3 in layers:
+		for s: BackdropLayerPainter.Slot in BackdropLayerPainter.landmark_slots(backdrop.theme, int(l.z) as LandmarkPainter.Layer, l.x):
+			if s.key == backdrop.theme.monument or s.key == &"beach_palms":
+				continue
+			# À la caméra de référence, x motif + 420 = x écran ; le plan défile à l.y.
+			var cam_x: float = REFERENCE.x + (s.x + (half_view - REFERENCE.x) - half_view) / l.y
+			print("%s : plan %d, x = %.0f, caméra %.0f (≈ %.0f s à 400 px/s)" % [s.key, int(l.z), s.x, cam_x, cam_x / 400.0])
+			shots.append(Vector2(cam_x, REFERENCE.y))
+	shots.append_array(EXTRA_SHOTS)
+	return shots
 
 
 func _tick() -> void:
@@ -49,16 +88,25 @@ func _tick() -> void:
 	if _frame % 4 != 0:
 		return
 	await RenderingServer.frame_post_draw
-	if _shot >= SHOTS.size() or _images.size() > _shot:
+	if _sheet_mode:
+		if _images.is_empty():
+			var img: Image = root.get_texture().get_image()
+			_images.append(img)
+			img.save_png(_out)
+			print("planche des repères : ", _out)
+			quit()
 		return
-	var img: Image = root.get_texture().get_image()
-	img.save_png(_out.get_basename() + "_%d.png" % _shot)
-	_images.append(img)
+	if _shot >= _shots.size() or _images.size() > _shot:
+		return
+	var shot_img: Image = root.get_texture().get_image()
+	shot_img.save_png(_out.get_basename() + "_%d.png" % _shot)
+	_images.append(shot_img)
 	_shot += 1
-	if _shot < SHOTS.size():
-		_camera.global_position = SHOTS[_shot]
+	if _shot < _shots.size():
+		_camera.global_position = _shots[_shot]
 		return
-	var sheet: Image = Image.create(THUMB.x * 2, THUMB.y * 3, false, Image.FORMAT_RGBA8)
+	var rows: int = (_images.size() + 1) / 2
+	var sheet: Image = Image.create(THUMB.x * 2, THUMB.y * rows, false, Image.FORMAT_RGBA8)
 	for i: int in _images.size():
 		var thumb: Image = _images[i]
 		thumb.convert(Image.FORMAT_RGBA8)
@@ -67,6 +115,31 @@ func _tick() -> void:
 	sheet.save_png(_out)
 	print("planche : ", _out)
 	quit()
+
+
+## Planche des repères : chaque repère agrandi dans la couleur de son plan.
+func _build_sheet(theme: CityTheme) -> void:
+	# Espace de l'étirement « canvas_items » : la taille de base du projet.
+	var size: Vector2 = Vector2(
+		ProjectSettings.get_setting("display/window/size/viewport_width") as float,
+		ProjectSettings.get_setting("display/window/size/viewport_height") as float)
+	var canvas: BackdropCanvas = BackdropCanvas.new()
+	canvas.add_gradient(PackedVector2Array([
+		Vector2.ZERO, Vector2(size.x, 0.0), Vector2(size.x, size.y), Vector2(0.0, size.y),
+	]), PackedColorArray([theme.sky_top, theme.sky_top, theme.sky_horizon, theme.sky_horizon]))
+	var keys: Array[StringName] = BackdropLayerPainter.theme_landmarks(theme)
+	keys.erase(&"beach_palms")
+	var per_row: int = ceili(float(keys.size()) / 2.0)
+	var cell: float = size.x / float(per_row)
+	for i: int in keys.size():
+		var key: StringName = keys[i]
+		var row: int = i / per_row
+		var ground: float = size.y * (0.5 if row == 0 else 0.97)
+		var scale: float = minf((cell - 30.0) / LandmarkPainter.width(key), 1.1)
+		var color: Color = theme.far_color if LandmarkPainter.layer_of(key) == LandmarkPainter.Layer.FAR else theme.mid_color
+		var slot: BackdropLayerPainter.Slot = BackdropLayerPainter.Slot.new(key, cell * (float(i % per_row) + 0.5), scale)
+		BackdropLayerPainter.paint_landmark(canvas, theme, slot, color, ground)
+	root.add_child(canvas)
 
 
 ## Premier plan factice : toits noirs (avec climatiseurs, citernes, garde-corps)

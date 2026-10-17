@@ -63,7 +63,12 @@ func _draw() -> void:
 			draw_rect(rect, LevelGeometry.INK)
 		return
 	for shape: PropShape in _shapes:
-		draw_colored_polygon(shape.points, shape.color)
+		if shape.is_text():
+			var font: Font = ThemeDB.fallback_font
+			var alignment: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER if shape.max_width > 0.0 else HORIZONTAL_ALIGNMENT_LEFT
+			draw_string(font, shape.points[0], shape.text, alignment, shape.max_width if shape.max_width > 0.0 else -1.0, shape.font_size, shape.color)
+		else:
+			draw_colored_polygon(shape.points, shape.color)
 
 
 func end_x() -> float:

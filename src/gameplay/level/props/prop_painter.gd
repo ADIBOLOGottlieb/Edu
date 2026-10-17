@@ -21,6 +21,15 @@ const STOREY: float = 118.0
 const FACADE_DEPTH: float = 640.0
 ## Budget de polygones par immeuble (mobile).
 const BUILDING_BUDGET: int = 110
+## Croix verte lumineuse des pharmacies (signe universel, aucune marque).
+const PHARMACY_GREEN: Color = Color(0.22, 0.86, 0.42)
+const PHARMACY_GREEN_DIM: Color = Color(0.06, 0.38, 0.18)
+const PHARMACY_GLOW: Color = Color(0.80, 1.0, 0.84)
+## Taille de police minimale d'une enseigne (lisible à l'échelle 1).
+const SIGN_FONT_MIN: int = 8
+## Quartiers de Lomé : chaque pharmacie, chaque station-service porte le sien.
+const QUARTIERS: Array[String] = ["BÈ", "TOKOIN", "NYÉKONAKPOÈ", "ADIDOGOMÉ", "AGOÈ", "HÉDZRANAWOÉ",
+		"KODJOVIAKOPÉ", "AMOUTIVÉ", "DJIDJOLÉ", "AGBALÉPÉDO", "ADAKPAMÉ", "KÉGUÉ"]
 
 
 ## Polygones (base d'encre d'abord) représentant le bloc `rect` de type `kind`.
@@ -32,10 +41,11 @@ static func shapes_for(rect: Rect2, kind: BlockKind.Kind, variant: int, theme: C
 	match kind:
 		BlockKind.Kind.BUILDING:
 			if lome:
-				match v % 3:
+				match v % 4:
 					0: _lome_house(pen)
 					1: _lome_balconies(pen)
-					_: _lome_mural(pen)
+					2: _lome_mural(pen)
+					_: _lome_pharmacy(pen)
 			else:
 				match v % 3:
 					0: _office(pen)
@@ -54,11 +64,12 @@ static func shapes_for(rect: Rect2, kind: BlockKind.Kind, variant: int, theme: C
 					_: _vent_stack(pen)
 		BlockKind.Kind.LOW_OBSTACLE:
 			if lome:
-				match v % 4:
+				match v % 5:
 					0: _market_stall(pen)
 					1: _jerrycans(pen)
 					2: _tyres(pen)
-					_: _zemidjan(pen)
+					3: _zemidjan(pen)
+					_: _fuel_pump(pen)
 			else:
 				match v % 3:
 					0: _ac_unit(pen)
@@ -66,11 +77,13 @@ static func shapes_for(rect: Rect2, kind: BlockKind.Kind, variant: int, theme: C
 					_: _roof_vent(pen)
 		BlockKind.Kind.WALL:
 			if lome:
-				match v % 4:
+				match v % 6:
 					0: _water_tank(pen, true)
 					1: _painted_wall(pen)
 					2: _claustra_wall(pen)
-					_: _stair_housing(pen)
+					3: _stair_housing(pen)
+					4: _price_totem(pen)
+					_: _pharmacy_wall(pen)
 			else:
 				match v % 4:
 					0: _water_tank(pen, false)
@@ -79,10 +92,11 @@ static func shapes_for(rect: Rect2, kind: BlockKind.Kind, variant: int, theme: C
 					_: _billboard_wall(pen)
 		BlockKind.Kind.PLATFORM:
 			if lome:
-				match v % 3:
+				match v % 4:
 					0: _tin_shed(pen)
 					1: _kiosk(pen)
-					_: _stair_room(pen)
+					2: _stair_room(pen)
+					_: _station_shop(pen)
 			else:
 				match v % 3:
 					0: _roof_shed(pen)
@@ -90,10 +104,12 @@ static func shapes_for(rect: Rect2, kind: BlockKind.Kind, variant: int, theme: C
 					_: _cooling_unit(pen)
 		BlockKind.Kind.CEILING:
 			if lome:
-				match v % 3:
+				match v % 5:
 					0: _market_canopy(pen)
 					1: _painted_hanging_sign(pen)
-					_: _skybridge(pen)
+					2: _skybridge(pen)
+					3: _station_canopy(pen)
+					_: _pharmacy_hanging_sign(pen)
 			else:
 				match v % 3:
 					0: _hanging_billboard(pen)
@@ -131,10 +147,13 @@ class Pen:
 	## Enseignes peintes.
 	var paint: Color
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	## Variante (positive) : choisit aussi le quartier des enseignes.
+	var variant: int = 0
 	var _clip: PackedVector2Array
 
-	func _init(target: Rect2, theme: CityTheme, variant: int, kind: int) -> void:
+	func _init(target: Rect2, theme: CityTheme, variant_seed: int, kind: int) -> void:
 		rect = target
+		variant = absi(variant_seed)
 		size = target.size
 		var accent: Color = DEFAULT_ACCENT
 		ink = DEFAULT_INK
@@ -148,7 +167,7 @@ class Pen:
 		glow = accent
 		glow_dim = accent.lerp(ink, 0.45)
 		paint = LOME_PAINT.lerp(accent, 0.2) if lome else accent.lerp(ink, 0.25)
-		rng.seed = hash("%d:%d:%d:%d" % [variant, kind, int(size.x), int(size.y)])
+		rng.seed = hash("%d:%d:%d:%d" % [variant_seed, kind, int(size.x), int(size.y)])
 		_clip = PackedVector2Array([rect.position, Vector2(rect.end.x, rect.position.y),
 				rect.end, Vector2(rect.position.x, rect.end.y)])
 
@@ -253,6 +272,10 @@ class Pen:
 			box(cursor, y, lw, h, color)
 			cursor += lw + (h * 0.9 if rng.randf() < 0.3 else h * 0.35)
 			count += 1
+
+	## Texte d'enseigne (coordonnées locales), centré sur [x, x + width].
+	func label(x: float, baseline: float, text: String, font_size: int, color: Color, width: float) -> void:
+		shapes.append(PropShape.label(rect.position + Vector2(x, baseline), text, font_size, color, width))
 
 	func _push(points: PackedVector2Array, color: Color) -> void:
 		if points.size() < 3:
@@ -1453,3 +1476,363 @@ static func _wood_scaffold(pen: Pen) -> void:
 		x += 46.0
 	pen.box(6.0, plank * 0.45, w * 0.5, 1.0, pen.shade)
 	pen.box(w * 0.6, plank * 0.6, w * 0.3, 1.0, pen.shade)
+
+
+# --- Pharmacies et stations-service de Lomé ----------------------------------
+
+## Quartier de Lomé de l'enseigne ; `salt` décale le choix d'un type d'objet à l'autre.
+static func _quartier(pen: Pen, salt: int) -> String:
+	return QUARTIERS[(pen.variant / 7 + salt) % QUARTIERS.size()]
+
+
+## « DE BÈ », « D'AGOÈ » : élision devant une voyelle.
+static func _of(quartier: String) -> String:
+	if "AÀÂEÉÈÊIOU".contains(quartier.left(1)):
+		return "D'" + quartier
+	return "DE " + quartier
+
+
+## Ligne de texte centrée horizontalement sur [x, x + w], verticalement sur y_mid
+## (hauteur des capitales) ; la police descend de `max_size` à SIGN_FONT_MIN pour
+## tenir dans la largeur. Renvoie false si rien ne tient (rien n'est ajouté).
+static func _sign_line(pen: Pen, text: String, x: float, y_mid: float, w: float, max_size: int, color: Color) -> bool:
+	var font: Font = ThemeDB.fallback_font
+	var s: int = max_size
+	while s >= SIGN_FONT_MIN:
+		if font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, s).x <= w:
+			pen.label(x, y_mid + s * 0.36, text, s, color, w)
+			return true
+		s -= 1
+	return false
+
+
+## Croix de pharmacie : 12 sommets, envergure s, épaisseur des bras t.
+static func _cross(cx: float, cy: float, s: float, t: float) -> PackedVector2Array:
+	var a: float = s * 0.5
+	var b: float = t * 0.5
+	var pts: PackedVector2Array = PackedVector2Array()
+	for p: Vector2 in [Vector2(-b, -a), Vector2(b, -a), Vector2(b, -b), Vector2(a, -b), Vector2(a, b), Vector2(b, b),
+			Vector2(b, a), Vector2(-b, a), Vector2(-b, b), Vector2(-a, b), Vector2(-a, -b), Vector2(-b, -b)]:
+		pts.append(Vector2(cx, cy) + p)
+	return pts
+
+
+## Caisson lumineux de pharmacie : cadre, halo vert, croix verte à cœur clair.
+static func _cross_box(pen: Pen, cx: float, cy: float, s: float) -> void:
+	var half: float = s * 0.5 + 7.0
+	# Halo derrière le caisson, puis cadre et fond sombre.
+	pen.round_box(cx - half - 6.0, cy - half - 6.0, half * 2.0 + 12.0, half * 2.0 + 12.0, 12.0,
+			Color(PHARMACY_GREEN, 0.18))
+	pen.round_box(cx - half, cy - half, half * 2.0, half * 2.0, 5.0, pen.line)
+	pen.round_box(cx - half + 2.5, cy - half + 2.5, half * 2.0 - 5.0, half * 2.0 - 5.0, 3.5, pen.ink)
+	pen.round_box(cx - s * 0.5 - 2.0, cy - s * 0.5 - 2.0, s + 4.0, s + 4.0, 4.0, Color(PHARMACY_GREEN, 0.14))
+	pen.poly(_cross(cx, cy, s, s * 0.36), PHARMACY_GREEN)
+	pen.poly(_cross(cx, cy, s * 0.62, s * 0.13), PHARMACY_GLOW)
+
+
+## Plaque verte éclairée : « PHARMACIE » puis « DE BÈ », ou une seule ligne si
+## elle tient. Texte à l'encre sur le vert.
+static func _pharmacy_plate(pen: Pen, x: float, y: float, w: float, h: float, quartier: String, size: int) -> void:
+	pen.box(x - 2.0, y - 2.0, w + 4.0, h + 4.0, pen.line)
+	pen.box(x, y, w, h, PHARMACY_GREEN)
+	pen.box(x, y + h - 4.0, w, 2.0, PHARMACY_GREEN_DIM)
+	var one: String = "PHARMACIE " + _of(quartier)
+	if h < size * 2.6 and _sign_line(pen, one, x + 4.0, y + h * 0.45, w - 8.0, size, pen.ink):
+		return
+	_sign_line(pen, "PHARMACIE", x + 3.0, y + h * 0.3, w - 6.0, size, pen.ink)
+	# Plaque étroite : le nom seul si « DE … » ne tient pas.
+	if not _sign_line(pen, _of(quartier), x + 3.0, y + h * 0.68, w - 6.0, maxi(SIGN_FONT_MIN, size - 2), pen.ink):
+		_sign_line(pen, quartier, x + 3.0, y + h * 0.68, w - 6.0, maxi(SIGN_FONT_MIN, size - 2), pen.ink)
+
+
+## Goutte de carburant (pictogramme générique).
+static func _fuel_drop(pen: Pen, cx: float, cy: float, r: float, color: Color) -> void:
+	var pts: PackedVector2Array = PackedVector2Array([Vector2(cx, cy - r * 1.8)])
+	for k: int in 11:
+		var a: float = deg_to_rad(-30.0 + 240.0 * k / 10.0)
+		pts.append(Vector2(cx + cos(a) * r, cy + sin(a) * r))
+	pen.poly(pts, color)
+
+
+## Pharmacie de quartier : bandeau vert lumineux, croix en drapeau, vitrine
+## éclairée sous rideau métallique, étages au-dessus.
+static func _lome_pharmacy(pen: Pen) -> void:
+	_frame(pen, 24.0, 6.0)
+	pen.box(0, 9.0, pen.size.x, 1.5, pen.line)
+	var area: Rect2 = _facade(pen, 24.0, 6.0)
+	var quartier: String = _quartier(pen, 0)
+	# Bandeau : petites croix aux deux bouts, nom au centre.
+	var by: float = area.position.y - 6.0
+	var bh: float = 30.0
+	var bx: float = area.position.x
+	var bw: float = area.size.x
+	pen.box(bx - 4.0, by - 3.0, bw + 8.0, bh + 6.0, pen.line)
+	pen.box(bx, by, bw, bh, PHARMACY_GREEN)
+	pen.box(bx, by + bh - 4.0, bw, 2.0, PHARMACY_GREEN_DIM)
+	for cx: float in [bx + bh * 0.5 + 2.0, bx + bw - bh * 0.5 - 2.0]:
+		pen.poly(_cross(cx, by + bh * 0.45, bh * 0.62, bh * 0.22), pen.ink)
+	var tx: float = bx + bh + 4.0
+	var tw: float = bw - 2.0 * bh - 8.0
+	if not _sign_line(pen, "PHARMACIE " + _of(quartier), tx, by + bh * 0.45, tw, 12, pen.ink):
+		_sign_line(pen, "PHARMACIE", tx, by + bh * 0.3, tw, 10, pen.ink)
+		_sign_line(pen, _of(quartier), tx, by + bh * 0.68, tw, 9, pen.ink)
+	# Vitrine éclairée sous un rideau métallique à moitié levé.
+	var right: bool = pen.rng.randf() < 0.5
+	var sy: float = by + bh + 18.0
+	var sh: float = 74.0
+	var sx0: float = bx if right else bx + 74.0
+	var sx1: float = bx + bw - 74.0 if right else bx + bw
+	var holes: PackedVector2Array = _spaced(sx0, sx1, 84.0, 72.0)
+	if not holes.is_empty():
+		pen.box(holes[0].x, sy, holes[holes.size() - 1].y - holes[0].x, sh, pen.shade)
+		pen.perforated(sx0, sx1, sy - 3.0, sy, sy + sh, holes, pen.ink)
+		var i: int = 0
+		for hole: Vector2 in holes:
+			var hw: float = hole.y - hole.x
+			var shutter: float = sh * (0.3 + 0.25 * float(i % 2))
+			pen.box(hole.x, sy + shutter, hw, sh - shutter, PHARMACY_GLOW.lerp(pen.glow, 0.35))
+			# Étagères de boîtes de médicaments.
+			pen.box(hole.x, sy + sh * 0.72, hw, 2.0, pen.shade)
+			pen.box(hole.x + 6.0, sy + sh * 0.72 - 9.0, hw - 12.0, 9.0, PHARMACY_GREEN.lerp(pen.ink, 0.25))
+			# Rideau métallique : lames claires, bas sombre.
+			pen.box(hole.x, sy, hw, shutter, pen.line)
+			pen.box(hole.x, sy + shutter * 0.5 - 1.0, hw, 1.5, pen.shade)
+			pen.box(hole.x, sy + shutter - 3.0, hw, 3.0, pen.ink)
+			i += 1
+		pen.box(sx0 - 4.0, sy + sh, sx1 - sx0 + 8.0, 5.0, pen.line)
+	# Croix en drapeau, sur sa potence, dans l'angle libre.
+	var cs: float = 44.0
+	var cx: float = bx + bw - 34.0 if right else bx + 34.0
+	var cy: float = sy + 34.0
+	var wall_x: float = bx + bw + 2.0 if right else bx - 2.0
+	pen.bar(Vector2(wall_x, cy - 18.0), Vector2(cx, cy - 18.0), 3.0, pen.line)
+	pen.bar(Vector2(wall_x, cy + 18.0), Vector2(cx, cy + 18.0), 3.0, pen.line)
+	_cross_box(pen, cx, cy, cs)
+	var rows: Rect2 = Rect2(area.position.x, sy + sh + 46.0, area.size.x, maxf(0.0, area.end.y - sy - sh - 46.0))
+	var wins: Array[Rect2] = _window_rows(pen, rows, 110.0, 36.0, 52.0, STOREY, 0.2, BUILDING_BUDGET - 8)
+	_facade_acs(pen, wins, 1)
+
+
+## Croix de pharmacie sur un muret : caisson lumineux, plaque au nom du quartier.
+static func _pharmacy_wall(pen: Pen) -> void:
+	var w: float = pen.size.x
+	var h: float = pen.size.y
+	pen.box(0, 0, w, h, pen.ink)
+	pen.box(0, 4.0, w, 3.0, pen.line)
+	var y: float = 22.0
+	var row: int = 0
+	while y < h - 4.0:
+		pen.box(0, y, w, 1.5, pen.shade)
+		pen.box(w * (0.5 if row % 2 == 0 else 0.25), y - 18.0, 1.5, 18.0, pen.shade)
+		y += 20.0
+		row += 1
+	var s: float = minf(w - 34.0, 54.0)
+	var cy: float = 22.0 + s * 0.5 + 7.0
+	_cross_box(pen, w * 0.5, cy, s)
+	_pharmacy_plate(pen, 6.0, cy + s * 0.5 + 18.0, w - 12.0, 34.0, _quartier(pen, 3), 10)
+	# Fixation et câble d'alimentation du caisson.
+	pen.box(w * 0.5 - 2.0, cy + s * 0.5 + 7.0, 4.0, 9.0, pen.line)
+	pen.box(w - 14.0, cy, 3.0, h - cy - 30.0, pen.shade)
+
+
+## Enseigne de pharmacie suspendue : chaînes, grande croix lumineuse, plaque.
+static func _pharmacy_hanging_sign(pen: Pen) -> void:
+	var w: float = pen.size.x
+	var h: float = pen.size.y
+	var top: float = 34.0
+	pen.box(0, 0, w, 8.0, pen.ink)
+	for x: float in [w * 0.15, w * 0.85]:
+		pen.box(x - 2.0, 8.0, 4.0, top - 6.0, pen.ink)
+		var y: float = 12.0
+		while y < top - 4.0:
+			pen.box(x - 3.5, y, 7.0, 4.0, pen.ink)
+			y += 8.0
+	pen.box(0, top, w, h - top, pen.ink)
+	pen.box(0, top + 6.0, w, 2.0, pen.line)
+	var s: float = clampf(w * 0.5, 80.0, 132.0)
+	var ph: float = 52.0
+	# Caisson et plaque centrés ensemble dans le panneau.
+	var content: float = s + 14.0 + 30.0 + ph
+	var y0: float = top + maxf(20.0, (h - top - 16.0 - content) * 0.5)
+	var cy: float = y0 + s * 0.5 + 7.0
+	_cross_box(pen, w * 0.5, cy, s)
+	var py: float = cy + s * 0.5 + 37.0
+	_pharmacy_plate(pen, 14.0, py, w - 28.0, ph, _quartier(pen, 5), 12)
+	pen.box(0, h - 14.0, w, 2.0, PHARMACY_GREEN_DIM)
+
+
+## Pompe à essence sur son îlot : colonne, afficheur de prix, pistolet, tuyau.
+static func _fuel_pump(pen: Pen) -> void:
+	var w: float = pen.size.x
+	var h: float = pen.size.y
+	pen.box(0, 0, w, h, pen.ink)
+	# Îlot bétonné aux bandes jaunes et noires.
+	var cy: float = h - 7.0
+	pen.box(0, cy, w, 1.5, pen.line)
+	var x: float = 2.0
+	while x < w - 4.0:
+		pen.poly(PackedVector2Array([Vector2(x, h - 1.0), Vector2(x + 4.0, cy + 2.0), Vector2(x + 9.0, cy + 2.0),
+				Vector2(x + 5.0, h - 1.0)]), pen.glow_dim)
+		x += 12.0
+	var pw: float = minf(w * 0.44, 36.0)
+	var px: float = w * 0.36 - pw * 0.5
+	pen.round_box(px, 2.5, pw, cy - 2.5, 3.0, pen.line)
+	pen.box(px + 2.0, 4.5, pw - 4.0, cy - 6.5, pen.ink)
+	# Afficheur : prix en chiffres sombres sur fond éclairé.
+	pen.box(px + 3.5, 6.0, pw - 7.0, 11.0, pen.glow)
+	_sign_line(pen, "%d" % (650 + (pen.variant / 5) % 8 * 5), px + 3.5, 11.5, pw - 7.0, 9, pen.ink)
+	pen.box(px + 2.0, 20.0, pw - 4.0, 3.0, pen.paint)
+	pen.box(px + 5.0, 25.0, pw - 10.0, maxf(0.0, cy - 30.0), pen.shade)
+	# Pistolet dans son étui et tuyau qui pend.
+	var hx: float = px + pw
+	pen.box(hx, 12.0, 5.0, 9.0, pen.line)
+	pen.bar(Vector2(hx + 4.0, 13.0), Vector2(hx + 9.0, 10.0), 2.5, pen.line)
+	pen.bar(Vector2(hx + 2.0, 21.0), Vector2(hx + 8.0, cy - 4.0), 2.0, pen.line)
+	pen.bar(Vector2(hx + 8.0, cy - 4.0), Vector2(hx + 15.0, cy - 9.0), 2.0, pen.line)
+	pen.bar(Vector2(hx + 15.0, cy - 9.0), Vector2(hx + 14.0, 18.0), 2.0, pen.line)
+	# Extincteur rouge au bout de l'îlot.
+	var ex: float = w - 12.0
+	pen.round_box(ex, cy - 18.0, 7.0, 17.0, 3.0, LOME_PAINT)
+	pen.box(ex + 2.0, cy - 21.0, 3.0, 3.0, pen.line)
+
+
+## Totem de prix d'une station : en-tête éclairé, carburants et prix, mât.
+static func _price_totem(pen: Pen) -> void:
+	var w: float = pen.size.x
+	var h: float = pen.size.y
+	var ph: float = h * 0.8
+	pen.box(0, 0, w, ph, pen.ink)
+	pen.box(w * 0.32, ph - 1.0, w * 0.36, h - ph + 1.0, pen.ink)
+	pen.box(4.0, h - 12.0, w - 8.0, 12.0, pen.ink)
+	pen.box(0, 4.0, w, 2.0, pen.line)
+	# En-tête lumineux au nom du quartier.
+	pen.box(6.0, 11.0, w - 12.0, 38.0, pen.glow)
+	pen.box(6.0, 44.0, w - 12.0, 2.0, pen.glow_dim)
+	_sign_line(pen, "STATION", 8.0, 22.0, w - 16.0, 11, pen.ink)
+	_sign_line(pen, _quartier(pen, 4), 8.0, 37.0, w - 16.0, 9, pen.ink)
+	pen.box(0, 52.0, w, 6.0, pen.paint)
+	# Carburants : nom, puis prix sur afficheur sombre en chiffres chauds.
+	var names: Array[String] = ["SUPER", "GASOIL", "PÉTROLE"]
+	var prices: Array[int] = [680, 675, 500]
+	var bump: int = (pen.variant / 9) % 5 * 5
+	var y: float = 66.0
+	var row_h: float = 44.0
+	var i: int = 0
+	while i < names.size() and y + row_h <= ph - 4.0:
+		_sign_line(pen, names[i], 8.0, y + 6.0, w - 16.0, 9, pen.line)
+		pen.box(8.0, y + 14.0, w - 16.0, 22.0, pen.shade)
+		_sign_line(pen, "%d" % (prices[i] + bump), 8.0, y + 25.0, w - 16.0, 12, pen.glow)
+		y += row_h
+		i += 1
+	# Mât : bague, puis socle.
+	pen.box(w * 0.32, ph + 10.0, w * 0.36, 2.0, pen.line)
+	pen.box(4.0, h - 12.0, w - 8.0, 2.0, pen.line)
+
+
+## Boutique de station : dalle, bandeau rouge et plaque éclairée, vitrine,
+## cage à bouteilles de gaz.
+static func _station_shop(pen: Pen) -> void:
+	var w: float = pen.size.x
+	var h: float = pen.size.y
+	pen.poly(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, 38), Vector2(w - 8, 42),
+			Vector2(w - 8, h), Vector2(8, h), Vector2(8, 42), Vector2(0, 38)]), pen.ink)
+	pen.box(0, 4.0, w, 1.5, pen.line)
+	pen.box(0, 8.0, w, 26.0, pen.paint)
+	pen.box(0, 30.0, w, 3.0, pen.glow)
+	var pw: float = minf(w * 0.56, 230.0)
+	var px: float = (w - pw) * 0.5
+	pen.box(px, 10.0, pw, 18.0, pen.glow)
+	_sign_line(pen, "STATION " + _of(_quartier(pen, 1)), px + 4.0, 19.0, pw - 8.0, 11, pen.ink)
+	for dx: float in [px - 16.0, px + pw + 16.0]:
+		_fuel_drop(pen, dx, 22.0, 5.0, pen.glow)
+	# Vitrine éclairée : rayonnages, porte vitrée.
+	var gy: float = 48.0
+	var gh: float = h - gy - 12.0
+	var gx1: float = w * 0.62
+	var holes: PackedVector2Array = _spaced(16.0, gx1, 64.0, 54.0)
+	if not holes.is_empty() and gh > 20.0:
+		pen.box(holes[0].x, gy, holes[holes.size() - 1].y - holes[0].x, gh, pen.shade)
+		pen.perforated(14.0, gx1, gy - 2.0, gy, gy + gh, holes, pen.ink)
+		for k: int in holes.size():
+			var hole: Vector2 = holes[k]
+			var hw: float = hole.y - hole.x
+			if k == 0:
+				# Porte : vitre sombre, barre de poussée.
+				pen.box(hole.x + hw * 0.5 - 6.0, gy + gh * 0.5, 12.0, 2.5, pen.line)
+				continue
+			pen.box(hole.x, gy, hw, gh, pen.glow_dim)
+			var sy: float = gy + gh * 0.4
+			pen.box(hole.x, sy, hw, 2.0, pen.ink)
+			pen.box(hole.x + 5.0, sy - 9.0, hw * 0.35, 9.0, pen.ink)
+			pen.box(hole.x + hw * 0.55, sy - 6.0, hw * 0.3, 6.0, pen.paint)
+	# Cage grillagée : bouteilles de gaz rouges et grises.
+	var cx0: float = gx1 + 18.0
+	var cx1: float = w - 22.0
+	if cx1 - cx0 > 40.0 and gh > 30.0:
+		pen.box(cx0, gy, cx1 - cx0, gh, pen.line)
+		pen.box(cx0 + 2.0, gy + 2.0, cx1 - cx0 - 4.0, gh - 4.0, pen.ink)
+		var bh: float = minf(gh - 10.0, 40.0)
+		var bx: float = cx0 + 6.0
+		var k: int = 0
+		while bx + 18.0 < cx1 - 4.0 and pen.shapes.size() < 36:
+			pen.round_box(bx, gy + gh - 3.0 - bh, 18.0, bh, 7.0, LOME_PAINT if k % 3 != 1 else pen.line)
+			pen.box(bx + 6.0, gy + gh - 7.0 - bh, 6.0, 4.0, pen.line)
+			bx += 24.0
+			k += 1
+		pen.box(cx0, gy + gh * 0.35, cx1 - cx0, 1.5, pen.line)
+	pen.box(8.0, h - 6.0, w - 16.0, 2.0, pen.line)
+
+
+## Auvent de station-service : on glisse dessous. Les poteaux montent au-dessus
+## de l'auvent ; dessous, le bandeau de rive, les rampes lumineuses, un bas droit.
+static func _station_canopy(pen: Pen) -> void:
+	var w: float = pen.size.x
+	var h: float = pen.size.y
+	var mass: float = 34.0
+	for x: float in [w * 0.22, w * 0.78]:
+		pen.box(x - 6.0, 0, 12.0, mass + 2.0, pen.ink)
+	pen.box(0, mass, w, h - mass, pen.ink)
+	for x: float in [w * 0.22, w * 0.78]:
+		pen.box(x - 3.0, 2.0, 2.0, mass, pen.line)
+	# Charpente en treillis de la toiture.
+	var fy: float = h - 104.0
+	var t0: float = mass + 10.0
+	var t1: float = fy - 12.0
+	pen.box(0, t0, w, 4.0, pen.line)
+	pen.box(0, t1, w, 4.0, pen.line)
+	var bays: int = maxi(2, int(w / 64.0))
+	var bw: float = w / bays
+	for i: int in bays:
+		var x0: float = i * bw
+		var a: Vector2 = Vector2(x0, t1 + 2.0) if i % 2 == 0 else Vector2(x0, t0 + 2.0)
+		var b: Vector2 = Vector2(x0 + bw, t0 + 2.0) if i % 2 == 0 else Vector2(x0 + bw, t1 + 2.0)
+		pen.bar(a, b, 4.0, pen.shade)
+	# Plaque lumineuse : goutte et nom de la station.
+	var pw: float = minf(w - 40.0, 190.0)
+	var ph: float = 50.0
+	var px: float = (w - pw) * 0.5
+	var py: float = (t0 + t1) * 0.5 - ph * 0.5
+	pen.box(px - 3.0, py - 3.0, pw + 6.0, ph + 6.0, pen.line)
+	pen.box(px, py, pw, ph, pen.glow)
+	pen.disc(px + 24.0, py + ph * 0.5, 17.0, pen.paint, 18)
+	_fuel_drop(pen, px + 24.0, py + ph * 0.5 + 4.0, 8.0, pen.glow)
+	var tx: float = px + 46.0
+	_sign_line(pen, "STATION", tx, py + 16.0, pw - 52.0, 12, pen.ink)
+	_sign_line(pen, _quartier(pen, 2), tx, py + 35.0, pw - 52.0, 10, pen.ink)
+	# Bandeau de rive : rouge, filets clairs et chauds.
+	var fh: float = 50.0
+	pen.box(0, fy, w, fh, pen.paint)
+	pen.box(0, fy + 6.0, w, 4.0, pen.glow)
+	pen.box(0, fy + fh - 10.0, w, 3.0, pen.line)
+	var dx: float = 22.0
+	while dx < w - 14.0:
+		_fuel_drop(pen, dx, fy + 28.0, 4.5, pen.ink)
+		dx += 60.0
+	# Sous-face : rampes lumineuses et leur halo ; le bas reste plein et droit.
+	var ly: float = h - 36.0
+	var lx: float = 24.0
+	while lx < w - 40.0:
+		pen.poly(PackedVector2Array([Vector2(lx - 4.0, ly + 4.0), Vector2(lx + 34.0, ly + 4.0), Vector2(lx + 44.0, h - 12.0),
+				Vector2(lx - 14.0, h - 12.0)]), Color(pen.glow, 0.11))
+		pen.box(lx, ly, 30.0, 4.0, pen.glow)
+		lx += 70.0

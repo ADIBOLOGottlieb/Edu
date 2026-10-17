@@ -71,6 +71,32 @@ func used_colors() -> Array[Color]:
 	return out
 
 
+## Vrai si le plan contient exactement ce polygone (tests : repère bien dessiné).
+func has_polygon(points: PackedVector2Array) -> bool:
+	for i: int in _points.size():
+		if _kinds[i] != Kind.LINE and _points[i] == points:
+			return true
+	return false
+
+
+## Point le plus haut (y minimal) des formes pleines qui empiètent sur [x0, x1].
+func top_between(x0: float, x1: float) -> float:
+	var top: float = INF
+	for i: int in _points.size():
+		if _kinds[i] == Kind.LINE:
+			continue
+		var lo: float = INF
+		var hi: float = -INF
+		var y: float = INF
+		for p: Vector2 in _points[i]:
+			lo = minf(lo, p.x)
+			hi = maxf(hi, p.x)
+			y = minf(y, p.y)
+		if hi > x0 and lo < x1:
+			top = minf(top, y)
+	return top
+
+
 ## Empreinte de la géométrie : deux constructions de même graine sont identiques.
 func signature() -> int:
 	var h: int = 17

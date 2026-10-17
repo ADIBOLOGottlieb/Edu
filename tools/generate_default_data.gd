@@ -56,7 +56,7 @@ func _lome_theme() -> CityTheme:
 	theme.satellite_dishes = true
 	theme.power_lines = true
 	theme.monument = &"lome_independence"
-	theme.landmarks = [&"cathedral", &"hotel_tower", &"beach_palms"] as Array[StringName]
+	theme.landmarks = [&"cathedral", &"colombe_paix", &"deux_lions", &"beach_palms", &"palais_lome", &"hotel_tower"] as Array[StringName]
 	theme.seed_value = 228
 	return theme
 
