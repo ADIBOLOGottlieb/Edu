@@ -18,6 +18,10 @@ extends Resource
 @export_range(0.0, 1.0) var knee_bend: float = 0.15
 ## Cycles par seconde à la vitesse de course (mis à l'échelle par la vitesse réelle).
 @export var cycle_hz: float = 0.0
+## Écart fixe entre jambe avant (+) et jambe arrière (−) : grand écart des sauts.
+@export var leg_split: float = 0.0
+## Écart fixe entre bras avant (+) et bras arrière (−) : bras ouverts pour l'équilibre.
+@export var arm_spread: float = 0.0
 ## Rotation du corps entier autour des hanches (radians, positif = vers l'avant) : saltos.
 @export var rotation: float = 0.0
 ## Vrille autour de l'axe vertical (radians) : rendue par un écrasement horizontal.

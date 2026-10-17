@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="SilhouetteStyle" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/silhouette_style.gd" id="1_shecv"]
+
+[resource]
+script = ExtResource("1_shecv")

@@ -9,7 +9,7 @@ extends Resource
 
 const FIELDS: Array[StringName] = [
 	&"lean", &"crouch", &"leg_base", &"arm_base", &"stride",
-	&"arm_swing", &"knee_bend", &"rotation", &"spin",
+	&"arm_swing", &"knee_bend", &"leg_split", &"arm_spread", &"rotation", &"spin",
 ]
 
 

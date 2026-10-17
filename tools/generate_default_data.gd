@@ -11,6 +11,7 @@ const TUNING_PATH: String = "res://data/tuning/player_move.tres"
 const ANIMS_PATH: String = "res://data/animations/player_anims.tres"
 const LIBRARY_PATH: String = "res://data/levels/chunk_library.tres"
 const FIGURES_PATH: String = "res://data/animations/player_figures.tres"
+const STYLE_PATH: String = "res://data/animations/protagonist_style.tres"
 ## Hauteur des immeubles sous leur toit : la rue est loin en dessous.
 const BUILDING_DEPTH: float = 1400.0
 ## Épaisseur d'une poutre (grue, passerelle).
@@ -23,6 +24,8 @@ func _init() -> void:
 	_save(_player_animations(), ANIMS_PATH, force)
 	_save(_chunk_library(), LIBRARY_PATH, force)
 	_save(_figure_library(), FIGURES_PATH, force)
+	# Valeurs par défaut du script = silhouette du protagoniste (sweat, cargo, baskets).
+	_save(SilhouetteStyle.new(), STYLE_PATH, force)
 	quit()
 
 
@@ -42,65 +45,68 @@ func _figure(times: Array[float], poses: Array[Dictionary]) -> FigureAnimation:
 func _figure_library() -> FigureLibrary:
 	var library: FigureLibrary = FigureLibrary.new()
 	library.animations = {
-		# Speed vault : le corps passe de profil, jambes groupées sur le côté, une main posée.
+		# Speed vault : une main posée sur l'obstacle (bras arrière), jambes balancées
+		# ensemble par-dessus, bras avant levé pour l'équilibre.
 		&"speed_vault": _figure([0.0, 0.4, 0.75, 1.0], [
-			{"lean": 0.3, "crouch": 0.2, "leg_base": 0.4, "arm_base": 0.8, "knee_bend": 0.6},
-			{"lean": -0.2, "crouch": 0.3, "leg_base": 1.4, "arm_base": 0.3, "knee_bend": 0.4},
-			{"lean": 0.1, "crouch": 0.15, "leg_base": 0.9, "arm_base": 1.5, "knee_bend": 0.3},
-			{"lean": 0.25, "leg_base": 0.2, "arm_base": 0.3, "knee_bend": 0.4},
+			{"lean": 0.3, "crouch": 0.2, "leg_base": 0.4, "knee_bend": 0.6, "arm_base": 0.9, "arm_spread": 0.3},
+			{"lean": -0.15, "crouch": 0.3, "leg_base": 1.35, "leg_split": 0.15, "knee_bend": 0.35, "arm_base": 0.7, "arm_spread": 1.0},
+			{"lean": 0.1, "crouch": 0.15, "leg_base": 0.9, "leg_split": 0.3, "knee_bend": 0.3, "arm_base": 1.1, "arm_spread": 0.9},
+			{"lean": 0.25, "leg_base": 0.2, "knee_bend": 0.4, "arm_base": 0.3},
 		]),
-		# Kong vault : plongeon horizontal mains en avant, jambes ramenées entre les bras.
+		# Kong vault : bras lancés, corps à l'horizontale mains à plat sur l'obstacle,
+		# jambes ramenées entre les bras, réception bras ouverts.
 		&"kong_vault": _figure([0.0, 0.35, 0.6, 1.0], [
-			{"lean": 0.6, "crouch": 0.2, "leg_base": -0.3, "arm_base": 1.6, "knee_bend": 0.2},
-			{"lean": 1.25, "crouch": 0.15, "leg_base": -0.6, "arm_base": 1.25, "knee_bend": 0.3},
-			{"lean": 0.8, "crouch": 0.35, "leg_base": 1.1, "arm_base": 0.6, "knee_bend": 1.0},
-			{"lean": 0.3, "leg_base": 0.5, "arm_base": 0.9, "knee_bend": 0.5},
+			{"lean": 0.6, "crouch": 0.2, "leg_base": -0.3, "leg_split": 0.3, "knee_bend": 0.25, "arm_base": 1.5, "arm_spread": 0.1},
+			{"lean": 1.35, "crouch": 0.1, "leg_base": -0.7, "leg_split": 0.15, "knee_bend": 0.25, "arm_base": 0.15, "arm_spread": 0.05},
+			{"lean": 0.8, "crouch": 0.35, "leg_base": 1.15, "knee_bend": 1.05, "arm_base": -0.4, "arm_spread": 0.2},
+			{"lean": 0.3, "leg_base": 0.5, "leg_split": 0.35, "knee_bend": 0.5, "arm_base": 1.0, "arm_spread": 0.8},
 		]),
-		# Lazy vault : passage lent, buste en arrière, jambes tendues devant.
+		# Lazy vault : passage lent, jambes en ciseaux, main arrière posée.
 		&"lazy_vault": _figure([0.0, 0.5, 1.0], [
-			{"lean": 0.1, "leg_base": 0.2, "arm_base": 0.4, "knee_bend": 0.3},
-			{"lean": -0.35, "crouch": 0.15, "leg_base": 1.2, "arm_base": 0.2, "knee_bend": 0.15},
-			{"lean": 0.1, "leg_base": 0.3, "arm_base": 0.4, "knee_bend": 0.3},
+			{"lean": 0.1, "leg_base": 0.2, "knee_bend": 0.3, "arm_base": 0.4},
+			{"lean": -0.35, "crouch": 0.15, "leg_base": 1.25, "leg_split": 0.35, "knee_bend": 0.15, "arm_base": 0.6, "arm_spread": 0.9},
+			{"lean": 0.1, "leg_base": 0.3, "knee_bend": 0.3, "arm_base": 0.4},
 		]),
-		# Tic-tac : pied planté sur le mur, poussée, genoux groupés au-dessus du sommet.
+		# Tic-tac : pied avant planté sur le mur, poussée en extension, genoux groupés
+		# au-dessus du sommet, bras ouverts.
 		&"tic_tac": _figure([0.0, 0.3, 0.7, 1.0], [
-			{"lean": 0.2, "crouch": 0.25, "leg_base": 1.35, "arm_base": 1.0, "knee_bend": 0.95},
-			{"lean": 0.1, "leg_base": 1.0, "arm_base": 2.5, "knee_bend": 0.2},
-			{"lean": 0.35, "crouch": 0.3, "leg_base": 0.95, "arm_base": 1.3, "knee_bend": 0.95},
-			{"lean": 0.2, "leg_base": 0.4, "arm_base": 0.6, "knee_bend": 0.5},
+			{"lean": 0.15, "crouch": 0.25, "leg_base": 0.75, "leg_split": 0.7, "knee_bend": 0.7, "arm_base": 1.4, "arm_spread": 0.9},
+			{"lean": 0.05, "leg_base": 0.6, "leg_split": 0.5, "knee_bend": 0.2, "arm_base": 2.2, "arm_spread": 0.9},
+			{"lean": 0.35, "crouch": 0.3, "leg_base": 0.95, "knee_bend": 0.95, "arm_base": 1.3, "arm_spread": 0.6},
+			{"lean": 0.2, "leg_base": 0.4, "leg_split": 0.3, "knee_bend": 0.5, "arm_base": 0.7, "arm_spread": 0.5},
 		]),
-		# Wall flip : salto arrière en se repoussant du mur (un tour vers l'arrière).
-		&"wall_flip": _figure([0.0, 0.2, 0.6, 0.85, 1.0], [
-			{"lean": -0.3, "leg_base": 0.8, "arm_base": 2.6, "knee_bend": 0.7, "rotation": 0.0},
-			{"crouch": 0.3, "leg_base": 1.25, "arm_base": 1.6, "knee_bend": 1.1, "rotation": -1.2},
-			{"crouch": 0.35, "leg_base": 1.35, "arm_base": 1.4, "knee_bend": 1.2, "rotation": -4.5},
-			{"leg_base": 0.4, "arm_base": 2.0, "knee_bend": 0.5, "rotation": -6.0},
-			{"leg_base": 0.3, "arm_base": 0.8, "knee_bend": 0.4, "rotation": -TAU},
+		# Wall flip : salto arrière tendu (bras au-dessus de la tête), regroupé pour la réception.
+		&"wall_flip": _figure([0.0, 0.25, 0.55, 0.85, 1.0], [
+			{"lean": -0.3, "leg_base": 0.8, "knee_bend": 0.7, "arm_base": 2.6, "rotation": 0.0},
+			{"crouch": 0.2, "leg_base": 0.6, "knee_bend": 0.5, "arm_base": 2.9, "rotation": -1.4},
+			{"leg_base": 0.4, "leg_split": 0.2, "knee_bend": 0.3, "arm_base": 3.0, "rotation": -3.6},
+			{"crouch": 0.3, "leg_base": 0.9, "knee_bend": 0.9, "arm_base": 1.6, "rotation": -5.9},
+			{"leg_base": 0.3, "knee_bend": 0.4, "arm_base": 0.8, "rotation": -TAU},
 		]),
-		# Salto avant : bras lancés, groupé, ouverture avant la réception.
+		# Salto avant groupé : bras lancés, genoux à la poitrine, mains aux tibias.
 		&"front_flip": _figure([0.0, 0.15, 0.7, 0.9, 1.0], [
-			{"lean": 0.3, "leg_base": 0.3, "arm_base": 2.8, "knee_bend": 0.3, "rotation": 0.0},
-			{"crouch": 0.3, "leg_base": 1.3, "arm_base": 1.4, "knee_bend": 1.2, "rotation": 0.8},
-			{"crouch": 0.35, "leg_base": 1.4, "arm_base": 1.3, "knee_bend": 1.25, "rotation": 5.2},
-			{"leg_base": 0.5, "arm_base": 2.2, "knee_bend": 0.5, "rotation": 6.1},
-			{"leg_base": 0.4, "arm_base": 1.2, "knee_bend": 0.4, "rotation": TAU},
+			{"lean": 0.3, "leg_base": 0.3, "knee_bend": 0.3, "arm_base": 2.8, "rotation": 0.0},
+			{"crouch": 0.3, "leg_base": 1.35, "knee_bend": 1.25, "arm_base": 1.0, "rotation": 0.8},
+			{"crouch": 0.35, "leg_base": 1.45, "knee_bend": 1.3, "arm_base": 1.0, "rotation": 5.2},
+			{"leg_base": 0.5, "leg_split": 0.3, "knee_bend": 0.5, "arm_base": 1.8, "arm_spread": 0.6, "rotation": 6.1},
+			{"leg_base": 0.4, "knee_bend": 0.4, "arm_base": 1.2, "arm_spread": 0.6, "rotation": TAU},
 		]),
-		# Vrille : salto avant avec un tour complet sur soi-même.
+		# Vrille : salto avec un tour complet sur soi-même.
 		&"corkscrew": _figure([0.0, 0.5, 1.0], [
-			{"lean": 0.2, "leg_base": 0.3, "arm_base": 2.9, "knee_bend": 0.3, "rotation": 0.0, "spin": 0.0},
-			{"crouch": 0.3, "leg_base": 1.2, "arm_base": 1.2, "knee_bend": 1.1, "rotation": PI, "spin": PI},
-			{"leg_base": 0.4, "arm_base": 1.6, "knee_bend": 0.4, "rotation": TAU, "spin": TAU},
+			{"lean": 0.2, "leg_base": 0.3, "knee_bend": 0.3, "arm_base": 2.6, "arm_spread": 0.6, "rotation": 0.0, "spin": 0.0},
+			{"crouch": 0.3, "leg_base": 1.2, "knee_bend": 1.1, "arm_base": 1.2, "rotation": PI, "spin": PI},
+			{"leg_base": 0.4, "leg_split": 0.3, "knee_bend": 0.4, "arm_base": 1.6, "arm_spread": 0.7, "rotation": TAU, "spin": TAU},
 		]),
 		# Cat leap : arrivée accroché au rebord, pieds amortissant contre le mur.
 		&"cat_leap": _figure([0.0, 1.0], [
-			{"lean": 0.3, "crouch": 0.4, "leg_base": 1.5, "arm_base": 2.9, "knee_bend": 1.2},
-			{"lean": 0.2, "crouch": 0.35, "leg_base": 1.3, "arm_base": 2.95, "knee_bend": 1.0},
+			{"lean": 0.3, "crouch": 0.4, "leg_base": 1.4, "leg_split": 0.25, "knee_bend": 1.2, "arm_base": 2.9},
+			{"lean": 0.2, "crouch": 0.35, "leg_base": 1.25, "leg_split": 0.2, "knee_bend": 1.0, "arm_base": 2.95},
 		]),
 		# Roulade : tour complet vers l'avant, groupé.
 		&"parkour_roll": _figure([0.0, 0.5, 1.0], [
-			{"lean": 0.8, "crouch": 0.6, "leg_base": 1.3, "arm_base": 1.4, "knee_bend": 1.1, "rotation": 0.0},
-			{"lean": 0.9, "crouch": 0.7, "leg_base": 1.6, "arm_base": 1.3, "knee_bend": 1.3, "rotation": PI},
-			{"lean": 0.3, "crouch": 0.3, "leg_base": 0.4, "arm_base": 0.5, "knee_bend": 0.5, "rotation": TAU},
+			{"lean": 0.8, "crouch": 0.6, "leg_base": 1.3, "knee_bend": 1.1, "arm_base": 1.4, "rotation": 0.0},
+			{"lean": 0.9, "crouch": 0.7, "leg_base": 1.6, "knee_bend": 1.3, "arm_base": 1.3, "rotation": PI},
+			{"lean": 0.3, "crouch": 0.3, "leg_base": 0.4, "leg_split": 0.3, "knee_bend": 0.5, "arm_base": 0.5, "arm_spread": 0.5, "rotation": TAU},
 		]),
 	}
 	return library
@@ -242,56 +248,65 @@ func _player_animations() -> AnimationSet:
 	anims.fallback = &"idle"
 	anims.clips = {
 		&"idle": _clip({
-			"lean": 0.04, "crouch": 0.04, "arm_base": 0.12,
-			"arm_swing": 0.04, "knee_bend": 0.08, "cycle_hz": 0.5,
+			"lean": 0.04, "crouch": 0.04, "arm_base": 0.15, "arm_spread": 0.1,
+			"arm_swing": 0.03, "knee_bend": 0.08, "cycle_hz": 0.5,
 		}),
+		# Course et sprint : cycle de foulée humain par images clés (RunnerVisual),
+		# stride = amplitude du cycle.
 		&"run": _clip({
-			"lean": 0.22, "crouch": 0.1, "leg_base": 0.05, "arm_base": 0.15,
-			"stride": 0.75, "arm_swing": 0.8, "knee_bend": 0.35, "cycle_hz": 2.4,
+			"lean": 0.22, "crouch": 0.06, "leg_base": 0.05, "arm_base": 0.1,
+			"stride": 0.8, "arm_swing": 0.8, "knee_bend": 0.3, "cycle_hz": 1.45,
 		}),
 		&"sprint": _clip({
-			"lean": 0.4, "crouch": 0.15, "leg_base": 0.1, "arm_base": 0.2,
-			"stride": 1.0, "arm_swing": 1.1, "knee_bend": 0.45, "cycle_hz": 2.0,
+			"lean": 0.38, "crouch": 0.1, "leg_base": 0.08, "arm_base": 0.15,
+			"stride": 1.0, "arm_swing": 1.0, "knee_bend": 0.35, "cycle_hz": 1.3,
 		}),
+		# Bond : grand écart (jambe avant pliée devant, arrière tendue), bras ouverts.
 		&"jump": _clip({
-			"lean": 0.1, "crouch": 0.08, "leg_base": 0.55, "arm_base": 2.3,
-			"knee_bend": 0.6,
+			"lean": 0.3, "crouch": 0.05, "leg_base": 0.35, "leg_split": 0.9,
+			"knee_bend": 0.55, "arm_base": 0.9, "arm_spread": 1.4,
 		}),
+		# Chute : pose de l'image de référence du coureur — en suspension, bras
+		# écartés vers le bas mains ouvertes, jambes droites serrées, pieds pointés.
 		&"fall": _clip({
-			"lean": 0.04, "leg_base": 0.25, "arm_base": 1.9,
-			"arm_swing": 0.2, "knee_bend": 0.3, "cycle_hz": 1.5,
+			"lean": 0.02, "leg_base": 0.05, "leg_split": 0.06, "knee_bend": 0.12,
+			"arm_base": 0.45, "arm_spread": 0.4, "arm_swing": 0.06, "cycle_hz": 0.8,
 		}),
+		# Réception à trois appuis : accroupi, main avant au sol.
 		&"landing": _clip({
-			"lean": 0.32, "crouch": 0.45, "leg_base": 0.35, "arm_base": 0.6,
-			"knee_bend": 0.8,
+			"lean": 0.55, "crouch": 0.7, "leg_base": 0.55, "leg_split": 0.35,
+			"knee_bend": 1.0, "arm_base": 0.15, "arm_spread": 0.35,
 		}),
 		&"slide": _clip({
-			"lean": -0.9, "crouch": 0.7, "leg_base": 1.3, "arm_base": -0.6,
-			"knee_bend": 0.2,
+			"lean": -0.9, "crouch": 0.7, "leg_base": 1.3, "leg_split": 0.25,
+			"knee_bend": 0.25, "arm_base": -0.4, "arm_spread": 0.5,
 		}),
-		# Jalon M2
 		&"double_jump": _clip({
-			"lean": 0.2, "leg_base": 0.9, "arm_base": 1.5,
+			"lean": 0.2, "leg_base": 0.9, "arm_base": 1.5, "arm_spread": 0.8,
 			"arm_swing": 0.6, "knee_bend": 0.9, "cycle_hz": 3.0,
 		}),
 		&"roll": _clip({
 			"lean": 1.4, "crouch": 0.85, "leg_base": 1.8, "arm_base": 1.6,
 			"knee_bend": 1.0,
 		}),
+		# Franchissement : mains posées sur l'obstacle.
 		&"vault": _clip({
-			"lean": 0.5, "crouch": 0.2, "leg_base": 1.1, "arm_base": 0.9,
-			"knee_bend": 0.9,
+			"lean": 0.5, "crouch": 0.2, "leg_base": 1.1, "arm_base": 0.3,
+			"arm_spread": 0.2, "knee_bend": 0.9,
 		}),
+		# Course murale : pied avant poussant contre le mur, bras ouverts.
 		&"wall_run": _clip({
-			"lean": -0.15, "leg_base": 1.2, "arm_base": 0.4,
-			"stride": 0.5, "arm_swing": 0.9, "knee_bend": 0.6, "cycle_hz": 1.5,
+			"lean": -0.1, "leg_base": 0.7, "leg_split": 0.7, "arm_base": 1.2,
+			"arm_spread": 0.9, "stride": 0.35, "arm_swing": 0.7, "knee_bend": 0.45,
+			"cycle_hz": 1.5,
 		}),
 		&"wall_climb": _clip({
-			"lean": 0.15, "leg_base": 0.8, "arm_base": 2.6, "arm_swing": 0.5,
-			"stride": 0.4, "knee_bend": 0.7, "cycle_hz": 0.9,
+			"lean": 0.15, "leg_base": 0.8, "arm_base": 2.5, "arm_spread": 0.2,
+			"arm_swing": 0.5, "stride": 0.45, "knee_bend": 0.8, "cycle_hz": 0.9,
 		}),
 		&"ledge_hang": _clip({
-			"lean": 0.08, "leg_base": 0.2, "arm_base": 2.95, "knee_bend": 0.25,
+			"lean": 0.08, "leg_base": 0.2, "leg_split": 0.15, "arm_base": 2.95,
+			"knee_bend": 0.3,
 		}),
 	}
 	return anims

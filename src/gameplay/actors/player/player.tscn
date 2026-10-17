@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://src/gameplay/actors/runner_body.gd" id="1_body"]
 [ext_resource type="Resource" path="res://data/tuning/player_move.tres" id="2_tuning"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://src/gameplay/actors/visual/runner_visual.gd" id="4_visual"]
 [ext_resource type="Resource" path="res://data/animations/player_anims.tres" id="5_anims"]
 [ext_resource type="Resource" path="res://data/animations/player_figures.tres" id="6_figures"]
+[ext_resource type="Resource" path="res://data/animations/protagonist_style.tres" id="7_style"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_stand"]
 radius = 14.0
@@ -50,3 +51,4 @@ script = ExtResource("3_ctrl")
 script = ExtResource("4_visual")
 animation_set = ExtResource("5_anims")
 figure_library = ExtResource("6_figures")
+style = ExtResource("7_style")
