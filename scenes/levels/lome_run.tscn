@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://src/gameplay/level/level_runner.gd" id="1_runner"]
 [ext_resource type="Script" path="res://src/gameplay/level/chunk_streamer.gd" id="2_streamer"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://src/ui/touch_controls/touch_controls.gd" id="9_touch"]
 [ext_resource type="Resource" path="res://data/cities/lome.tres" id="10_city"]
 [ext_resource type="Resource" path="res://data/cities/lome_theme.tres" id="11_theme"]
+[ext_resource type="Script" path="res://src/gameplay/encounter/encounter_director.gd" id="12_director"]
 
 [node name="LomeRun" type="Node2D"]
 
@@ -47,3 +48,7 @@ runner = NodePath("../LevelRunner")
 
 [node name="TouchControls" type="CanvasLayer" parent="."]
 script = ExtResource("9_touch")
+
+[node name="Encounter" type="Node2D" parent="." node_paths=PackedStringArray("runner")]
+script = ExtResource("12_director")
+runner = NodePath("../LevelRunner")

@@ -4,6 +4,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M5 Poursuite (vigile, sans combat)
+- **Vigile poursuivant** (`pursuer.tscn`) : même corps physique que le joueur (aucune téléportation, aucune traversée de collision), sprint 455 px/s contre 480 pour le coureur ; silhouette élancée brun-rouge, casquette et lampe torche, sans arme. Les pièges l'ignorent ; il ne bloque jamais le coureur.
+- **IA** (`PursuerAIController`, basée sur le pilote automatique) : poursuite (parkour complet : vides, murs, plafonds, pièges rythmés), prise au contact, récupération, fouille de la dernière position vue quand le coureur se cache dans une `StealthZone`, abandon. Rubber-banding uniquement dans les bornes de son `MoveTuning`.
+- **EncounterFSM** (table §5.1, 15 transitions ; toute autre transition refusée et journalisée), **jauge de capture** (1,5 s de contact), **AttackTokenPool**.
+- **EncounterDirector** : entrée du vigile 380 px derrière le coureur, contact → jauge, fuite → fenêtre d'évasion, jauge pleine → capture **non graphique** (fondu, « ATTRAPÉ », menottes lumineuses) → nouvelle tentative au point de contrôle (en attendant l'écran de résultat, M6) ; affichage de la distance du vigile et de la jauge.
+- **Lomé** : les parcours 2 à 5 sont poursuivis (`CityRoute.pursuit`), le Grand Marché reste une initiation sans vigile.
+- Équilibrage : écraseurs à 2 s de cycle (au lieu de 2,6–2,8) pour que l'attente devant un piège ne livre pas le coureur au vigile ; écraseur de `high_wall` éloigné de la zone de réception.
+
+### Vérifié — M5
+- **269/269 tests verts** (435 s) : table complète de l'EncounterFSM, jauge, jetons, 16 tests d'IA (dont « aucune téléportation » tick par tick), 4 de zone d'ombre, 3 de directeur (capture d'un coureur immobile, fuite d'un coureur qui sprinte, parcours sans vigile).
+- **Le pilote finit les 5 parcours de Lomé sans capture, sans mort ni chute** (4 avec vigile).
+
+
 ### Ajouté — Lomé : monuments, pharmacies et stations-service
 - **Monuments en arrière-plan** (évocations stylisées originales d'après les photos fournies, non importées) : Monument de l'Indépendance refait (deux dalles perforées, découpe en forme de personnage aux bras levés où passe le ciel, statue à l'étoile), **Colombe de la Paix**, **Deux Lions** (arcs, drapeau du Togo), **Palais de Lomé** (tour à couronne festonnée, arcades, escalier), **cathédrale** affinée. Chacun apparaît dans la première minute et demie de course ; un seul dessin par couche.
 - **Pharmacies** (croix verte lumineuse, enseigne « PHARMACIE DE … ») et **stations-service génériques** (auvent sous lequel on glisse, pompes avec prix, totem de prix, boutique) au premier plan, avec les noms des **quartiers de Lomé** (Bè, Tokoin, Nyékonakpoè, Adidogomé, Agoè, Hédzranawoé, Kodjoviakopé, Amoutivé, Djidjolé, Agbalépédo, Adakpamé, Kégué). Aucune marque réelle.

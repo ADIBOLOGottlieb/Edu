@@ -12,6 +12,7 @@ const ENDLESS_CHUNKS: int = 15
 
 var _chunk_ids: Array = _load_chunk_ids()
 var _runner: LevelRunner
+var _director: EncounterDirector
 var _body: RunnerBody
 var _trail: Array[String] = []
 
@@ -50,10 +51,14 @@ func _build(
 	_body.position = Vector2(60, -2)
 	_body.state_changed.connect(_record_state)
 	_runner.player = _body
+	_director = EncounterDirector.new()
+	_director.runner = _runner
+	_director.enabled = city != null
 	_body.died.connect(func(cause: StringName) -> void: _trail.append("MORT:%s@%d" % [cause, int(_body.global_position.x)]))
 
 	root.add_child(_runner)
 	root.add_child(_body)
+	root.add_child(_director)
 	add_child_autofree(root)
 
 
@@ -103,4 +108,5 @@ func test_autopilot_finishes_every_lome_route(route_index: Variant = use_paramet
 	var context: String = "%s : %s" % [route.display_name, " ".join(_trail)]
 	assert_eq(_runner.fall_count, 0, "chute — " + context)
 	assert_eq(_runner.death_count, 0, "mort sur un piège — " + context)
+	assert_eq(_director.captures, 0, "rattrapé par le vigile — " + context)
 	assert_true(_runner.is_completed(), "arrivée non atteinte — " + context)
