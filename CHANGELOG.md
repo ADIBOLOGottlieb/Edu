@@ -4,6 +4,22 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M7 Menus, carte du monde et sauvegarde
+- **Sauvegarde** (`SaveStore`, `SaveSchema`, autoload `SaveService`) : `user://save.json` versionné, écriture **atomique** (save.tmp → relecture → l'ancien devient save.bak → renommage), somme de contrôle SHA-256 (détection de corruption), reprise sur la sauvegarde de secours, **migrations** une par une (v1 → v2), version inconnue refusée sans toucher le fichier, écritures regroupées par image. Aucune donnée de paiement.
+- **Progression** (`Progression`, `ProfileService`) : étoiles par parcours (1 = arrivée, 2 = ≤ 2 morts, 3 = sans mort sous le temps de référence), meilleurs temps, déblocage parcours par parcours et ville par ville ; temps de référence des 5 parcours de Lomé.
+- **Réglages** (`GameSettings`, `SettingsService`) : volumes, vibrations, opacité et taille des boutons tactiles (appliquées en direct), qualité, langue — bornés et persistés.
+- **SceneRouter** : transitions en fondu et passage de paramètres ; `LevelRunner` lit le parcours choisi et chronomètre la course ; `RouteSession` enregistre l'arrivée et ouvre l'écran de résultat.
+- **Écrans** (`src/ui/menus/`) : menu principal sur le décor de Lomé, **carte du monde** (continents stylisés originaux, Lomé jouable, 9 villes « Bientôt », route aérienne), écran de ville (5 parcours : difficulté, vigile, étoiles, record, verrou), **résultat** (temps, référence, morts, captures, étoiles, nouveau record, Rejouer / Parcours suivant / Carte), réglages, crédits (Quaternius CC0, Godot, GUT), **pause** en jeu (bouton, Échap, retour Android). Le jeu démarre sur le menu principal ; le lanceur de développement reste accessible.
+- Panneaux de débogage masqués par défaut dans le niveau de Lomé (F3).
+
+### Vérifié — M7
+- **304/304 tests verts** (436 s), dont 10 de sauvegarde (aller-retour, .bak, troncature, falsification, tout corrompu, coupure pendant l'écriture, migration v1 → v2, migration au chargement, version du futur), 6 de progression et réglages, 4 de persistance réelle par les services, 15 d'écrans et de navigation.
+
+### Limites connues — M7
+- Qualité graphique et langue enregistrées mais pas encore appliquées (textes en français uniquement).
+- Écran de défaite / capture définitif : M6 (la capture relance au point de contrôle).
+
+
 ### Ajouté — M5 Poursuite (vigile, sans combat)
 - **Vigile poursuivant** (`pursuer.tscn`) : même corps physique que le joueur (aucune téléportation, aucune traversée de collision), sprint 455 px/s contre 480 pour le coureur ; silhouette élancée brun-rouge, casquette et lampe torche, sans arme. Les pièges l'ignorent ; il ne bloque jamais le coureur.
 - **IA** (`PursuerAIController`, basée sur le pilote automatique) : poursuite (parkour complet : vides, murs, plafonds, pièges rythmés), prise au contact, récupération, fouille de la dernière position vue quand le coureur se cache dans une `StealthZone`, abandon. Rubber-banding uniquement dans les bornes de son `MoveTuning`.

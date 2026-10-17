@@ -13,3 +13,5 @@ extends Resource
 @export var pursuit: bool = false
 ## Délai avant l'entrée du vigile (s).
 @export var pursuer_delay: float = 2.5
+## Temps de référence (s) pour la 3e étoile (arrivée sans mort sous ce temps).
+@export var par_time: float = 0.0

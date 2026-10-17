@@ -39,6 +39,8 @@ var furthest_x: float = 0.0
 var fall_count: int = 0
 ## Morts sur un piège (les chutes sont comptées à part dans fall_count).
 var death_count: int = 0
+## Temps de course (s), arrêté à l'arrivée.
+var elapsed: float = 0.0
 
 var _completed: bool = false
 var _respawn_left: float = 0.0
@@ -48,6 +50,10 @@ var _respawn_left: float = 0.0
 
 func _ready() -> void:
 	seed_used = seed_value if seed_value != 0 else randi_range(1, 2147483646)
+	# Parcours choisi sur l'écran de la ville (SceneRouter).
+	var router: SceneRouterNode = get_node_or_null(^"/root/SceneRouter") as SceneRouterNode
+	if router != null and city != null and router.param("route_index") != null:
+		route_index = int(router.param("route_index"))
 	var route: CityRoute = current_route()
 	if route != null:
 		mode = ChunkSequencer.Mode.ORDERED
@@ -106,6 +112,8 @@ func _physics_process(delta: float) -> void:
 			player.revive(_checkpoint(chunk))
 		return
 	furthest_x = maxf(furthest_x, player.global_position.x)
+	if not _completed:
+		elapsed += delta
 	var floor_limit: float = chunk.deepest_y() if chunk != null else streamer.end_y()
 	if player.global_position.y > floor_limit + kill_depth:
 		_respawn(chunk)

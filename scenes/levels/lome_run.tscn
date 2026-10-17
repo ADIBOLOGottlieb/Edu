@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://src/gameplay/level/level_runner.gd" id="1_runner"]
 [ext_resource type="Script" path="res://src/gameplay/level/chunk_streamer.gd" id="2_streamer"]
@@ -12,6 +12,8 @@
 [ext_resource type="Resource" path="res://data/cities/lome.tres" id="10_city"]
 [ext_resource type="Resource" path="res://data/cities/lome_theme.tres" id="11_theme"]
 [ext_resource type="Script" path="res://src/gameplay/encounter/encounter_director.gd" id="12_director"]
+[ext_resource type="Script" path="res://src/gameplay/level/route_session.gd" id="13_session"]
+[ext_resource type="Script" path="res://src/ui/hud/pause_menu.gd" id="14_pause"]
 
 [node name="LomeRun" type="Node2D"]
 
@@ -41,14 +43,26 @@ target = NodePath("../Player")
 [node name="MovementOverlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("body")]
 script = ExtResource("7_movement")
 body = NodePath("../Player")
+start_hidden = true
 
 [node name="LevelOverlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("runner")]
 script = ExtResource("8_level")
 runner = NodePath("../LevelRunner")
+start_hidden = true
 
 [node name="TouchControls" type="CanvasLayer" parent="."]
 script = ExtResource("9_touch")
 
 [node name="Encounter" type="Node2D" parent="." node_paths=PackedStringArray("runner")]
 script = ExtResource("12_director")
+runner = NodePath("../LevelRunner")
+
+[node name="Session" type="Node" parent="." node_paths=PackedStringArray("runner", "encounter")]
+script = ExtResource("13_session")
+runner = NodePath("../LevelRunner")
+encounter = NodePath("../Encounter")
+
+[node name="PauseMenu" type="CanvasLayer" parent="." node_paths=PackedStringArray("runner")]
+process_mode = 3
+script = ExtResource("14_pause")
 runner = NodePath("../LevelRunner")

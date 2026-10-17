@@ -18,7 +18,8 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 | M3d Décor urbain + Lomé | objets urbains réels par type de bloc, arrière-plan en couches, Lomé (5 parcours, monument, cathédrale, palmiers) | terminé, 205/205 tests ; branche `m3d/decor-lome` |
 | M4 (pièges) | pics, scies, écraseurs, flammes, plateformes fragiles ; mort et réapparition ; animations AnimationTree (course à la vraie cadence, sauts synchronisés) | terminé ; branche `m4/dangers-ennemis` (pièces et ennemis retirés à la demande) |
 | M5 Poursuite | vigile (même physique, IA parkour, zone d'ombre), EncounterFSM, jauge de capture, capture non graphique ; Lomé poursuivie (parcours 2 à 5) | terminé, 269/269 tests ; branche `m5/poursuite` |
-| M6 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
+| M7 Menus, carte, sauvegarde | sauvegarde atomique versionnée, progression (étoiles, records, déblocages), réglages, menu principal, carte du monde, écrans de ville et de résultat, pause | terminé, 304/304 tests ; branche `m7/menus-carte-sauvegarde` |
+| M6, M8 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.
 

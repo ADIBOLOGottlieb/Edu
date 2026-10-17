@@ -9,6 +9,7 @@ script = ExtResource("1_krsdp")
 id = &"lome_grand_marche"
 display_name = "Grand Marché"
 chunk_ids = Array[StringName]([&"flat_run", &"vault_pair", &"low_tunnel", &"small_gap", &"step_platform", &"flat_run"])
+par_time = 17.0
 
 [sub_resource type="Resource" id="Resource_fawi0"]
 script = ExtResource("1_krsdp")
@@ -17,6 +18,7 @@ display_name = "Boulevard du 13-Janvier"
 difficulty = 1
 chunk_ids = Array[StringName]([&"flat_run", &"roof_hop", &"stairs_up", &"vent_field", &"drop_down", &"tunnel_then_vault", &"flat_run"])
 pursuit = true
+par_time = 20.0
 
 [sub_resource type="Resource" id="Resource_anm3d"]
 script = ExtResource("1_krsdp")
@@ -25,6 +27,7 @@ display_name = "Quartier Bè"
 difficulty = 2
 chunk_ids = Array[StringName]([&"flat_run", &"double_gap", &"wall_ledge", &"roof_climb", &"gap_drop_roll", &"slide_gap", &"flat_run"])
 pursuit = true
+par_time = 27.0
 
 [sub_resource type="Resource" id="Resource_5xyvo"]
 script = ExtResource("1_krsdp")
@@ -33,6 +36,7 @@ display_name = "Cathédrale"
 difficulty = 3
 chunk_ids = Array[StringName]([&"flat_run", &"high_wall", &"precision_hops", &"upper_route", &"gap_then_wall", &"wall_gap_wall", &"flat_run"])
 pursuit = true
+par_time = 29.0
 
 [sub_resource type="Resource" id="Resource_3ajoo"]
 script = ExtResource("1_krsdp")
@@ -41,6 +45,7 @@ display_name = "Place de l'Indépendance"
 difficulty = 4
 chunk_ids = Array[StringName]([&"flat_run", &"skyline_run", &"crane_line", &"tunnel_drop_climb", &"rooftop_gauntlet", &"flat_run"])
 pursuit = true
+par_time = 33.0
 
 [resource]
 script = ExtResource("2_f4cqe")
