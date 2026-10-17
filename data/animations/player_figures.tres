@@ -6,344 +6,550 @@
 
 [sub_resource type="Resource" id="Resource_7vmts"]
 script = ExtResource("2_mc1bj")
-lean = 0.3
-crouch = 0.2
-leg_base = 0.4
+lean = 0.4
+crouch = 0.3
+leg_base = 0.45
 arm_base = 0.9
-knee_bend = 0.6
-arm_spread = 0.3
+knee_bend = 0.75
+leg_split = 0.2
+arm_spread = 0.4
 
 [sub_resource type="Resource" id="Resource_ggex4"]
 script = ExtResource("2_mc1bj")
-lean = -0.15
-crouch = 0.3
-leg_base = 1.35
+lean = -0.1
+crouch = 0.25
+leg_base = 1.2
 arm_base = 0.7
-knee_bend = 0.35
+knee_bend = 0.45
 leg_split = 0.15
 arm_spread = 1.0
 
 [sub_resource type="Resource" id="Resource_drp1p"]
 script = ExtResource("2_mc1bj")
-lean = 0.1
-crouch = 0.15
-leg_base = 0.9
-arm_base = 1.1
+lean = -0.2
+crouch = 0.2
+leg_base = 1.4
+arm_base = 0.9
 knee_bend = 0.3
-leg_split = 0.3
-arm_spread = 0.9
+leg_split = 0.2
+arm_spread = 1.05
 
 [sub_resource type="Resource" id="Resource_kikce"]
 script = ExtResource("2_mc1bj")
-lean = 0.25
-leg_base = 0.2
-arm_base = 0.3
+lean = 0.15
+crouch = 0.15
+leg_base = 0.8
+arm_base = 1.1
 knee_bend = 0.4
+leg_split = 0.35
+arm_spread = 0.85
 
 [sub_resource type="Resource" id="Resource_xuckt"]
-script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.4, 0.75, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_7vmts"), SubResource("Resource_ggex4"), SubResource("Resource_drp1p"), SubResource("Resource_kikce")])
+script = ExtResource("2_mc1bj")
+lean = 0.3
+crouch = 0.12
+leg_base = 0.25
+arm_base = 0.3
+knee_bend = 0.45
+leg_split = 0.25
+arm_spread = 0.5
 
 [sub_resource type="Resource" id="Resource_ivkld"]
+script = ExtResource("1_qmawn")
+times = PackedFloat32Array(0, 0.3, 0.55, 0.8, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_7vmts"), SubResource("Resource_ggex4"), SubResource("Resource_drp1p"), SubResource("Resource_kikce"), SubResource("Resource_xuckt")])
+
+[sub_resource type="Resource" id="Resource_rgmlc"]
 script = ExtResource("2_mc1bj")
-lean = 0.6
-crouch = 0.2
-leg_base = -0.3
-arm_base = 1.5
+lean = 0.5
+crouch = 0.35
+leg_base = 0.1
+arm_base = -0.4
+knee_bend = 0.7
+leg_split = 0.4
+arm_spread = 0.15
+
+[sub_resource type="Resource" id="Resource_smshn"]
+script = ExtResource("2_mc1bj")
+lean = 0.9
+crouch = 0.1
+leg_base = -0.35
+arm_base = 1.6
 knee_bend = 0.25
 leg_split = 0.3
 arm_spread = 0.1
 
-[sub_resource type="Resource" id="Resource_rgmlc"]
+[sub_resource type="Resource" id="Resource_vxd2o"]
 script = ExtResource("2_mc1bj")
 lean = 1.35
 crouch = 0.1
 leg_base = -0.7
-arm_base = 0.15
-knee_bend = 0.25
+arm_base = 0.2
+knee_bend = 0.3
 leg_split = 0.15
 arm_spread = 0.05
 
-[sub_resource type="Resource" id="Resource_smshn"]
+[sub_resource type="Resource" id="Resource_w3tdq"]
 script = ExtResource("2_mc1bj")
 lean = 0.8
 crouch = 0.35
-leg_base = 1.15
+leg_base = 1.2
 arm_base = -0.4
-knee_bend = 1.05
+knee_bend = 1.1
+leg_split = 0.05
 arm_spread = 0.2
-
-[sub_resource type="Resource" id="Resource_vxd2o"]
-script = ExtResource("2_mc1bj")
-lean = 0.3
-leg_base = 0.5
-arm_base = 1.0
-knee_bend = 0.5
-leg_split = 0.35
-arm_spread = 0.8
-
-[sub_resource type="Resource" id="Resource_w3tdq"]
-script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.35, 0.6, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_ivkld"), SubResource("Resource_rgmlc"), SubResource("Resource_smshn"), SubResource("Resource_vxd2o")])
 
 [sub_resource type="Resource" id="Resource_xryu5"]
 script = ExtResource("2_mc1bj")
-lean = 0.1
-leg_base = 0.2
-arm_base = 0.4
-knee_bend = 0.3
+lean = 0.35
+crouch = 0.05
+leg_base = 0.55
+arm_base = 1.1
+knee_bend = 0.45
+leg_split = 0.35
+arm_spread = 0.8
 
 [sub_resource type="Resource" id="Resource_uj8ks"]
+script = ExtResource("2_mc1bj")
+lean = 0.45
+crouch = 0.35
+leg_base = 0.6
+arm_base = 0.7
+knee_bend = 0.8
+leg_split = 0.3
+arm_spread = 0.6
+
+[sub_resource type="Resource" id="Resource_vx58e"]
+script = ExtResource("1_qmawn")
+times = PackedFloat32Array(0, 0.2, 0.42, 0.62, 0.82, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_rgmlc"), SubResource("Resource_smshn"), SubResource("Resource_vxd2o"), SubResource("Resource_w3tdq"), SubResource("Resource_xryu5"), SubResource("Resource_uj8ks")])
+
+[sub_resource type="Resource" id="Resource_dvxsg"]
+script = ExtResource("2_mc1bj")
+lean = 0.15
+crouch = 0.1
+leg_base = 0.35
+arm_base = 0.5
+knee_bend = 0.4
+leg_split = 0.15
+arm_spread = 0.2
+
+[sub_resource type="Resource" id="Resource_5v0dh"]
+script = ExtResource("2_mc1bj")
+lean = -0.15
+crouch = 0.15
+leg_base = 0.9
+arm_base = 0.6
+knee_bend = 0.3
+leg_split = 0.45
+arm_spread = 0.8
+
+[sub_resource type="Resource" id="Resource_mjm4k"]
 script = ExtResource("2_mc1bj")
 lean = -0.35
 crouch = 0.15
 leg_base = 1.25
-arm_base = 0.6
-leg_split = 0.35
-arm_spread = 0.9
-
-[sub_resource type="Resource" id="Resource_vx58e"]
-script = ExtResource("2_mc1bj")
-lean = 0.1
-leg_base = 0.3
-arm_base = 0.4
-knee_bend = 0.3
-
-[sub_resource type="Resource" id="Resource_dvxsg"]
-script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.5, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_xryu5"), SubResource("Resource_uj8ks"), SubResource("Resource_vx58e")])
-
-[sub_resource type="Resource" id="Resource_5v0dh"]
-script = ExtResource("2_mc1bj")
-lean = 0.15
-crouch = 0.25
-leg_base = 0.75
-arm_base = 1.4
-knee_bend = 0.7
-leg_split = 0.7
-arm_spread = 0.9
-
-[sub_resource type="Resource" id="Resource_mjm4k"]
-script = ExtResource("2_mc1bj")
-lean = 0.05
-leg_base = 0.6
-arm_base = 2.2
-knee_bend = 0.2
-leg_split = 0.5
-arm_spread = 0.9
+arm_base = 0.65
+leg_split = 0.4
+arm_spread = 0.95
 
 [sub_resource type="Resource" id="Resource_f50qi"]
 script = ExtResource("2_mc1bj")
-lean = 0.35
-crouch = 0.3
-leg_base = 0.95
-arm_base = 1.3
-knee_bend = 0.95
+lean = -0.05
+crouch = 0.1
+leg_base = 0.6
+arm_base = 0.6
+knee_bend = 0.3
+leg_split = 0.4
 arm_spread = 0.6
 
 [sub_resource type="Resource" id="Resource_ef8b1"]
 script = ExtResource("2_mc1bj")
-lean = 0.2
-leg_base = 0.4
-arm_base = 0.7
-knee_bend = 0.5
-leg_split = 0.3
-arm_spread = 0.5
+lean = 0.12
+crouch = 0.08
+leg_base = 0.3
+arm_base = 0.4
+knee_bend = 0.35
+leg_split = 0.2
+arm_spread = 0.3
 
 [sub_resource type="Resource" id="Resource_onmxf"]
 script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.3, 0.7, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_5v0dh"), SubResource("Resource_mjm4k"), SubResource("Resource_f50qi"), SubResource("Resource_ef8b1")])
+times = PackedFloat32Array(0, 0.3, 0.55, 0.8, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_dvxsg"), SubResource("Resource_5v0dh"), SubResource("Resource_mjm4k"), SubResource("Resource_f50qi"), SubResource("Resource_ef8b1")])
 
 [sub_resource type="Resource" id="Resource_gqlej"]
 script = ExtResource("2_mc1bj")
-lean = -0.3
-leg_base = 0.8
-arm_base = 2.6
-knee_bend = 0.7
+lean = 0.2
+crouch = 0.3
+leg_base = 0.75
+arm_base = 0.2
+knee_bend = 0.8
+leg_split = 0.7
+arm_spread = 0.6
 
 [sub_resource type="Resource" id="Resource_s51a1"]
 script = ExtResource("2_mc1bj")
-crouch = 0.2
-leg_base = 0.6
-arm_base = 2.9
-knee_bend = 0.5
-rotation = -1.4
+lean = 0.05
+leg_base = 0.5
+arm_base = 2.4
+knee_bend = 0.2
+leg_split = 0.5
+arm_spread = 0.6
 
 [sub_resource type="Resource" id="Resource_jora0"]
 script = ExtResource("2_mc1bj")
-leg_base = 0.4
-arm_base = 3.0
-knee_bend = 0.3
-leg_split = 0.2
-rotation = -3.6
+lean = 0.45
+crouch = 0.3
+leg_base = 1.1
+arm_base = 0.6
+knee_bend = 1.1
+leg_split = 0.5
+arm_spread = 0.3
 
 [sub_resource type="Resource" id="Resource_wsjpv"]
 script = ExtResource("2_mc1bj")
-crouch = 0.3
-leg_base = 0.9
-arm_base = 1.6
-knee_bend = 0.9
-rotation = -5.9
+lean = 0.7
+crouch = 0.1
+leg_base = 0.2
+arm_base = 1.7
+knee_bend = 0.35
+leg_split = 0.45
+arm_spread = 0.5
 
 [sub_resource type="Resource" id="Resource_iu032"]
 script = ExtResource("2_mc1bj")
-leg_base = 0.3
+lean = 0.3
+crouch = 0.3
+leg_base = 0.55
 arm_base = 0.8
-knee_bend = 0.4
-rotation = -6.283185307179586
+knee_bend = 0.7
+leg_split = 0.3
+arm_spread = 0.6
 
 [sub_resource type="Resource" id="Resource_lvxhq"]
 script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.25, 0.55, 0.85, 1)
+times = PackedFloat32Array(0, 0.25, 0.5, 0.75, 1)
 poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_gqlej"), SubResource("Resource_s51a1"), SubResource("Resource_jora0"), SubResource("Resource_wsjpv"), SubResource("Resource_iu032")])
 
 [sub_resource type="Resource" id="Resource_bpvuw"]
 script = ExtResource("2_mc1bj")
 lean = 0.3
-leg_base = 0.3
-arm_base = 2.8
-knee_bend = 0.3
+crouch = 0.3
+leg_base = 0.9
+arm_base = -0.5
+knee_bend = 0.95
+leg_split = 0.25
+arm_spread = 0.2
 
 [sub_resource type="Resource" id="Resource_calho"]
 script = ExtResource("2_mc1bj")
-crouch = 0.3
-leg_base = 1.35
-arm_base = 1.0
-knee_bend = 1.25
-rotation = 0.8
+lean = -0.25
+leg_base = 0.3
+arm_base = 2.9
+knee_bend = 0.25
+leg_split = 0.2
+arm_spread = 0.2
+rotation = -0.7
 
 [sub_resource type="Resource" id="Resource_4xlrd"]
 script = ExtResource("2_mc1bj")
-crouch = 0.35
-leg_base = 1.45
+lean = 0.4
+crouch = 0.3
+leg_base = 1.5
 arm_base = 1.0
-knee_bend = 1.3
-rotation = 5.2
+knee_bend = 1.45
+leg_split = 0.05
+arm_spread = 0.1
+rotation = -2.9
 
 [sub_resource type="Resource" id="Resource_al6ml"]
 script = ExtResource("2_mc1bj")
-leg_base = 0.5
-arm_base = 1.8
-knee_bend = 0.5
-leg_split = 0.3
-arm_spread = 0.6
-rotation = 6.1
+lean = 0.45
+crouch = 0.32
+leg_base = 1.6
+arm_base = 0.95
+knee_bend = 1.5
+arm_spread = 0.05
+rotation = -4.9
 
 [sub_resource type="Resource" id="Resource_l2cw7"]
 script = ExtResource("2_mc1bj")
-leg_base = 0.4
-arm_base = 1.2
-knee_bend = 0.4
-arm_spread = 0.6
-rotation = 6.283185307179586
+lean = 0.1
+leg_base = 0.5
+arm_base = 1.6
+knee_bend = 0.45
+leg_split = 0.2
+arm_spread = 0.75
+rotation = -5.95
 
 [sub_resource type="Resource" id="Resource_fury6"]
-script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.15, 0.7, 0.9, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_bpvuw"), SubResource("Resource_calho"), SubResource("Resource_4xlrd"), SubResource("Resource_al6ml"), SubResource("Resource_l2cw7")])
+script = ExtResource("2_mc1bj")
+lean = 0.4
+crouch = 0.4
+leg_base = 0.65
+arm_base = 1.1
+knee_bend = 0.85
+leg_split = 0.2
+arm_spread = 0.6
+rotation = -6.283185307179586
 
 [sub_resource type="Resource" id="Resource_i2a5b"]
-script = ExtResource("2_mc1bj")
-lean = 0.2
-leg_base = 0.3
-arm_base = 2.6
-knee_bend = 0.3
-arm_spread = 0.6
+script = ExtResource("1_qmawn")
+times = PackedFloat32Array(0, 0.15, 0.4, 0.65, 0.85, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_bpvuw"), SubResource("Resource_calho"), SubResource("Resource_4xlrd"), SubResource("Resource_al6ml"), SubResource("Resource_l2cw7"), SubResource("Resource_fury6")])
 
 [sub_resource type="Resource" id="Resource_phhmb"]
 script = ExtResource("2_mc1bj")
-crouch = 0.3
-leg_base = 1.2
-arm_base = 1.2
-knee_bend = 1.1
-rotation = 3.141592653589793
-spin = 3.141592653589793
+lean = 0.45
+crouch = 0.35
+leg_base = 0.35
+arm_base = -0.7
+knee_bend = 0.75
+leg_split = 0.2
+arm_spread = 0.15
 
 [sub_resource type="Resource" id="Resource_dars7"]
 script = ExtResource("2_mc1bj")
-leg_base = 0.4
-arm_base = 1.6
-knee_bend = 0.4
-leg_split = 0.3
-arm_spread = 0.7
-rotation = 6.283185307179586
-spin = 6.283185307179586
+lean = 0.15
+leg_base = -0.1
+arm_base = 2.9
+leg_split = 0.15
+arm_spread = 0.15
+rotation = 0.35
 
 [sub_resource type="Resource" id="Resource_n861j"]
-script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.5, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_i2a5b"), SubResource("Resource_phhmb"), SubResource("Resource_dars7")])
+script = ExtResource("2_mc1bj")
+lean = 0.55
+crouch = 0.3
+leg_base = 1.6
+arm_base = 0.95
+knee_bend = 1.55
+leg_split = 0.05
+arm_spread = 0.1
+rotation = 2.2
 
 [sub_resource type="Resource" id="Resource_0rhsc"]
 script = ExtResource("2_mc1bj")
-lean = 0.3
-crouch = 0.4
-leg_base = 1.4
-arm_base = 2.9
-knee_bend = 1.2
-leg_split = 0.25
+lean = 0.6
+crouch = 0.32
+leg_base = 1.7
+arm_base = 0.9
+knee_bend = 1.6
+arm_spread = 0.05
+rotation = 4.6
 
 [sub_resource type="Resource" id="Resource_77ta3"]
 script = ExtResource("2_mc1bj")
-lean = 0.2
-crouch = 0.35
-leg_base = 1.25
-arm_base = 2.95
-knee_bend = 1.0
-leg_split = 0.2
+lean = 0.15
+crouch = 0.05
+leg_base = 0.55
+arm_base = 1.5
+knee_bend = 0.45
+leg_split = 0.15
+arm_spread = 0.65
+rotation = 5.9
 
 [sub_resource type="Resource" id="Resource_k6xpi"]
-script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_0rhsc"), SubResource("Resource_77ta3")])
+script = ExtResource("2_mc1bj")
+lean = 0.35
+crouch = 0.35
+leg_base = 0.7
+arm_base = 1.3
+knee_bend = 0.85
+leg_split = 0.2
+arm_spread = 0.6
+rotation = 6.2
 
 [sub_resource type="Resource" id="Resource_3wqh7"]
 script = ExtResource("2_mc1bj")
-lean = 0.8
-crouch = 0.6
-leg_base = 1.3
-arm_base = 1.4
-knee_bend = 1.1
-
-[sub_resource type="Resource" id="Resource_4nn4o"]
-script = ExtResource("2_mc1bj")
-lean = 0.9
-crouch = 0.7
-leg_base = 1.6
-arm_base = 1.3
-knee_bend = 1.3
-rotation = 3.141592653589793
-
-[sub_resource type="Resource" id="Resource_nvi4u"]
-script = ExtResource("2_mc1bj")
-lean = 0.3
-crouch = 0.3
-leg_base = 0.4
-arm_base = 0.5
-knee_bend = 0.5
-leg_split = 0.3
+lean = 0.45
+crouch = 0.45
+leg_base = 0.6
+arm_base = 1.0
+knee_bend = 0.9
+leg_split = 0.15
 arm_spread = 0.5
 rotation = 6.283185307179586
 
-[sub_resource type="Resource" id="Resource_fkx7w"]
+[sub_resource type="Resource" id="Resource_4nn4o"]
 script = ExtResource("1_qmawn")
-times = PackedFloat32Array(0, 0.5, 1)
-poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_3wqh7"), SubResource("Resource_4nn4o"), SubResource("Resource_nvi4u")])
+times = PackedFloat32Array(0, 0.12, 0.32, 0.6, 0.8, 0.93, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_phhmb"), SubResource("Resource_dars7"), SubResource("Resource_n861j"), SubResource("Resource_0rhsc"), SubResource("Resource_77ta3"), SubResource("Resource_k6xpi"), SubResource("Resource_3wqh7")])
+
+[sub_resource type="Resource" id="Resource_nvi4u"]
+script = ExtResource("2_mc1bj")
+lean = 0.15
+leg_base = 0.2
+arm_base = 2.7
+knee_bend = 0.35
+leg_split = 0.25
+arm_spread = 0.5
+
+[sub_resource type="Resource" id="Resource_fkx7w"]
+script = ExtResource("2_mc1bj")
+lean = 0.35
+crouch = 0.2
+leg_base = 1.0
+arm_base = 1.6
+knee_bend = 1.0
+arm_spread = 0.3
+rotation = 1.0
+spin = 0.9
+
+[sub_resource type="Resource" id="Resource_vixgl"]
+script = ExtResource("2_mc1bj")
+lean = 0.5
+crouch = 0.3
+leg_base = 1.45
+arm_base = 1.0
+knee_bend = 1.4
+arm_spread = 0.1
+rotation = 3.7
+spin = 3.6
+
+[sub_resource type="Resource" id="Resource_2rbcl"]
+script = ExtResource("2_mc1bj")
+lean = 0.15
+crouch = 0.05
+leg_base = 0.5
+arm_base = 1.5
+knee_bend = 0.45
+leg_split = 0.2
+arm_spread = 0.75
+rotation = 5.8
+spin = 5.9
+
+[sub_resource type="Resource" id="Resource_gatgc"]
+script = ExtResource("2_mc1bj")
+lean = 0.35
+crouch = 0.3
+leg_base = 0.6
+arm_base = 1.2
+knee_bend = 0.75
+leg_split = 0.25
+arm_spread = 0.6
+rotation = 6.283185307179586
+spin = 6.283185307179586
+
+[sub_resource type="Resource" id="Resource_d0lso"]
+script = ExtResource("1_qmawn")
+times = PackedFloat32Array(0, 0.2, 0.55, 0.82, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_nvi4u"), SubResource("Resource_fkx7w"), SubResource("Resource_vixgl"), SubResource("Resource_2rbcl"), SubResource("Resource_gatgc")])
+
+[sub_resource type="Resource" id="Resource_5lxx4"]
+script = ExtResource("2_mc1bj")
+lean = 0.1
+crouch = 0.1
+leg_base = 0.5
+arm_base = 3.0
+knee_bend = 0.45
+leg_split = 0.2
+arm_spread = 0.1
+
+[sub_resource type="Resource" id="Resource_xqcio"]
+script = ExtResource("2_mc1bj")
+lean = 0.3
+crouch = 0.35
+leg_base = 1.3
+arm_base = 2.7
+knee_bend = 1.15
+leg_split = 0.3
+arm_spread = 0.15
+
+[sub_resource type="Resource" id="Resource_h5jp4"]
+script = ExtResource("2_mc1bj")
+lean = 0.35
+crouch = 0.4
+leg_base = 1.4
+arm_base = 2.75
+knee_bend = 1.25
+leg_split = 0.45
+arm_spread = 0.1
+
+[sub_resource type="Resource" id="Resource_x8hil"]
+script = ExtResource("2_mc1bj")
+lean = 0.25
+crouch = 0.3
+leg_base = 1.2
+arm_base = 2.85
+knee_bend = 1.05
+leg_split = 0.3
+arm_spread = 0.08
+
+[sub_resource type="Resource" id="Resource_p526h"]
+script = ExtResource("1_qmawn")
+times = PackedFloat32Array(0, 0.35, 0.7, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_5lxx4"), SubResource("Resource_xqcio"), SubResource("Resource_h5jp4"), SubResource("Resource_x8hil")])
+
+[sub_resource type="Resource" id="Resource_gcitr"]
+script = ExtResource("2_mc1bj")
+lean = 0.9
+crouch = 0.75
+leg_base = 1.1
+arm_base = 1.3
+knee_bend = 1.15
+leg_split = 0.2
+arm_spread = 0.25
+
+[sub_resource type="Resource" id="Resource_f1027"]
+script = ExtResource("2_mc1bj")
+lean = 1.0
+crouch = 0.85
+leg_base = 1.7
+arm_base = 1.1
+knee_bend = 1.5
+arm_spread = 0.15
+rotation = 1.9
+
+[sub_resource type="Resource" id="Resource_s0h2x"]
+script = ExtResource("2_mc1bj")
+lean = 0.95
+crouch = 0.85
+leg_base = 1.75
+arm_base = 0.95
+knee_bend = 1.55
+leg_split = 0.05
+arm_spread = 0.1
+rotation = 4.1
+
+[sub_resource type="Resource" id="Resource_4hqdx"]
+script = ExtResource("2_mc1bj")
+lean = 0.7
+crouch = 0.65
+leg_base = 1.0
+arm_base = 1.2
+knee_bend = 1.1
+leg_split = 0.3
+arm_spread = 0.4
+rotation = 5.85
+
+[sub_resource type="Resource" id="Resource_8clr0"]
+script = ExtResource("2_mc1bj")
+lean = 0.35
+crouch = 0.25
+leg_base = 0.35
+arm_base = 0.4
+knee_bend = 0.55
+leg_split = 0.35
+arm_spread = 0.6
+rotation = 6.283185307179586
+
+[sub_resource type="Resource" id="Resource_mstyv"]
+script = ExtResource("1_qmawn")
+times = PackedFloat32Array(0, 0.25, 0.55, 0.8, 1)
+poses = Array[ExtResource("2_mc1bj")]([SubResource("Resource_gcitr"), SubResource("Resource_f1027"), SubResource("Resource_s0h2x"), SubResource("Resource_4hqdx"), SubResource("Resource_8clr0")])
 
 [resource]
 script = ExtResource("3_yy1fk")
 animations = Dictionary[StringName, ExtResource("1_qmawn")]({
-&"cat_leap": SubResource("Resource_k6xpi"),
-&"corkscrew": SubResource("Resource_n861j"),
-&"front_flip": SubResource("Resource_fury6"),
-&"kong_vault": SubResource("Resource_w3tdq"),
-&"lazy_vault": SubResource("Resource_dvxsg"),
-&"parkour_roll": SubResource("Resource_fkx7w"),
-&"speed_vault": SubResource("Resource_xuckt"),
-&"tic_tac": SubResource("Resource_onmxf"),
-&"wall_flip": SubResource("Resource_lvxhq")
+&"cat_leap": SubResource("Resource_p526h"),
+&"corkscrew": SubResource("Resource_d0lso"),
+&"front_flip": SubResource("Resource_4nn4o"),
+&"kong_vault": SubResource("Resource_vx58e"),
+&"lazy_vault": SubResource("Resource_onmxf"),
+&"parkour_roll": SubResource("Resource_mstyv"),
+&"speed_vault": SubResource("Resource_ivkld"),
+&"tic_tac": SubResource("Resource_lvxhq"),
+&"wall_flip": SubResource("Resource_i2a5b")
 })

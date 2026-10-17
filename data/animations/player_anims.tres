@@ -15,35 +15,35 @@ arm_spread = 0.1
 
 [sub_resource type="Resource" id="Resource_mudlf"]
 script = ExtResource("1_5vlsh")
-lean = 0.22
+lean = 0.24
 crouch = 0.06
 leg_base = 0.05
-arm_base = 0.1
-stride = 0.8
+arm_base = 0.12
+stride = 0.85
 arm_swing = 0.8
 knee_bend = 0.3
 cycle_hz = 1.45
 
 [sub_resource type="Resource" id="Resource_6u2a5"]
 script = ExtResource("1_5vlsh")
-lean = 0.38
+lean = 0.42
 crouch = 0.1
 leg_base = 0.08
-arm_base = 0.15
-stride = 1.0
+arm_base = 0.18
+stride = 1.05
 arm_swing = 1.0
 knee_bend = 0.35
 cycle_hz = 1.3
 
 [sub_resource type="Resource" id="Resource_e3ree"]
 script = ExtResource("1_5vlsh")
-lean = 0.3
-crouch = 0.05
-leg_base = 0.35
-arm_base = 0.9
-knee_bend = 0.55
-leg_split = 0.9
-arm_spread = 1.4
+lean = 0.2
+crouch = 0.02
+leg_base = 0.4
+arm_base = 1.9
+knee_bend = 0.6
+leg_split = 0.75
+arm_spread = 0.9
 
 [sub_resource type="Resource" id="Resource_fjk4d"]
 script = ExtResource("1_5vlsh")
@@ -58,13 +58,13 @@ arm_spread = 0.4
 
 [sub_resource type="Resource" id="Resource_cngq4"]
 script = ExtResource("1_5vlsh")
-lean = 0.55
-crouch = 0.7
-leg_base = 0.55
-arm_base = 0.15
-knee_bend = 1.0
-leg_split = 0.35
-arm_spread = 0.35
+lean = 0.6
+crouch = 0.75
+leg_base = 0.6
+arm_base = 0.35
+knee_bend = 1.05
+leg_split = 0.3
+arm_spread = 0.45
 
 [sub_resource type="Resource" id="Resource_uwlbv"]
 script = ExtResource("1_5vlsh")
@@ -78,21 +78,25 @@ arm_spread = 0.5
 
 [sub_resource type="Resource" id="Resource_hj886"]
 script = ExtResource("1_5vlsh")
-lean = 0.2
-leg_base = 0.9
-arm_base = 1.5
-arm_swing = 0.6
-knee_bend = 0.9
-cycle_hz = 3.0
-arm_spread = 0.8
+lean = 0.25
+crouch = 0.1
+leg_base = 1.1
+arm_base = 2.2
+arm_swing = 0.3
+knee_bend = 1.05
+cycle_hz = 2.0
+leg_split = 0.15
+arm_spread = 0.5
 
 [sub_resource type="Resource" id="Resource_s1bwd"]
 script = ExtResource("1_5vlsh")
-lean = 1.4
+lean = 1.3
 crouch = 0.85
-leg_base = 1.8
-arm_base = 1.6
-knee_bend = 1.0
+leg_base = 1.7
+arm_base = 1.4
+knee_bend = 1.15
+leg_split = 0.05
+arm_spread = 0.2
 
 [sub_resource type="Resource" id="Resource_d5u8b"]
 script = ExtResource("1_5vlsh")
@@ -105,34 +109,42 @@ arm_spread = 0.2
 
 [sub_resource type="Resource" id="Resource_b33g7"]
 script = ExtResource("1_5vlsh")
-lean = -0.1
-leg_base = 0.7
+lean = -0.05
+crouch = 0.05
+leg_base = 0.75
 arm_base = 1.2
-stride = 0.35
-arm_swing = 0.7
-knee_bend = 0.45
-cycle_hz = 1.5
-leg_split = 0.7
-arm_spread = 0.9
+stride = 0.55
+arm_swing = 0.8
+knee_bend = 0.5
+cycle_hz = 1.6
+leg_split = 0.55
+arm_spread = 0.8
 
 [sub_resource type="Resource" id="Resource_huolp"]
 script = ExtResource("1_5vlsh")
-lean = 0.15
-leg_base = 0.8
-arm_base = 2.5
-stride = 0.45
-arm_swing = 0.5
-knee_bend = 0.8
-cycle_hz = 0.9
-arm_spread = 0.2
+lean = 0.2
+crouch = 0.15
+leg_base = 1.05
+arm_base = 2.6
+stride = 0.5
+arm_swing = 0.35
+knee_bend = 0.95
+cycle_hz = 1.0
+leg_split = 0.1
+arm_spread = 0.15
 
 [sub_resource type="Resource" id="Resource_qcpe0"]
 script = ExtResource("1_5vlsh")
-lean = 0.08
-leg_base = 0.2
-arm_base = 2.95
-knee_bend = 0.3
-leg_split = 0.15
+lean = 0.25
+crouch = 0.3
+leg_base = 1.15
+arm_base = 2.85
+stride = 0.1
+arm_swing = 0.12
+knee_bend = 1.0
+cycle_hz = 0.4
+leg_split = 0.3
+arm_spread = 0.08
 
 [resource]
 script = ExtResource("2_i2n7d")

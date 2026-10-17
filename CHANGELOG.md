@@ -4,6 +4,25 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M3b (3/3) Silhouette humaine et gestuelle fluide
+- **Silhouette fidèle à la photo de référence**, adaptée de profil : adulte athlétique (≈ 8 têtes), cheveux courts arrondis avec frange, col de sweat relevé, sweat ample aux manches bouffantes resserrées aux poignets, grandes mains ouvertes aux doigts écartés, pantalon ample froissé au genou et à la cheville, baskets épaisses. Contours lissés (Catmull-Rom), plus de « personnage Lego ».
+- Proportions et volumes en données : `SilhouetteStyle` (`data/animations/protagonist_style.tres`).
+- **Cycle de foulée humain** pour la course et le sprint (appui, amorti, poussée, suspension, ramené), bras opposés coudes fléchis, rebond du bassin ; poses lissées par des **ressorts amortis**.
+- **Couche de mouvement** inspirée des vidéos de référence : bras lancés à l'appel, amorti de réception proportionnel à l'impact, genoux groupés en montée et jambes tendues bras écartés en descente, inclinaison selon la vitesse et l'accélération (on se redresse en freinant), tête stabilisée.
+- **Figures retravaillées d'après les vidéos** : chaque figure a une anticipation (accroupi, bras armés) et une réception amortie. Salto avant et wall flip très groupés (genoux à la poitrine), vrille, roulade, cat leap et suspension pieds plantés au mur, tic-tac avec passage de hanche, kong vault bras armés. Course plus penchée, sprint encore plus, saut avec genou d'attaque, réception profonde.
+- `tools/capture_motion.gd` : filme une course du pilote automatique (images à assembler en vidéo avec ffmpeg).
+
+### Vérifié — M3b (3/3)
+- **169/169 tests verts** (239 s), dont `test_silhouette_style` (proportions, détails de la référence, vêtements amples) et `test_runner_motion` (amorti proportionnel à l'impact puis retour au repos, bras lancés à l'appel).
+- Vidéo de contrôle de 25 s sur 10 tronçons (pilote automatique, aucune chute) et planche des 9 figures relues.
+
+### Limites connues — M3b (3/3)
+- Le hissage depuis un rebord n'a pas encore sa propre figure (il réutilise la pose de saut).
+- Légère pause de la rotation à chaque image clé d'un salto (interpolation adoucie entre clés).
+- En suspension, la jambe côté mur est dessinée sur le bloc noir et se lit mal.
+- Silhouette toujours dessinée par code (provisoire) ; performances Android non mesurées.
+
+
 ### Ajouté — M3b (2/3) Figures de parkour
 - 9 figures choisies selon le contexte à l'entrée d'un état (`Figure.choose`), signal `figure_started(nom)` :
   - **Tic-tac** (nouveau mouvement) : vite contre un mur de 50 à 150 px, appui du pied et passage par-dessus sans s'accrocher (une fois par phase aérienne, comme la course murale).

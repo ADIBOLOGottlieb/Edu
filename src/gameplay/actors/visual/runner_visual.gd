@@ -20,6 +20,13 @@ const SPRING_DAMPING: float = 32.0
 const GAIT_THIGH: Array[float] = [28.0, 12.0, -6.0, -24.0, -34.0, -8.0, 30.0, 42.0]
 const GAIT_KNEE: Array[float] = [12.0, 34.0, 24.0, 22.0, 72.0, 108.0, 78.0, 30.0]
 const LIMB_SIDES: int = 7
+## Couche de mouvement (agilité) : impulsions données aux ressorts au saut et à
+## l'atterrissage, pose aérienne selon la vitesse verticale, inclinaison selon
+## la vitesse et l'accélération, tête stabilisée (regard vers l'avant).
+## Impact (px/s) pour lequel l'amorti d'atterrissage est complet.
+const LANDING_FULL_IMPACT: float = 900.0
+## Part de l'inclinaison du buste que la tête compense.
+const HEAD_STABILIZE: float = 0.45
 
 @export var animation_set: AnimationSet
 @export var figure_library: FigureLibrary
@@ -34,6 +41,9 @@ var _gait_weight: float = 0.0
 var _figure_active: bool = false
 var _spin_scale: float = 1.0
 var _pivot: Vector2 = Vector2.ZERO
+## Accélération horizontale lissée (px/s²), pour pencher en accélérant et freinant.
+var _accel_x: float = 0.0
+var _last_velocity_x: float = 0.0
 
 
 func _ready() -> void:
@@ -43,6 +53,34 @@ func _ready() -> void:
 	for field: StringName in FigureAnimation.FIELDS:
 		_pose[field] = 0.0
 		_velocity[field] = 0.0
+	if _body != null:
+		_body.jump_started.connect(_on_jump_started)
+		_body.landed.connect(_on_landed)
+
+
+## Impulsion d'appel : bras lancés vers le haut, jambes qui se tendent, buste qui
+## se redresse (le ressort revient seul : détente puis relâchement).
+func _on_jump_started(kind: StringName) -> void:
+	var power: float = 0.7 if kind == &"double" else 1.0
+	_kick(&"arm_base", 30.0 * power)
+	_kick(&"crouch", -6.0 * power)
+	_kick(&"knee_bend", -8.0 * power)
+	_kick(&"lean", -1.5 * power)
+
+
+## Amorti de réception proportionnel à l'impact : genoux qui plient, bassin qui
+## descend, buste vers l'avant, bras devant pour l'équilibre.
+func _on_landed(impact_speed: float) -> void:
+	var k: float = clampf(impact_speed / LANDING_FULL_IMPACT, 0.15, 1.0)
+	_kick(&"crouch", 20.0 * k)
+	_kick(&"knee_bend", 24.0 * k)
+	_kick(&"lean", 8.0 * k)
+	_kick(&"arm_base", 14.0 * k)
+
+
+func _kick(field: StringName, speed: float) -> void:
+	if _velocity.has(field):
+		_velocity[field] += speed
 
 
 ## Pose actuelle (lecture seule, pour les tests et le débogage).
@@ -77,6 +115,7 @@ func _process(delta: float) -> void:
 			gait_target = 1.0
 			var speed_ratio: float = absf(_body.velocity.x) / maxf(_body.tuning.run_speed, 1.0)
 			cycle_hz *= clampf(speed_ratio, 0.35, 1.8)
+		_add_motion_layer(target, state, delta)
 
 	for field: StringName in target:
 		if figure_now and (field == &"rotation" or field == &"spin"):
@@ -94,6 +133,34 @@ func _process(delta: float) -> void:
 	_spin_scale = (1.0 if spin_cos >= 0.0 else -1.0) * maxf(absf(spin_cos), 0.2)
 	scale.x = float(_body.facing)
 	queue_redraw()
+
+
+## Ajoute à la pose de clip ce qui dépend du mouvement réel du corps.
+func _add_motion_layer(
+		target: Dictionary[StringName, float], state: PlayerState.State, delta: float
+) -> void:
+	var v: Vector2 = _body.velocity
+	var raw_accel: float = (v.x - _last_velocity_x) / maxf(delta, 0.001)
+	_accel_x = lerpf(_accel_x, raw_accel, minf(1.0, delta * 8.0))
+	_last_velocity_x = v.x
+	var facing: float = float(_body.facing)
+	var tuning: MoveTuning = _body.tuning
+	match state:
+		PlayerState.State.RUN, PlayerState.State.SPRINT:
+			# Plus on va vite, plus on se penche ; on se penche aussi en accélérant
+			# et on se redresse (voire en arrière) en freinant.
+			var speed_ratio: float = absf(v.x) / maxf(tuning.sprint_speed, 1.0)
+			target[&"lean"] += 0.1 * speed_ratio + clampf(_accel_x * facing / 6000.0, -0.25, 0.2)
+		PlayerState.State.JUMP, PlayerState.State.DOUBLE_JUMP, PlayerState.State.FALL:
+			# Montée : genoux groupés ; descente rapide : jambes tendues vers le sol,
+			# bras écartés pour l'équilibre.
+			var rise: float = clampf(-v.y / maxf(tuning.jump_velocity, 1.0), 0.0, 1.0)
+			var drop: float = clampf(v.y / maxf(tuning.max_fall_speed * 0.6, 1.0), 0.0, 1.0)
+			target[&"knee_bend"] += 0.35 * rise - 0.15 * drop
+			target[&"leg_base"] += 0.25 * rise + 0.15 * drop
+			target[&"arm_spread"] += 0.55 * drop + 0.2 * rise
+			target[&"arm_base"] += 0.1 * drop
+			target[&"lean"] += 0.08 * rise - 0.06 * drop
 
 
 ## Pose cible de la figure en cours, ou vide s'il n'y en a pas (ou pas d'animation).
@@ -134,8 +201,8 @@ func _limb_angles(side: int) -> Dictionary[StringName, float]:
 	var pose_thigh: float = _pose[&"leg_base"] + sign * _pose[&"leg_split"] + leg_swing
 	var pose_knee: float = _pose[&"knee_bend"] * 1.4 + maxf(0.0, -leg_swing) * 0.9
 	var pose_arm: float = _pose[&"arm_base"] + sign * _pose[&"arm_spread"] - wave * _pose[&"arm_swing"]
-	# Bras détendus au repos ; plus fléchis quand ils balancent.
-	var pose_elbow: float = 0.25 + 0.4 * absf(_pose[&"arm_swing"])
+	# Coudes toujours un peu fléchis (bras humains, jamais raides) ; plus en balançant ou accroupi.
+	var pose_elbow: float = 0.5 + 0.4 * absf(_pose[&"arm_swing"]) + 0.4 * _pose[&"crouch"]
 
 	var u: float = _phase + (0.0 if side == 0 else 0.5)
 	var amplitude: float = _pose[&"stride"]
@@ -173,7 +240,10 @@ func _draw() -> void:
 	_draw_leg(hip - front * 1.0, back_side, s.back_ink)
 	_draw_arm(shoulder - front * 1.5, back_side, s.back_ink)
 	_draw_torso(hip, shoulder, up, front)
-	_draw_head(shoulder, up, front)
+	# Tête stabilisée : elle compense une partie de l'inclinaison du buste (hors figures).
+	var head_lean: float = lean * (1.0 if _figure_active else 1.0 - HEAD_STABILIZE)
+	var head_up: Vector2 = Vector2.UP.rotated(head_lean)
+	_draw_head(shoulder, head_up, Vector2(-head_up.y, head_up.x))
 	_draw_leg(hip + front * 1.0, front_side, s.ink)
 	_draw_arm(shoulder + front * 1.0, front_side, s.ink)
 
