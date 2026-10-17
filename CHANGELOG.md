@@ -4,6 +4,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — Prototype : silhouette 3D par capture de mouvement
+- `RunnerModelVisual` : mannequin humain 3D (Quaternius *Universal Animation Library*, **CC0**) rendu en noir uni dans un `SubViewport`, caméra orthographique de profil, affiché comme un sprite 2D. Animations capturées (repos, jogging, sprint, appel, suspension, réception, roulade, accroupi) fondues au changement d'état ; cadence de course calée sur la vitesse réelle ; saltos par rotation autour des hanches (`FigureAnimation.rotation`).
+- Pas encore branché sur `player.tscn` : activé par `tools/capture_motion.gd -- <dossier> --model3d` pour comparaison.
+- Tests : `test_runner_model_visual` (clips présents, repos, course, appel) ; **173/173**.
+
+### Limites connues — prototype 3D
+- Pose aérienne passive (bras ballants), aussi utilisée pour les franchissements ; pas de vraie glissade ni de hissage. La bibliothèque 2 (glissade, hissage, saut dynamique) utilise un autre squelette : reciblage à faire.
+- Performances Android du rendu 3D en SubViewport non mesurées.
+
+
 ### Ajouté — M3b (3/3) Silhouette humaine et gestuelle fluide
 - **Silhouette fidèle à la photo de référence**, adaptée de profil : adulte athlétique (≈ 8 têtes), cheveux courts arrondis avec frange, col de sweat relevé, sweat ample aux manches bouffantes resserrées aux poignets, grandes mains ouvertes aux doigts écartés, pantalon ample froissé au genou et à la cheville, baskets épaisses. Contours lissés (Catmull-Rom), plus de « personnage Lego ».
 - Proportions et volumes en données : `SilhouetteStyle` (`data/animations/protagonist_style.tres`).

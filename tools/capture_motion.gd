@@ -2,7 +2,7 @@ extends SceneTree
 ## Filme le coureur (pilote automatique) sur une suite de toits riches en figures :
 ## une image PNG toutes les 2 images, à assembler en vidéo avec ffmpeg.
 ## Contrôle de la fluidité de la gestuelle (nécessite une fenêtre, pas --headless).
-## Usage : godot --path . --fixed-fps 60 -s tools/capture_motion.gd -- <dossier_de_sortie_absolu>
+## Usage : godot --path . --fixed-fps 60 -s tools/capture_motion.gd -- <dossier_de_sortie_absolu> [--model3d]
 ## Puis : ffmpeg -framerate 30 -i <dossier>/f_%04d.png -pix_fmt yuv420p motion.mp4
 
 const MAX_FRAMES: int = 1500
@@ -42,6 +42,15 @@ func _init() -> void:
 	pilot.name = "Controller"
 	body.add_child(pilot)
 	body.position = Vector2(60, -2)
+	if OS.get_cmdline_user_args().has("--model3d"):
+		# Silhouette 3D (mannequin + capture de mouvement) à la place du dessin par code.
+		var drawn: RunnerVisual = body.get_node("Visual") as RunnerVisual
+		var model: RunnerModelVisual = RunnerModelVisual.new()
+		model.name = "ModelVisual"
+		model.figure_library = drawn.figure_library
+		drawn.visible = false
+		drawn.process_mode = Node.PROCESS_MODE_DISABLED
+		body.add_child(model)
 	_runner.player = body
 	var camera: RunnerCamera = RunnerCamera.new()
 	camera.target = body

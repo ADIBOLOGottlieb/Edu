@@ -7,6 +7,7 @@ Rien de cette liste n'est un asset final. Ce sont des formes simples dessinées 
 | Élément | Implémentation actuelle | À produire |
 |---|---|---|
 | Silhouette du protagoniste | `RunnerVisual` + `SilhouetteStyle` : silhouette humaine dessinée par code (contours lissés, sweat ample, pantalon froissé, baskets, mains ouvertes), poses en données lissées par ressorts ; membres arrière en gris foncé | sprites ou squelette 2D dessinés, silhouette « sweat + pantalon ample » (références fournies) |
+| Mannequin 3D et animations (prototype) | `assets/characters/quaternius/mannequin_anims.glb` : Quaternius *Universal Animation Library* (Standard), **CC0 1.0**, licence jointe (`LICENSE.txt`), source opengameart.org | à conserver ou remplacer par une capture dédiée aux figures de parkour |
 | Poses des 13 états M1 + M2 | `data/animations/player_anims.tres` : angles et amplitudes procéduraux | animations dessinées image par image ou squelettales |
 | 9 autres états (dodge, attack, block, hit, stagger, escape, capture, death, victory) | aucun clip : affichent la pose `idle` (repli) | une animation chacun, au jalon où l'état est implémenté |
 
