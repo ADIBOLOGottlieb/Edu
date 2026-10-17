@@ -4,6 +4,15 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — M8 Inventaire et équipement (sans combat)
+- **Inventaire** (`Inventory`, autoload `InventoryService`) : 20 emplacements + extensions, 1 objet = 1 emplacement ; inventaire plein → la caisse **reste au sol** ; objets ramassés pendant le parcours **perdus à la capture ou à l’abandon**, gardés à l’arrivée ; sauvegardé (section « inventory ») ; kit de départ : Accélérateur + Surcharge.
+- **Effets** (`EffectRunner`) : chronos en temps de jeu (gelés en pause et en arrière-plan), règles REFRESH / REPLACE / REJECT, incompatibilités dans les deux sens, charges ; un objet refusé est conservé avec un message.
+- **10 objets** (`data/equipment/catalog.tres`, générés) : Gilet (encaisse un piège), Bouclier (brise 2 prises du vigile), Gants (escalade ×1,6), Accélérateur (vitesse ×1,25), Impulsion (repousse le vigile), Leurre (vigile distrait 4 s), Camouflage (le vigile perd la trace), Cachette (invisible immobile, annulée si l’on bouge), Piratage (pièges à moins de 900 px coupés 8 s), Surcharge (jauge de capture −60 %).
+- **En jeu** (`EquipmentRuntime`) : une **caisse d’objet** tous les 2 tronçons (objet tiré de façon reproductible), bouton tactile **OBJET** (touche E), objet choisi en haut à gauche (toucher ou Tab = objet suivant), effets actifs avec leur temps restant, messages courts ; contenu de l’inventaire dans le menu pause.
+
+### Vérifié — M8
+- **334/334 tests verts** (457 s) : 10 d’inventaire, 10 d’effets, 1 de persistance, 9 en jeu (caisses ramassées, inventaire plein, accélérateur, gilet, refus sans vigile, incompatibilité, impulsion et surcharge, bouclier puis capture avec perte des objets ramassés, piratage). Capture d’écran du HUD contrôlée (`tools/capture_level_hud.gd`). Non testé sur téléphone.
+
 ### Modifié — Fluidité sur téléphone (retour : « le jeu donne l'impression de ramer »)
 - **Interpolation physique** (physique à 60 Hz, affichage fluide sur les écrans 90/120 Hz), remise à zéro aux réapparitions.
 - Silhouettes 3D : **sans anticrénelage** (inutile, l'image est réduite), résolution selon la **qualité graphique** (160 / 208 / 256 px ; « moyenne » par défaut sur téléphone), **aucun rendu ni animation hors écran** (vigile au loin).

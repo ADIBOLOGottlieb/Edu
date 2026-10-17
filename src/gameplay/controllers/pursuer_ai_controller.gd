@@ -70,6 +70,9 @@ const GLUE_GAIN: float = 0.02
 ## Distance à la cible au-delà de laquelle le gardien abandonne (px).
 @export var give_up_distance: float = 2200.0
 
+## Cible dissimulée par un équipement (camouflage, cachette) : vaut une StealthZone.
+var target_concealed: bool = false
+
 var _state: AIState = AIState.CHASE
 var _active: bool = true
 var _in_contact: bool = false
@@ -125,6 +128,8 @@ func reset(at: Vector2) -> void:
 func target_hidden() -> bool:
 	if target == null or _body == null:
 		return false
+	if target_concealed:
+		return true
 	for node: Node in _body.get_tree().get_nodes_in_group(StealthZone.GROUP):
 		var zone: StealthZone = node as StealthZone
 		if zone != null and zone.contains(target):

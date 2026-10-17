@@ -22,6 +22,8 @@ var panel: Control
 var resume_button: Button
 var restart_button: Button
 var map_button: Button
+## Contenu de l'inventaire (M8), mis à jour à chaque ouverture.
+var inventory_label: Label
 
 var _is_open: bool = false
 
@@ -64,6 +66,7 @@ func open() -> void:
 	if _is_open:
 		return
 	_is_open = true
+	_refresh_inventory()
 	panel.visible = true
 	pause_button.visible = false
 	get_tree().paused = true
@@ -176,6 +179,11 @@ func _build_panel() -> Control:
 	map_button.name = "MapButton"
 	map_button.pressed.connect(to_map)
 	column.add_child(map_button)
+	inventory_label = MenuStyle.label("", 20, MenuStyle.MUTED)
+	inventory_label.name = "InventoryLabel"
+	inventory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	inventory_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(inventory_label)
 	return veil
 
 
@@ -191,3 +199,18 @@ func _layout() -> void:
 		inset_right = maxf(0.0, window_size.x - float(safe.end.x)) * to_canvas.x
 		inset_top = maxf(0.0, float(safe.position.y)) * to_canvas.y
 	pause_button.position = Vector2(visible_rect.size.x - MenuStyle.TOUCH - 20.0 - inset_right, 16.0 + inset_top)
+
+
+## Inventaire : « Inventaire 3/20 » puis les objets et leur nombre.
+func _refresh_inventory() -> void:
+	var service: InventoryServiceNode = get_node_or_null(^"/root/InventoryService") as InventoryServiceNode
+	if service == null or inventory_label == null:
+		return
+	var inventory: Inventory = service.inventory
+	var parts: PackedStringArray = []
+	for data: EquipmentData in service.catalog.items:
+		var count: int = inventory.quantity(data.id)
+		if count > 0:
+			parts.append("%s ×%d" % [data.display_name, count])
+	inventory_label.text = "Inventaire %d/%d\n%s" % [inventory.count(), inventory.capacity(),
+			", ".join(parts) if not parts.is_empty() else "vide"]

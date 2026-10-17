@@ -14,6 +14,8 @@ extends Node2D
 
 signal capture_changed(value: float)
 signal captured()
+## Le vigile vient de saisir le coureur (bouclier : M8).
+signal pursuer_grabbed()
 
 const ESCAPE_WINDOW_TIME: float = 2.0
 ## Hors du niveau sous le toit le plus bas : le vigile est replacé (il a chuté).
@@ -104,9 +106,10 @@ func _spawn_pursuer() -> void:
 
 ## Point d'entrée du vigile : sur le sol `start_behind` px derrière le coureur (assez
 ## près pour être vu, comme dans une vraie poursuite), sinon au début du tronçon.
-func _spawn_point() -> Vector2:
+func _spawn_point(behind: float = -1.0) -> Vector2:
 	var player: RunnerBody = runner.player
-	var behind_x: float = player.global_position.x - start_behind * float(player.facing)
+	var distance: float = start_behind if behind < 0.0 else behind
+	var behind_x: float = player.global_position.x - distance * float(player.facing)
 	var ray: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(
 		Vector2(behind_x, player.global_position.y - 400.0),
 		Vector2(behind_x, player.global_position.y + 500.0),
@@ -119,7 +122,7 @@ func _spawn_point() -> Vector2:
 	if chunk == null:
 		chunk = runner.streamer.chunk_at(player.global_position.x)
 	if chunk == null:
-		return player.global_position - Vector2(start_behind, 0.0)
+		return player.global_position - Vector2(distance, 0.0)
 	return chunk.position + Vector2(runner.respawn_offset_x * 0.5, -2.0)
 
 
@@ -136,6 +139,7 @@ func _on_contact_changed(in_contact: bool) -> void:
 		if fsm.current == EncounterFSM.State.RUNNING:
 			fsm.request(EncounterFSM.State.PURSUIT, &"repere")
 		fsm.request(EncounterFSM.State.COMBAT, &"contact")
+		pursuer_grabbed.emit()
 	elif fsm.current == EncounterFSM.State.COMBAT:
 		_escape_left = ESCAPE_WINDOW_TIME
 		fsm.request(EncounterFSM.State.ESCAPE_WINDOW, &"arrache")
@@ -259,3 +263,35 @@ class PursuitHud:
 		_canvas.draw_rect(bar, Color(0.0, 0.0, 0.0, 0.55))
 		_canvas.draw_rect(Rect2(bar.position, Vector2(bar.size.x * value, bar.size.y)), Color(0.95, 0.25, 0.15, 0.95))
 		_canvas.draw_rect(bar, Color(1.0, 0.8, 0.5, 0.9), false, 1.5)
+
+
+# --- Équipement (M8) : effets sur le vigile, sans combat --------------------------
+
+func has_pursuer() -> bool:
+	return pursuer != null and _ai != null and enabled and not fsm.is_terminal()
+
+
+## Repousse le vigile à `distance` px derrière le coureur (sur le sol), lâche la prise.
+func repel_pursuer(distance: float) -> bool:
+	if not has_pursuer():
+		return false
+	_ai.reset(_spawn_point(maxf(distance, pursuer_distance())))
+	return true
+
+
+## Leurre : le vigile reste sur place tant que `on` est vrai.
+func distract_pursuer(on: bool) -> void:
+	if _ai != null:
+		_ai.set_active(not on)
+
+
+## Dissimule le coureur (camouflage, cachette) : le vigile perd sa trace.
+func conceal_target(on: bool) -> void:
+	if _ai != null:
+		_ai.target_concealed = on
+
+
+## Vide une part de la jauge de capture (surcharge : 0,6 = −60 %).
+func reduce_gauge(fraction: float) -> void:
+	gauge.value = maxf(0.0, gauge.value * (1.0 - clampf(fraction, 0.0, 1.0)))
+	capture_changed.emit(gauge.value)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://src/gameplay/level/level_runner.gd" id="1_runner"]
 [ext_resource type="Script" path="res://src/gameplay/level/chunk_streamer.gd" id="2_streamer"]
@@ -14,6 +14,8 @@
 [ext_resource type="Script" path="res://src/gameplay/encounter/encounter_director.gd" id="12_director"]
 [ext_resource type="Script" path="res://src/gameplay/level/route_session.gd" id="13_session"]
 [ext_resource type="Script" path="res://src/ui/hud/pause_menu.gd" id="14_pause"]
+[ext_resource type="Script" path="res://src/gameplay/equipment/equipment_runtime.gd" id="15_equipment"]
+[ext_resource type="Script" path="res://src/ui/hud/equipment_hud.gd" id="16_equipment_hud"]
 
 [node name="LomeRun" type="Node2D"]
 
@@ -66,3 +68,12 @@ encounter = NodePath("../Encounter")
 process_mode = 3
 script = ExtResource("14_pause")
 runner = NodePath("../LevelRunner")
+
+[node name="Equipment" type="Node2D" parent="." node_paths=PackedStringArray("runner", "encounter")]
+script = ExtResource("15_equipment")
+runner = NodePath("../LevelRunner")
+encounter = NodePath("../Encounter")
+
+[node name="EquipmentHud" type="CanvasLayer" parent="." node_paths=PackedStringArray("runtime")]
+script = ExtResource("16_equipment_hud")
+runtime = NodePath("../Equipment")

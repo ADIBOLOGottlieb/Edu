@@ -17,6 +17,7 @@ const LAYOUT: Array[Dictionary] = [
 	{"action": InputActions.JUMP, "label": "SAUT", "side": 1, "col": 0, "row": 0, "passby": false},
 	{"action": InputActions.SLIDE, "label": "GLISSE", "side": 1, "col": 1, "row": 0, "passby": false},
 	{"action": InputActions.SPRINT, "label": "SPRINT", "side": 1, "col": 0, "row": 1, "passby": false},
+	{"action": InputActions.USE_ITEM, "label": "OBJET", "side": 1, "col": 1, "row": 1, "passby": false},
 ]
 
 ## Affiche les boutons même sans écran tactile (test sur PC avec l'option

@@ -39,6 +39,9 @@ var abilities: AbilitySet = AbilitySet.new()
 ## Figure en cours (Figure.Kind.NONE sinon). Lue par RunnerVisual.
 var figure: Figure.Kind = Figure.Kind.NONE
 
+## Appelé par kill(cause) : vrai = coup encaissé, pas de mort (équipement, M8).
+var hurt_guard: Callable
+
 var _controller: Controller
 var _ctx: MovementContext = MovementContext.new()
 var _sensors: ParkourSensors = ParkourSensors.new()
@@ -97,6 +100,10 @@ func can_be_hurt() -> bool:
 ## Tue le corps (sans effet s'il ne peut pas être blessé). Retourne vrai s'il meurt.
 func kill(cause: StringName) -> bool:
 	if not can_be_hurt():
+		return false
+	if hurt_guard.is_valid() and bool(hurt_guard.call(cause)):
+		# Coup encaissé (gilet) : brève invulnérabilité pour sortir du piège.
+		_invulnerable_left = INVULNERABLE_AFTER_REVIVE
 		return false
 	_dead = true
 	velocity = Vector2.ZERO

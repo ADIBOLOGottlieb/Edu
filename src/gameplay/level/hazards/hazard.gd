@@ -64,6 +64,7 @@ const CRUMBLE_DELAY: float = 0.5
 const CRUMBLE_RESPAWN: float = 3.0
 const CRUMBLE_FALL_ANIM: float = 0.45
 const CRUMBLE_FADE_IN: float = 0.2
+const DISABLED_ALPHA: float = 0.3
 
 enum CrumbleState { SOLID, SHAKING, FALLEN }
 
@@ -82,6 +83,8 @@ var _sensor: Area2D
 var _crumble_state: CrumbleState = CrumbleState.SOLID
 ## Temps passé dans l'état courant de la plateforme fragile.
 var _crumble_time: float = 0.0
+## Piratage (équipement) : piège inoffensif pendant ce temps (s).
+var _disabled_left: float = 0.0
 
 
 ## theme nul = encre et accent par défaut.
@@ -99,6 +102,8 @@ static func create(hazard_spec: HazardSpec, city_theme: CityTheme) -> Hazard:
 
 ## État initial (tronçons recyclés) : horloge à zéro, plateforme en place.
 func reset() -> void:
+	_disabled_left = 0.0
+	modulate.a = 1.0
 	_time = 0.0
 	_crumble_state = CrumbleState.SOLID
 	_crumble_time = CRUMBLE_FADE_IN
@@ -119,8 +124,21 @@ func get_time() -> float:
 	return _time
 
 
+## Rend le piège inoffensif (piratage) : il reste visible, estompé.
+func disable_for(seconds: float) -> void:
+	_disabled_left = maxf(_disabled_left, seconds)
+	modulate.a = DISABLED_ALPHA
+
+
+func is_disabled() -> bool:
+	return _disabled_left > 0.0
+
+
 ## Avance l'horloge d'un pas : pose, plateforme fragile, puis mises à mort.
 func advance(delta: float) -> void:
+	if _disabled_left > 0.0:
+		_disabled_left = maxf(0.0, _disabled_left - delta)
+		modulate.a = DISABLED_ALPHA if _disabled_left > 0.0 else 1.0
 	_time += delta
 	if spec.kind == CRUMBLE:
 		_advance_crumble(delta)
@@ -140,6 +158,8 @@ func is_dangerous() -> bool:
 
 ## Danger à un instant de l'horloge (anticipation par l'autopilote).
 func is_dangerous_at(t: float) -> bool:
+	if _disabled_left > 0.0 and t - _time < _disabled_left:
+		return false
 	match spec.kind:
 		SPIKES, SAW:
 			return true
