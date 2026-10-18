@@ -251,3 +251,18 @@ func _bounds(polys: Array[PackedVector2Array]) -> Rect2:
 		for p: Vector2 in poly:
 			box = box.expand(p)
 	return box
+
+
+## Téléphone à 7 FPS : chaque forme était un appel de dessin. Un plan = un maillage.
+func test_layer_is_one_merged_mesh() -> void:
+	var canvas: BackdropCanvas = BackdropCanvas.new()
+	canvas.add_rect(Rect2(0, 0, 10, 10), Color.RED)
+	canvas.add_gradient(PackedVector2Array([Vector2(0, 0), Vector2(10, 0), Vector2(5, 8)]),
+			PackedColorArray([Color.RED, Color.GREEN, Color.BLUE]))
+	canvas.add_line(PackedVector2Array([Vector2(0, 20), Vector2(30, 22), Vector2(60, 20)]), Color.BLACK, 1.5)
+	var mesh: ArrayMesh = canvas.build_mesh()
+	assert_not_null(mesh)
+	assert_eq(mesh.get_surface_count(), 1, "un seul appel de dessin")
+	# rectangle 2 + triangle 1 + câble 2 segments × 3 quadrilatères × 2 triangles
+	assert_eq(canvas.triangle_count(), 2 + 1 + 12)
+	canvas.free()

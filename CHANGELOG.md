@@ -4,6 +4,12 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Corrigé — 7 FPS sur téléphone (retour utilisateur, APK 0.0.3)
+- Cause mesurée (`tools/profile_level.gd`) : **6 646 appels de dessin par image**, car chaque immeuble, fenêtre, palmier et câble du décor était dessiné séparément (le rendu Compatibility ne les regroupe pas). Un PC le supporte, pas un téléphone.
+- Chaque plan d’arrière-plan et chaque tronçon est maintenant **un seul maillage** construit une fois : **43 appels de dessin par image** (÷ 150), rendu identique.
+- La silhouette 2D de secours (masquée) n’est plus calculée à chaque image pour le coureur et le vigile.
+- APK **0.0.4**.
+
 ### Ajouté — M8 Inventaire et équipement (sans combat)
 - **Inventaire** (`Inventory`, autoload `InventoryService`) : 20 emplacements + extensions, 1 objet = 1 emplacement ; inventaire plein → la caisse **reste au sol** ; objets ramassés pendant le parcours **perdus à la capture ou à l’abandon**, gardés à l’arrivée ; sauvegardé (section « inventory ») ; kit de départ : Accélérateur + Surcharge.
 - **Effets** (`EffectRunner`) : chronos en temps de jeu (gelés en pause et en arrière-plan), règles REFRESH / REPLACE / REJECT, incompatibilités dans les deux sens, charges ; un objet refusé est conservé avec un message.

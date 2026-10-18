@@ -91,6 +91,9 @@ func pose_value(field: StringName) -> float:
 func _process(delta: float) -> void:
 	if _body == null or animation_set == null:
 		return
+	# Silhouette 2D de secours masquée (la 3D est affichée) : aucun calcul de pose.
+	if not is_visible_in_tree():
+		return
 	delta = minf(delta, 1.0 / 20.0)
 	var target: Dictionary[StringName, float] = _figure_target()
 	var figure_now: bool = not target.is_empty()

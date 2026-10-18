@@ -18,6 +18,7 @@ func before_each() -> void:
 	world.add_child(_body)
 	await wait_physics_frames(15)
 	_visual = _body.get_node("Visual") as RunnerVisual
+	_visual.visible = true  # silhouette 2D de secours, masquée en jeu
 	# Pas de temps contrôlé : le test fait avancer le visuel lui-même.
 	_visual.set_process(false)
 	_steps(90)

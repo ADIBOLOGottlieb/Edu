@@ -1,10 +1,15 @@
 class_name BackdropCanvas
 extends Node2D
 ## Plan de décor : liste ordonnée de formes (polygones pleins, dégradés, câbles)
-## dessinée en un seul _draw (un seul élément de dessin par plan : batching
-## mobile, ADR-025). Les formes sont ajoutées une fois à la construction.
+## fusionnées en **un seul maillage** à couleurs par sommet (un appel de dessin
+## par plan, ADR-025 / ADR-048 : le rendu Compatibility ne regroupe pas les
+## polygones, des milliers d’appels faisaient tomber un téléphone à 7 FPS).
+## Les formes sont ajoutées une fois à la construction ; l’ordre est conservé.
 
 enum Kind { FILL, GRADIENT, LINE }
+
+## Bord adouci des câbles (px, de chaque côté) : remplace l’anticrénelage.
+const LINE_FEATHER: float = 0.8
 
 ## Couleur principale du plan (silhouettes) ; les autres tons en dérivent.
 var base_color: Color = Color.GRAY
@@ -13,6 +18,7 @@ var _kinds: PackedByteArray = PackedByteArray()
 var _points: Array[PackedVector2Array] = []
 var _colors: Array[PackedColorArray] = []
 var _widths: PackedFloat32Array = PackedFloat32Array()
+var _mesh: ArrayMesh
 
 
 func add_polygon(points: PackedVector2Array, color: Color) -> void:
@@ -124,15 +130,70 @@ func _push(kind: Kind, points: PackedVector2Array, colors: PackedColorArray, wid
 	_points.append(points)
 	_colors.append(colors)
 	_widths.append(width)
+	_mesh = null
 	queue_redraw()
 
 
 func _draw() -> void:
+	if _mesh == null:
+		_mesh = build_mesh()
+	if _mesh != null:
+		draw_mesh(_mesh, null)
+
+
+## Nombre de triangles du maillage fusionné (tests, mesure).
+func triangle_count() -> int:
+	var mesh: ArrayMesh = build_mesh() if _mesh == null else _mesh
+	if mesh == null:
+		return 0
+	return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector2Array).size() / 3
+
+
+## Toutes les formes, dans l’ordre, en une liste de triangles colorés.
+func build_mesh() -> ArrayMesh:
+	var verts: PackedVector2Array = PackedVector2Array()
+	var cols: PackedColorArray = PackedColorArray()
 	for i: int in _kinds.size():
 		match _kinds[i]:
-			Kind.FILL:
-				draw_colored_polygon(_points[i], _colors[i][0])
-			Kind.GRADIENT:
-				draw_polygon(_points[i], _colors[i])
+			Kind.FILL, Kind.GRADIENT:
+				var pts: PackedVector2Array = _points[i]
+				var indices: PackedInt32Array = Geometry2D.triangulate_polygon(pts)
+				for index: int in indices:
+					verts.append(pts[index])
+					cols.append(_colors[i][0] if _kinds[i] == Kind.FILL else _colors[i][index])
 			Kind.LINE:
-				draw_polyline(_points[i], _colors[i][0], _widths[i], true)
+				_append_line(verts, cols, _points[i], _colors[i][0], _widths[i])
+	if verts.is_empty():
+		return null
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_COLOR] = cols
+	var mesh: ArrayMesh = ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
+## Trait épais : un quadrilatère plein par segment, bordé d’un dégradé vers le
+## transparent (bord doux sans anticrénelage matériel).
+static func _append_line(verts: PackedVector2Array, cols: PackedColorArray, pts: PackedVector2Array,
+		color: Color, width: float) -> void:
+	var half: float = maxf(width, 1.0) * 0.5
+	var clear: Color = Color(color, 0.0)
+	for k: int in pts.size() - 1:
+		var a: Vector2 = pts[k]
+		var b: Vector2 = pts[k + 1]
+		if a.is_equal_approx(b):
+			continue
+		var n: Vector2 = (b - a).normalized().orthogonal()
+		var core: Vector2 = n * half
+		var edge: Vector2 = n * (half + LINE_FEATHER)
+		_quad(verts, cols, a - core, b - core, b + core, a + core, color, color, color, color)
+		_quad(verts, cols, a + core, b + core, b + edge, a + edge, color, color, clear, clear)
+		_quad(verts, cols, a - edge, b - edge, b - core, a - core, clear, clear, color, color)
+
+
+static func _quad(verts: PackedVector2Array, cols: PackedColorArray, p0: Vector2, p1: Vector2, p2: Vector2,
+		p3: Vector2, c0: Color, c1: Color, c2: Color, c3: Color) -> void:
+	verts.append_array(PackedVector2Array([p0, p1, p2, p0, p2, p3]))
+	cols.append_array(PackedColorArray([c0, c1, c2, c0, c2, c3]))

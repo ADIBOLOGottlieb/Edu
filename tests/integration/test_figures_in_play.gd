@@ -17,6 +17,7 @@ func before_each() -> void:
 	_world = Node2D.new()
 	add_child_autofree(_world)
 	_body = PLAYER_SCENE.instantiate() as RunnerBody
+	(_body.get_node("Visual") as CanvasItem).visible = true  # silhouette 2D de secours, masquée en jeu
 	var human: Node = _body.get_node("Controller")
 	_body.remove_child(human)
 	human.free()
