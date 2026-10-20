@@ -342,6 +342,8 @@ signal mission_ended(result: MissionResult)
 
 ## 8. Tentatives et énergie (mode course)
 
+> **Remplacé par ADR-049 (2026-10-20)** : énergie par parcours (tickets), implémentée dans `EnergyMeter` et `AttemptService`. Le texte ci-dessous est l’ancienne proposition.
+
 **Définition unique d'un échec** (`docs/GAME_RULES.md`) : *une tentative du mode course qui atteint l'état `MISSION_FAILED`*. Un abandon volontaire en cours de partie compte comme un échec (sinon il suffirait de quitter pour éviter le compteur — **à valider**). Une fermeture forcée de l'application est enregistrée au démarrage suivant grâce à un marqueur `attempt_in_progress`.
 
 - 10 échecs → `LOCKED` pendant 6 h à partir du 10ᵉ échec. Fin → compteur remis à 0.

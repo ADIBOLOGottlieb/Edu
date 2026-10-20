@@ -156,8 +156,9 @@ func back() -> void:
 
 
 func _play(index: int) -> void:
-	var scene: String = CityScreen.CITY_SCENES.get(_city.id, MenuScreen.LOME_RUN) as String
-	go_to(scene, {"route_index": index})
+	# Plus d’énergie : retour à l’écran de la ville, qui affiche l’attente.
+	if not launch_route(_city, index):
+		back()
 
 
 ## Les étoiles gagnées apparaissent l'une après l'autre (grossissement élastique).

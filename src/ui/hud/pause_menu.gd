@@ -92,10 +92,13 @@ func toggle() -> void:
 		open()
 
 
-## Relance le même parcours (paramètre route_index conservé).
+## Relance le même parcours (route_index conservé) ; même tentative : le ticket
+## d'énergie éventuel reste engagé et sera rendu à l'arrivée (ADR-049).
 func restart() -> void:
 	var scene: String = _current_scene_path()
-	_navigate(scene, {"route_index": runner.route_index if runner != null else 0})
+	var router: SceneRouterNode = get_node_or_null(^"/root/SceneRouter") as SceneRouterNode
+	var ticket: bool = bool(router.param(AttemptServiceNode.TICKET_PARAM, false)) if router != null else false
+	_navigate(scene, {"route_index": runner.route_index if runner != null else 0, AttemptServiceNode.TICKET_PARAM: ticket})
 
 
 func to_map() -> void:

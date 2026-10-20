@@ -20,7 +20,8 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 | M5 Poursuite | vigile (même physique, IA parkour, zone d'ombre), EncounterFSM, jauge de capture, capture non graphique ; Lomé poursuivie (parcours 2 à 5) | terminé, 269/269 tests ; branche `m5/poursuite` |
 | M7 Menus, carte, sauvegarde | sauvegarde atomique versionnée, progression (étoiles, records, déblocages), réglages, menu principal, carte du monde, écrans de ville et de résultat, pause | terminé, 304/304 tests ; branche `m7/menus-carte-sauvegarde` |
 | M8 Inventaire et équipement | 20 emplacements, 10 objets sans combat (protection, mobilité, vigile, discrétion, pièges), caisses dans les tronçons, bouton OBJET, effets à durée, perte à la capture | terminé, 335/335 tests ; branche `m8/inventaire` |
-| M6, M9 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
+| M9 Énergie | tickets par parcours : 5, 1 toutes les 72 min, morts gratuites, ticket rendu à l’arrivée, parcours réussis gratuits (ADR-049) | terminé, 348/348 tests |
+| M6, M10 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.
 

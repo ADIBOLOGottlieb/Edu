@@ -24,6 +24,7 @@ func before_all() -> void:
 	_save.use_store(SaveStore.new(SAVE_DIR, "save.json"))
 	_profile.reload()
 	_settings.reload()
+	(get_node(^"/root/AttemptService") as AttemptServiceNode).reload()
 
 
 func before_each() -> void:
@@ -40,6 +41,7 @@ func after_all() -> void:
 	_save.use_store(SaveStore.new())
 	_profile.reload()
 	_settings.reload()
+	(get_node(^"/root/AttemptService") as AttemptServiceNode).reload()
 
 
 func _screen(path: String) -> MenuScreen:
@@ -151,7 +153,8 @@ func test_city_screen_lists_the_five_lome_routes_first_one_open() -> void:
 	screen.play_route(2)
 	assert_signal_not_emitted(screen, "navigation_requested", "parcours verrouillé")
 	screen.route_cards[0].pressed.emit()
-	assert_signal_emitted_with_parameters(screen, "navigation_requested", [MenuScreen.LOME_RUN, {"route_index": 0}])
+	# Nouveau parcours : un ticket d'énergie est dépensé (ADR-049).
+	assert_signal_emitted_with_parameters(screen, "navigation_requested", [MenuScreen.LOME_RUN, {"route_index": 0, "ticket": true}])
 
 
 func test_city_screen_unlocks_the_next_route_after_a_finish() -> void:
@@ -198,9 +201,10 @@ func test_result_screen_shows_the_result_values() -> void:
 	assert_true(screen.next_button.visible, "parcours suivant débloqué")
 	watch_signals(screen)
 	screen.replay_button.pressed.emit()
-	assert_signal_emitted_with_parameters(screen, "navigation_requested", [MenuScreen.LOME_RUN, {"route_index": 0}])
+	# Parcours réussi : rejoué gratuitement ; parcours suivant : un ticket (ADR-049).
+	assert_signal_emitted_with_parameters(screen, "navigation_requested", [MenuScreen.LOME_RUN, {"route_index": 0, "ticket": false}])
 	screen.next_button.pressed.emit()
-	assert_signal_emitted_with_parameters(screen, "navigation_requested", [MenuScreen.LOME_RUN, {"route_index": 1}])
+	assert_signal_emitted_with_parameters(screen, "navigation_requested", [MenuScreen.LOME_RUN, {"route_index": 1, "ticket": true}])
 	screen.map_button.pressed.emit()
 	assert_signal_emitted_with_parameters(screen, "navigation_requested", [MenuScreen.WORLD_MAP, {}])
 
@@ -298,7 +302,7 @@ func test_pause_key_toggles_and_menu_buttons_navigate() -> void:
 	pause.open()
 	pause.restart_button.pressed.emit()
 	var params: Array = get_signal_parameters(pause, "navigation_requested")
-	assert_eq(params[1], {"route_index": 0})
+	assert_eq(params[1], {"route_index": 0, "ticket": false}, "même tentative, même ticket (ADR-049)")
 	assert_false(get_tree().paused)
 
 

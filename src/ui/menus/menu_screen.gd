@@ -9,6 +9,8 @@ extends Control
 ## use_router = false pour ne pas changer de scène).
 
 signal navigation_requested(scene_path: String, params: Dictionary)
+## Départ refusé : plus d’énergie (ADR-049).
+signal energy_refused()
 
 const MAIN_MENU: String = "res://src/ui/menus/main_menu.tscn"
 const WORLD_MAP: String = "res://src/ui/menus/world_map.tscn"
@@ -130,6 +132,21 @@ func make_back_button() -> Button:
 ## Le monde : WorldMap des données.
 static func load_world() -> WorldMap:
 	return load(WORLD_MAP_DATA) as WorldMap
+
+
+## Lance le parcours n° index de la ville : gratuit s’il est déjà réussi, sinon
+## un ticket d’énergie (rendu à l’arrivée). Faux si l’énergie manque.
+func launch_route(city_def: CityDefinition, index: int) -> bool:
+	var route: CityRoute = city_def.routes[index]
+	var completed: bool = current_progression().is_completed(route.id)
+	var attempts: AttemptServiceNode = get_node_or_null(^"/root/AttemptService") as AttemptServiceNode
+	var start: AttemptServiceNode.Start = attempts.request_start(completed) if attempts != null else AttemptServiceNode.Start.FREE
+	if start == AttemptServiceNode.Start.EMPTY:
+		energy_refused.emit()
+		return false
+	var scene: String = CityScreen.CITY_SCENES.get(city_def.id, LOME_RUN) as String
+	go_to(scene, {"route_index": index, AttemptServiceNode.TICKET_PARAM: start == AttemptServiceNode.Start.TICKET})
+	return true
 
 
 static func current_progression() -> Progression:

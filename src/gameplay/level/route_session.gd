@@ -16,6 +16,8 @@ const END_DELAY: float = 1.0
 
 var last_result: Dictionary = {}
 
+var _refunded: bool = false
+
 
 func _ready() -> void:
 	if runner != null:
@@ -27,10 +29,23 @@ func _on_level_completed() -> void:
 	if route == null:
 		return
 	last_result = build_result(route)
+	refund_ticket()
 	await get_tree().create_timer(END_DELAY).timeout
 	var router: SceneRouterNode = get_node_or_null(^"/root/SceneRouter") as SceneRouterNode
 	if router != null and ResourceLoader.exists(RESULT_SCENE):
 		router.go_to(RESULT_SCENE, {"result": last_result})
+
+
+## Arrivée : le ticket d'énergie dépensé au départ est rendu (ADR-049).
+## Faux si le parcours était gratuit (déjà réussi) ou déjà remboursé.
+func refund_ticket() -> bool:
+	var router: SceneRouterNode = get_node_or_null(^"/root/SceneRouter") as SceneRouterNode
+	var attempts: AttemptServiceNode = get_node_or_null(^"/root/AttemptService") as AttemptServiceNode
+	if _refunded or router == null or attempts == null or not bool(router.param(AttemptServiceNode.TICKET_PARAM, false)):
+		return false
+	_refunded = true
+	attempts.refund()
+	return true
 
 
 ## Enregistre l'arrivée et décrit le résultat (testable sans changer de scène).

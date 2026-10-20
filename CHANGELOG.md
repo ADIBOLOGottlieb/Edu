@@ -4,6 +4,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — Énergie par parcours (M9, ADR-049)
+- **Tickets d’énergie** (`EnergyMeter`, autoload `AttemptService`, section « attempts ») : 5 tickets, 1 ticket revient toutes les 72 min.
+- Un parcours **pas encore réussi** coûte 1 ticket au départ ; **mourir, être capturé ou recommencer est gratuit** ; **l’arrivée rend le ticket** ; quitter vers la carte le perd. Un parcours **déjà réussi** se rejoue gratuitement.
+- Écran de la ville : « Énergie 4/5 · +1 dans 1 h 12 » ; énergie vide → message avec le temps d’attente. Écran de résultat : sans énergie, retour à la ville.
+- Horloge reculée : aucun temps accordé ; sauvegarde abîmée : valeurs bornées.
+- APK **0.0.5**.
+
 ### Corrigé — 7 FPS sur téléphone (retour utilisateur, APK 0.0.3)
 - Cause mesurée (`tools/profile_level.gd`) : **6 646 appels de dessin par image**, car chaque immeuble, fenêtre, palmier et câble du décor était dessiné séparément (le rendu Compatibility ne les regroupe pas). Un PC le supporte, pas un téléphone.
 - Chaque plan d’arrière-plan et chaque tronçon est maintenant **un seul maillage** construit une fois : **43 appels de dessin par image** (÷ 150), rendu identique.

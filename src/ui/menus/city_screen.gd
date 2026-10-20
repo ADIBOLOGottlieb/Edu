@@ -20,6 +20,12 @@ var city_id: StringName = &""
 var world_city: WorldCity
 var city: CityDefinition
 var route_cards: Array[Button] = []
+## « Énergie 4/5 · +1 dans 1 h 12 », mis à jour chaque seconde.
+var energy_label: Label
+## Message quand l’énergie manque.
+var energy_message: Label
+
+var _energy_tick: float = 0.0
 
 var _progression: Progression
 
@@ -68,6 +74,17 @@ func _build() -> void:
 	stars_box.add_child(total)
 	header.add_child(stars_box)
 
+	energy_label = MenuStyle.label("", 24, MenuStyle.CREAM, true)
+	energy_label.name = "Energy"
+	energy_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	column.add_child(energy_label)
+	energy_message = MenuStyle.label("", 22, MenuStyle.ACCENT, true)
+	energy_message.name = "EnergyMessage"
+	energy_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	column.add_child(energy_message)
+	energy_refused.connect(_on_energy_refused)
+	_refresh_energy()
+
 	var spacer: Control = Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -100,12 +117,31 @@ func is_route_open(index: int) -> bool:
 	return _progression.is_route_unlocked(city, index)
 
 
-## Lance le parcours n° index s'il est débloqué.
+## Lance le parcours n° index s'il est débloqué (énergie : launch_route).
 func play_route(index: int) -> void:
 	if not is_route_open(index):
 		return
-	route_selected.emit(index)
-	go_to(CITY_SCENES.get(city_id, CITY_SCENES[DEFAULT_CITY]) as String, {"route_index": index})
+	if launch_route(city, index):
+		route_selected.emit(index)
+
+
+func _process(delta: float) -> void:
+	_energy_tick += delta
+	if _energy_tick >= 1.0:
+		_energy_tick = 0.0
+		_refresh_energy()
+
+
+func _refresh_energy() -> void:
+	var attempts: AttemptServiceNode = get_node_or_null(^"/root/AttemptService") as AttemptServiceNode
+	if energy_label != null and attempts != null:
+		energy_label.text = attempts.status_text()
+
+
+func _on_energy_refused() -> void:
+	var attempts: AttemptServiceNode = get_node_or_null(^"/root/AttemptService") as AttemptServiceNode
+	var wait: String = EnergyMeter.format_wait(attempts.seconds_to_next()) if attempts != null else ""
+	energy_message.text = "Plus d'énergie : prochain ticket dans %s. Les parcours réussis se rejouent gratuitement." % wait
 
 
 func back() -> void:
