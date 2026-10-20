@@ -35,11 +35,13 @@ extends Resource
 @export var slide_min_speed: float = 200.0
 ## Un appui sur Glisse reste mémorisé ce temps-là (ex. pendant une réception).
 @export var slide_buffer_time: float = 0.12
-@export var slide_duration: float = 0.55
+## Glissade courte qui garde l'élan (ADR-050) : elle ne fait plus perdre de terrain
+## face au vigile (avant : 0,55 s, freinage 500, 120 px/s sous un plafond).
+@export var slide_duration: float = 0.4
 @export var slide_boost: float = 1.15
-@export var slide_friction: float = 500.0
-## Vitesse conservée sous un plafond bas, pour ne jamais rester bloqué.
-@export var slide_crawl_speed: float = 120.0
+@export var slide_friction: float = 250.0
+## Vitesse conservée sous un plafond bas (≈ course), pour ne jamais ramper.
+@export var slide_crawl_speed: float = 320.0
 
 @export_group("Roulade")
 ## Déclenchée par Glisse au moment d'une réception dure : annule l'immobilisation.

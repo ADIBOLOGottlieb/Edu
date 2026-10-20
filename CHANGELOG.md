@@ -4,6 +4,9 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Modifié — Glissade plus rapide (retour utilisateur, ADR-050)
+- La glissade **garde l’élan** : plus courte (0,40 s), freine deux fois moins, et **sous un plafond bas le coureur glisse à vitesse de course** au lieu de ramper à 3 m/s. Le vigile ne rattrape plus le coureur à chaque tunnel. Même physique pour le vigile.
+
 ### Ajouté — Énergie par parcours (M9, ADR-049)
 - **Tickets d’énergie** (`EnergyMeter`, autoload `AttemptService`, section « attempts ») : 5 tickets, 1 ticket revient toutes les 72 min.
 - Un parcours **pas encore réussi** coûte 1 ticket au départ ; **mourir, être capturé ou recommencer est gratuit** ; **l’arrivée rend le ticket** ; quitter vers la carte le perd. Un parcours **déjà réussi** se rejoue gratuitement.
