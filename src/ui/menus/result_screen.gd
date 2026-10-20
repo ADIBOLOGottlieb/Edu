@@ -158,7 +158,7 @@ func back() -> void:
 func _play(index: int) -> void:
 	# Plus d’énergie : retour à l’écran de la ville, qui affiche l’attente.
 	if not launch_route(_city, index):
-		back()
+		go_to(CITY_SCREEN, {"city_id": String(_city.id), "no_energy": true})
 
 
 ## Les étoiles gagnées apparaissent l'une après l'autre (grossissement élastique).

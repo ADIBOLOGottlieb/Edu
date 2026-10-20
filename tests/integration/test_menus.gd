@@ -63,8 +63,11 @@ func test_main_menu_has_its_buttons_and_play_opens_the_world_map() -> void:
 		assert_not_null(menu.find_child(button_name, true, false), button_name)
 	assert_eq(menu.quit_button.visible, not MainMenu.is_mobile(), "Quitter seulement sur PC")
 	watch_signals(menu)
+	# Joueur ayant déjà fait le tutoriel (ADR-051) : JOUER ouvre la carte.
+	_profile.tutorial_done = true
 	menu.play_button.pressed.emit()
 	assert_signal_emitted_with_parameters(menu, "navigation_requested", [MenuScreen.WORLD_MAP, {}])
+	_profile.tutorial_done = false
 	menu.settings_button.pressed.emit()
 	assert_signal_emitted_with_parameters(menu, "navigation_requested", [MenuScreen.SETTINGS_SCREEN, {}])
 	menu.developer_button.pressed.emit()

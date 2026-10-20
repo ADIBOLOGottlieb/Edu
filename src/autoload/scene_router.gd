@@ -24,6 +24,11 @@ func _ready() -> void:
 
 
 ## Paramètre passé par la scène précédente (ex. "route_index", "result").
+## Vrai pendant un changement de scène (les appuis répétés sont ignorés).
+func is_busy() -> bool:
+	return _busy
+
+
 func param(key: String, default: Variant = null) -> Variant:
 	return _params.get(key, default)
 

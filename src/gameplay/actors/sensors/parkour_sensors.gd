@@ -110,8 +110,15 @@ func scan(body: CharacterBody2D, facing: int, tuning: MoveTuning, half_width: fl
 					ledge_top_y = top_y
 
 
+## Requête de rayon partagée (fil principal uniquement) : pas d'allocation par rayon.
+static var _query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.new()
+
+
 static func _ray(
 	space: PhysicsDirectSpaceState2D, from: Vector2, to: Vector2, mask: int, exclude: Array[RID]
 ) -> Dictionary:
-	var params: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(from, to, mask, exclude)
-	return space.intersect_ray(params)
+	_query.from = from
+	_query.to = to
+	_query.collision_mask = mask
+	_query.exclude = exclude
+	return space.intersect_ray(_query)

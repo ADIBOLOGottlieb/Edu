@@ -21,6 +21,7 @@ Jeu d'action-parkour 2D à défilement horizontal pour Android (portage PC prév
 | M7 Menus, carte, sauvegarde | sauvegarde atomique versionnée, progression (étoiles, records, déblocages), réglages, menu principal, carte du monde, écrans de ville et de résultat, pause | terminé, 304/304 tests ; branche `m7/menus-carte-sauvegarde` |
 | M8 Inventaire et équipement | 20 emplacements, 10 objets sans combat (protection, mobilité, vigile, discrétion, pièges), caisses dans les tronçons, bouton OBJET, effets à durée, perte à la capture | terminé, 335/335 tests ; branche `m8/inventaire` |
 | M9 Énergie | tickets par parcours : 5, 1 toutes les 72 min, morts gratuites, ticket rendu à l’arrivée, parcours réussis gratuits (ADR-049) | terminé, 348/348 tests |
+| Tutoriel, sang, choix d’objets, audit | tutoriel « Premiers pas » au premier lancement, vidéo tuto, sang à la mort (désactivable), choix des objets, corrections et fluidité (ADR-051 à 053) | terminé, 362/362 tests |
 | M6, M10 → M13 | voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §17 | à faire |
 
 Le personnage est une **silhouette provisoire** dessinée par code ([docs/PLACEHOLDER_ASSETS.md](docs/PLACEHOLDER_ASSETS.md)). Aucune mission n'est jouable.

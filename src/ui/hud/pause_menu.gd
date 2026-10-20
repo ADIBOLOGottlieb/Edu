@@ -26,12 +26,16 @@ var map_button: Button
 var inventory_label: Label
 
 var _is_open: bool = false
+## Parcours terminé : plus de pause (évite « Recommencer » avec un ticket déjà rendu).
+var _locked: bool = false
 
 
 func _ready() -> void:
 	layer = 60
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().set_quit_on_go_back(false)
+	if runner != null:
+		runner.level_completed.connect(_lock)
 	var root: Control = Control.new()
 	root.name = "Root"
 	root.theme = MenuStyle.theme()
@@ -63,7 +67,7 @@ func is_open() -> bool:
 
 
 func open() -> void:
-	if _is_open:
+	if _is_open or _locked:
 		return
 	_is_open = true
 	_refresh_inventory()
@@ -85,7 +89,16 @@ func close() -> void:
 	closed.emit()
 
 
+func _lock() -> void:
+	close()
+	_locked = true
+	pause_button.visible = false
+
+
 func toggle() -> void:
+	# Jeu déjà en pause par un autre panneau (choix d'objet) : c'est lui qui répond.
+	if not _is_open and get_tree().paused:
+		return
 	if _is_open:
 		close()
 	else:
@@ -98,6 +111,8 @@ func restart() -> void:
 	var scene: String = _current_scene_path()
 	var router: SceneRouterNode = get_node_or_null(^"/root/SceneRouter") as SceneRouterNode
 	var ticket: bool = bool(router.param(AttemptServiceNode.TICKET_PARAM, false)) if router != null else false
+	if runner != null and runner.is_completed():
+		ticket = false
 	_navigate(scene, {"route_index": runner.route_index if runner != null else 0, AttemptServiceNode.TICKET_PARAM: ticket})
 
 

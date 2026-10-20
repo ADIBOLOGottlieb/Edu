@@ -138,6 +138,10 @@ static func load_world() -> WorldMap:
 ## Lance le parcours n° index de la ville : gratuit s’il est déjà réussi, sinon
 ## un ticket d’énergie (rendu à l’arrivée). Faux si l’énergie manque.
 func launch_route(city_def: CityDefinition, index: int) -> bool:
+	# Double appui pendant le fondu : un seul départ, un seul ticket.
+	var router: SceneRouterNode = get_node_or_null(^"/root/SceneRouter") as SceneRouterNode
+	if use_router and router != null and router.is_busy():
+		return false
 	var route: CityRoute = city_def.routes[index]
 	var completed: bool = current_progression().is_completed(route.id)
 	var attempts: AttemptServiceNode = get_node_or_null(^"/root/AttemptService") as AttemptServiceNode

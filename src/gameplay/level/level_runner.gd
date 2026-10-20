@@ -65,6 +65,8 @@ func _ready() -> void:
 	sequencer = ChunkSequencer.new(library, mode, seed_used, ordered_ids)
 	streamer.sequencer = sequencer
 	streamer.sequence_finished.connect(_on_sequence_finished)
+	# Mur invisible avant le départ : pas de chute « en arrière » hors du niveau.
+	add_child(LevelGeometry.make_block(Rect2(-60.0, -2000.0, 40.0, 4000.0), LevelGeometry.INK, false))
 	if follow_target == null:
 		follow_target = player
 	if player != null:
@@ -84,6 +86,9 @@ func _on_player_died(cause: StringName) -> void:
 	death_count += 1
 	_respawn_left = DEATH_PAUSE
 	_spawn_blood(cause)
+	var settings: SettingsServiceNode = get_node_or_null(^"/root/SettingsService") as SettingsServiceNode
+	if settings != null:
+		settings.haptic(220 if cause == &"capture" else 120)
 	player_died.emit(cause)
 
 

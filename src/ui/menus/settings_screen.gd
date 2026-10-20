@@ -74,6 +74,8 @@ func _build() -> void:
 	language_option = _option(LANGUAGE_NAMES, GameSettings.LANGUAGES.find(settings.language))
 	language_option.name = "Language"
 	_row(right, "Langue", language_option)
+	# Traductions pas encore faites : réglage masqué (le choix reste enregistré).
+	language_option.get_parent().visible = false
 
 	for slider: HSlider in [music_slider, sfx_slider, opacity_slider, scale_slider]:
 		slider.value_changed.connect(_on_slider_changed.bind(slider))

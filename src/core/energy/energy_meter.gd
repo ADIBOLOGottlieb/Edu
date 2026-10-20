@@ -55,9 +55,12 @@ func spend(now: int) -> bool:
 	return true
 
 
-## Rend un ticket (arrivée du parcours).
+## Rend un ticket (arrivée du parcours), sans dépasser le plein : un ticket
+## revenu pendant la course compte déjà comme le ticket rendu.
 func refund(now: int) -> void:
-	add(1, now)
+	refresh(now)
+	if tickets < MAX_TICKETS:
+		add(1, now)
 
 
 ## Ajoute des tickets (remboursement, récompense ; achat validé plus tard, M12).

@@ -153,7 +153,7 @@ func _capture() -> void:
 	captured.emit()
 	_overlay.play()
 	_ai.set_active(false)
-	runner.player.kill(&"capture")
+	runner.player.force_kill(&"capture")
 	fsm.request(EncounterFSM.State.MISSION_FAILED, &"capture")
 	# Nouvelle tentative au point de contrôle (en attendant l'écran de résultat, M6).
 	_restart_after(LevelRunner.DEATH_PAUSE + 0.05)
@@ -242,8 +242,16 @@ class PursuitHud:
 		_canvas.draw.connect(_on_draw)
 		add_child(_canvas)
 
+	var _shown: Vector2i = Vector2i(-2, -2)
+
 	func _process(_delta: float) -> void:
-		_canvas.queue_redraw()
+		var distance: float = director.pursuer_distance()
+		var key: Vector2i = Vector2i(
+			-1 if distance < 0.0 else int(distance / LevelRunner.PIXELS_PER_METER),
+			roundi(director.gauge.value * 50.0))
+		if key != _shown:
+			_shown = key
+			_canvas.queue_redraw()
 
 	func _on_draw() -> void:
 		var distance: float = director.pursuer_distance()
@@ -281,13 +289,13 @@ func repel_pursuer(distance: float) -> bool:
 
 ## Leurre : le vigile reste sur place tant que `on` est vrai.
 func distract_pursuer(on: bool) -> void:
-	if _ai != null:
+	if _ai != null and not fsm.is_terminal():
 		_ai.set_active(not on)
 
 
 ## Dissimule le coureur (camouflage, cachette) : le vigile perd sa trace.
 func conceal_target(on: bool) -> void:
-	if _ai != null:
+	if _ai != null and not fsm.is_terminal():
 		_ai.target_concealed = on
 
 

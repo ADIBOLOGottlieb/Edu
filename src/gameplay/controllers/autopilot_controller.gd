@@ -43,6 +43,8 @@ enum HazardDecision { NONE, JUMP, WAIT }
 var _body: RunnerBody
 var _space: PhysicsDirectSpaceState2D
 var _exclude: Array[RID] = []
+## Requête de rayon réutilisée (pas d'allocation par rayon, ADR-053).
+var _query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.new()
 
 
 func _ready() -> void:
@@ -56,7 +58,8 @@ func fill(intent: IntentFrame) -> void:
 	if _body == null:
 		return
 	_space = _body.get_world_2d().direct_space_state
-	_exclude = [_body.get_rid()]
+	if _exclude.is_empty():
+		_exclude = [_body.get_rid()]
 	var origin: Vector2 = _body.global_position
 	var forward: float = float(direction)
 
@@ -181,6 +184,8 @@ func _hits(from: Vector2, to: Vector2) -> bool:
 
 
 func _ray(from: Vector2, to: Vector2) -> Dictionary:
-	return _space.intersect_ray(
-		PhysicsRayQueryParameters2D.create(from, to, _body.collision_mask, _exclude)
-	)
+	_query.from = from
+	_query.to = to
+	_query.collision_mask = _body.collision_mask
+	_query.exclude = _exclude
+	return _space.intersect_ray(_query)

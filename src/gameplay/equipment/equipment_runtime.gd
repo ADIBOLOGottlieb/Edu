@@ -44,6 +44,8 @@ var _base_tuning: MoveTuning
 var _hide_grace_left: float = 0.0
 var _pickups: Array[ItemPickup] = []
 var _finished: bool = false
+## Empreinte des secondes affichées (HUD rafraîchi seulement si elle change).
+var _shown_effects: int = 0
 
 
 func _ready() -> void:
@@ -97,7 +99,11 @@ func _physics_process(delta: float) -> void:
 	effects.tick(step)
 	_update_hiding(step)
 	_cleanup_pickups()
-	if not effects.active_ids().is_empty():
+	var shown: int = 0
+	for id: StringName in effects.active_ids():
+		shown = shown * 31 + ceili(effects.remaining(id)) + hash(id)
+	if shown != _shown_effects:
+		_shown_effects = shown
 		changed.emit()
 
 
@@ -299,6 +305,9 @@ func _on_pickup_touched(pickup: ItemPickup, body: Node2D) -> void:
 	match inventory.try_add(pickup.item_id, true):
 		Inventory.AddResult.OK:
 			message.emit("+ %s" % pickup.label)
+			var settings: SettingsServiceNode = get_node_or_null(^"/root/SettingsService") as SettingsServiceNode
+			if settings != null:
+				settings.haptic(30)
 			_pickups.erase(pickup)
 			pickup.queue_free()
 		Inventory.AddResult.FULL:
@@ -310,9 +319,10 @@ func _cleanup_pickups() -> void:
 	if runner == null or runner.player == null:
 		return
 	var limit: float = runner.player.global_position.x - PICKUP_CLEANUP_BEHIND
-	for pickup: ItemPickup in _pickups.duplicate():
+	for i: int in range(_pickups.size() - 1, -1, -1):
+		var pickup: ItemPickup = _pickups[i]
 		if pickup.global_position.x < limit:
-			_pickups.erase(pickup)
+			_pickups.remove_at(i)
 			pickup.queue_free()
 
 

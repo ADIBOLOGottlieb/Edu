@@ -85,6 +85,8 @@ var _crumble_state: CrumbleState = CrumbleState.SOLID
 var _crumble_time: float = 0.0
 ## Piratage (équipement) : piège inoffensif pendant ce temps (s).
 var _disabled_left: float = 0.0
+## Visible à l'écran : seuls ces pièges sont redessinés à chaque image (ADR-053).
+var _on_screen: bool = false
 
 
 ## theme nul = encre et accent par défaut.
@@ -130,6 +132,12 @@ func disable_for(seconds: float) -> void:
 	modulate.a = DISABLED_ALPHA
 
 
+func _set_on_screen(on: bool) -> void:
+	_on_screen = on
+	if on:
+		queue_redraw()
+
+
 func is_disabled() -> bool:
 	return _disabled_left > 0.0
 
@@ -144,7 +152,7 @@ func advance(delta: float) -> void:
 		_advance_crumble(delta)
 	_apply_pose()
 	_hurt_overlapping()
-	if spec.kind != SPIKES:
+	if spec.kind != SPIKES and _on_screen:
 		queue_redraw()
 
 
@@ -233,6 +241,7 @@ func trigger() -> void:
 # --- Construction --------------------------------------------------------------
 
 func _build() -> void:
+	_add_screen_notifier.call_deferred()
 	match spec.kind:
 		SPIKES:
 			_area = _make_area(self)
@@ -270,6 +279,16 @@ func _build() -> void:
 			_sensor.monitorable = false
 			_add_rect_shape(_sensor, spec.rect.grow_side(SIDE_TOP, 6.0))
 			add_child(_sensor)
+
+
+## Détecteur de visibilité, ajouté après les zones et corps du piège (ordre des enfants conservé).
+func _add_screen_notifier() -> void:
+	var notifier: VisibleOnScreenNotifier2D = VisibleOnScreenNotifier2D.new()
+	var reach: Rect2 = spec.rect.merge(Rect2(spec.rect.position + spec.path_to, spec.rect.size))
+	notifier.rect = reach.grow(CRUSHER_ROD + 160.0)
+	notifier.screen_entered.connect(_set_on_screen.bind(true))
+	notifier.screen_exited.connect(_set_on_screen.bind(false))
+	add_child(notifier)
 
 
 func _make_area(parent: Node) -> Area2D:

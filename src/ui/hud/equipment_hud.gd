@@ -44,7 +44,22 @@ func _ready() -> void:
 	if runtime != null:
 		runtime.changed.connect(_refresh)
 		runtime.message.connect(show_message)
+	get_viewport().size_changed.connect(_layout)
+	_layout()
 	_refresh()
+
+
+## Objet et effets en haut à gauche, dans la zone sûre (encoches des téléphones).
+func _layout() -> void:
+	var inset: Vector2 = Vector2.ZERO
+	var visible_rect: Rect2 = get_viewport().get_visible_rect()
+	var window_size: Vector2 = Vector2(DisplayServer.window_get_size())
+	var safe: Rect2i = DisplayServer.get_display_safe_area()
+	if MainMenu.is_mobile() and window_size.x > 0.0 and safe.size.x > 0:
+		var to_canvas: Vector2 = visible_rect.size / window_size
+		inset = Vector2(maxf(0.0, float(safe.position.x)) * to_canvas.x, maxf(0.0, float(safe.position.y)) * to_canvas.y)
+	slot_button.position = Vector2(20.0, TOP) + inset
+	effects_label.position = Vector2(24.0, TOP + 62.0) + inset
 
 
 func _process(delta: float) -> void:

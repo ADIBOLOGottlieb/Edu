@@ -96,3 +96,12 @@ func test_format_wait() -> void:
 	assert_eq(EnergyMeter.format_wait(3120), "52 min")
 	assert_eq(EnergyMeter.format_wait(61), "2 min")
 	assert_eq(EnergyMeter.format_wait(30), "30 s")
+
+
+func test_refund_never_goes_above_full() -> void:
+	var meter: EnergyMeter = EnergyMeter.new()
+	meter.spend(T0)
+	meter.refresh(T0 + R)
+	assert_eq(meter.tickets, 5, "le ticket est revenu pendant la course")
+	meter.refund(T0 + R + 10)
+	assert_eq(meter.tickets, 5, "pas de 6e ticket")

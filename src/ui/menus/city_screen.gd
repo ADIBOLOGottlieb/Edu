@@ -84,6 +84,8 @@ func _build() -> void:
 	column.add_child(energy_message)
 	energy_refused.connect(_on_energy_refused)
 	_refresh_energy()
+	if bool(router_param("no_energy", false)):
+		_on_energy_refused()
 
 	var spacer: Control = Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL

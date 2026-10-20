@@ -4,6 +4,30 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 
 ## [Non publié]
 
+### Ajouté — Tutoriel, sang, choix des objets (demandes utilisateur)
+- **Tutoriel « Premiers pas »** (ADR-051) : au tout premier JOUER, un parcours d’entraînement apprend courir, sauter, glisser, franchir, grimper, sprinter, utiliser un objet et éviter des pics ; panneau de leçon avec « Réussi ! », bouton « Passer », gratuit (pas d’énergie, pas de vigile) ; « Revoir le tutoriel » dans les Réglages.
+- **Vidéo tutoriel** sous-titrée (4 min 35) générée par `tools/record_tutorial.gd` : menus, commandes, les 12 figures et comment les faire, pièges, vigile, objets, pause, étoiles, énergie, réglages.
+- **Sang à la mort par un piège** (ADR-052) : éclaboussure et tache au sol (plus forte pour la scie et l’écraseur), jamais à la capture ; Réglages > « Effets de sang ».
+- **Choix des objets** : toucher l’objet en haut à gauche met le jeu en pause et affiche tous les objets possédés (nombre, effet, durée) ; toucher une carte la choisit pour le bouton OBJET.
+- **Vibrations** : mort, capture et ramassage (réglage « Vibrations », téléphone).
+
+### Corrigé — Audit du projet
+- Double appui sur un parcours : un seul ticket dépensé.
+- « Recommencer » juste après l’arrivée ne rend plus de ticket en trop ; pas de pause après l’arrivée.
+- Un remboursement ne fait plus dépasser 5 tickets.
+- Boutons tactiles relâchés pendant une pause (plus de course bloquée à la reprise) ; plus de chevauchement en grande taille.
+- Capture pendant l’invulnérabilité de réapparition : la capture s’applique vraiment.
+- Leurre / camouflage à l’arrivée ne réveillent plus le vigile.
+- Mur invisible avant le départ (plus de chute « en arrière »).
+- Plus d’énergie depuis l’écran de résultat : le message s’affiche sur l’écran de la ville.
+- Objet en haut à gauche dans la zone sûre (encoches) ; réglage « Langue » masqué tant que les traductions n’existent pas.
+- Caméras des niveaux en mode physique (avertissement d’interpolation).
+
+### Modifié — Fluidité PC et téléphone (ADR-053)
+- Pièges redessinés seulement à l’écran ; HUD du vigile et des objets redessinés seulement quand la valeur change.
+- Poses 3D du coureur calculées une seule fois et partagées : l’entrée du vigile est plus légère.
+- Rayons sans allocation ; rattrapage physique limité à 3 pas par image ; mannequin 3D importé sans LOD, ombres ni tangentes.
+
 ### Modifié — Glissade plus rapide (retour utilisateur, ADR-050)
 - La glissade **garde l’élan** : plus courte (0,40 s), freine deux fois moins, et **sous un plafond bas le coureur glisse à vitesse de course** au lieu de ramper à 3 m/s. Le vigile ne rattrape plus le coureur à chaque tunnel. Même physique pour le vigile.
 

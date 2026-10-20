@@ -16,6 +16,12 @@ func _ready() -> void:
 	reload()
 
 
+## Vibration courte (mort, capture, objet) si le joueur l'a laissée active (téléphone).
+func haptic(duration_ms: int) -> void:
+	if settings.vibrations and OS.has_feature("mobile"):
+		Input.vibrate_handheld(duration_ms)
+
+
 func reload() -> void:
 	var save: SaveServiceNode = get_node_or_null(^"/root/SaveService") as SaveServiceNode
 	if save != null:

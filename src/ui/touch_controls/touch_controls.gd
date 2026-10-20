@@ -26,6 +26,8 @@ const LAYOUT: Array[Dictionary] = [
 @export_range(0.1, 1.0) var opacity: float = 0.55
 
 var _buttons: Array[TouchScreenButton] = []
+## Taille réglée par le joueur (Réglages > Taille des boutons).
+var _scale: float = 1.0
 
 
 func _ready() -> void:
@@ -64,13 +66,15 @@ func _create_button(entry: Dictionary) -> TouchScreenButton:
 
 func _relayout() -> void:
 	var area: Rect2 = _safe_rect()
-	var step: float = RADIUS * 2.0 + GAP
+	# Espacement à l'échelle des boutons : jamais de chevauchement (◀ ▶ annulés).
+	var radius: float = RADIUS * _scale
+	var step: float = radius * 2.0 + GAP
 	for button: TouchScreenButton in _buttons:
 		var entry: Dictionary = button.get_meta(&"layout")
 		var side: int = int(entry["side"])
-		var x_from_edge: float = MARGIN + RADIUS + float(entry["col"]) * step
+		var x_from_edge: float = MARGIN + radius + float(entry["col"]) * step
 		var x: float = area.position.x + x_from_edge if side < 0 else area.end.x - x_from_edge
-		var y: float = area.end.y - MARGIN - RADIUS - float(entry["row"]) * step
+		var y: float = area.end.y - MARGIN - radius - float(entry["row"]) * step
 		button.position = Vector2(x, y)
 
 
@@ -125,8 +129,21 @@ func _apply_settings() -> void:
 		return
 	opacity = settings_service.settings.touch_opacity
 	var size: float = settings_service.settings.touch_scale
+	_scale = size
 	for button: TouchScreenButton in _buttons:
 		button.scale = Vector2(size, size)
 		for child: Node in button.get_children():
 			if child is CanvasItem:
 				(child as CanvasItem).modulate.a = opacity
+	_relayout()
+
+
+## Pause (menu, choix d'objet, appli en arrière-plan) : les boutons sont relâchés,
+## sinon un doigt posé pendant la pause laisserait l'action enfoncée à la reprise.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		for button: TouchScreenButton in _buttons:
+			button.visible = false
+	elif what == NOTIFICATION_UNPAUSED:
+		for button: TouchScreenButton in _buttons:
+			button.visible = true

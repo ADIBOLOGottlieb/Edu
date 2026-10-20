@@ -316,7 +316,16 @@ func _update_beam() -> void:
 
 
 ## Clips dérivés (poses figées, extraits accélérés) dans la bibliothèque « gen ».
+## Clips calculés (poses aériennes, réception…), partagés entre instances.
+static var _clips_cache: AnimationLibrary
+
+
 func _build_clips() -> void:
+	# Poses recalculées une seule fois pour tout le jeu (coureur et vigile partagent
+	# le même mannequin) : l'entrée du vigile ne recalcule plus ses 9 clips (ADR-053).
+	if _clips_cache != null:
+		_player.add_animation_library(&"gen", _clips_cache)
+		return
 	var gen: AnimationLibrary = AnimationLibrary.new()
 	var start: Animation = _player.get_animation(&"parkour/NinjaJump_Start")
 	var fall: Animation = _player.get_animation(&"Jump_Start")
@@ -332,6 +341,7 @@ func _build_clips() -> void:
 	gen.add_animation(&"slide_start", resample(_player.get_animation(&"parkour/Slide_Start"), 0.0, -2.0, 2.2))
 	gen.add_animation(&"vault", resample(_player.get_animation(&"parkour/ClimbUp"), 0.0, -2.0, 1.6))
 	gen.add_animation(&"roll", resample(_player.get_animation(&"Roll"), 0.0, -2.0, 1.7))
+	_clips_cache = gen
 	_player.add_animation_library(&"gen", gen)
 
 

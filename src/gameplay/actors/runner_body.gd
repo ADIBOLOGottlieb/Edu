@@ -113,6 +113,12 @@ func kill(cause: StringName) -> bool:
 	return true
 
 
+## Mort imposée (capture par le vigile) : ignore l'invulnérabilité de réapparition.
+func force_kill(cause: StringName) -> bool:
+	_invulnerable_left = 0.0
+	return kill(cause)
+
+
 ## Réapparition (point de contrôle) : debout, immobile, brièvement invulnérable.
 func revive(at: Vector2) -> void:
 	global_position = at
