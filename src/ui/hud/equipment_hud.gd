@@ -1,7 +1,8 @@
 class_name EquipmentHud
 extends CanvasLayer
-## Équipement à l'écran (M8) : objet choisi en haut à gauche (toucher = objet
-## suivant), effets actifs avec leur temps restant, messages courts au centre.
+## Équipement à l'écran (M8) : objet choisi en haut à gauche (toucher = ouvrir
+## le choix des objets, ItemPicker ; Tab = objet suivant), effets actifs avec leur
+## temps restant, messages courts au centre.
 ## L'utilisation passe par l'action use_item (bouton tactile OBJET, touche E).
 
 const MESSAGE_TIME: float = 1.6
@@ -12,6 +13,7 @@ const TOP: float = 44.0
 var slot_button: Button
 var effects_label: Label
 var message_label: Label
+var picker: ItemPicker
 
 var _message_left: float = 0.0
 
@@ -24,7 +26,7 @@ func _ready() -> void:
 	slot_button.add_theme_font_size_override(&"font_size", 20)
 	slot_button.custom_minimum_size.y = 52.0
 	slot_button.position = Vector2(20.0, TOP)
-	slot_button.pressed.connect(func() -> void: runtime.select_next())
+	slot_button.pressed.connect(func() -> void: picker.open())
 	add_child(slot_button)
 	effects_label = MenuStyle.label("", 18, MenuStyle.ACCENT, true)
 	effects_label.position = Vector2(24.0, TOP + 62.0)
@@ -35,6 +37,10 @@ func _ready() -> void:
 	message_label.position.y = 120.0
 	message_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(message_label)
+	picker = ItemPicker.new()
+	picker.name = "ItemPicker"
+	picker.runtime = runtime
+	add_child(picker)
 	if runtime != null:
 		runtime.changed.connect(_refresh)
 		runtime.message.connect(show_message)

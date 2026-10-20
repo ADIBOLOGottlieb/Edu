@@ -20,6 +20,7 @@ const SETTINGS_SCREEN: String = "res://src/ui/menus/settings_screen.tscn"
 const CREDITS_SCREEN: String = "res://src/ui/menus/credits_screen.tscn"
 const DEV_SCREEN: String = "res://scenes/boot.tscn"
 const LOME_RUN: String = "res://scenes/levels/lome_run.tscn"
+const TUTORIAL_RUN: String = "res://scenes/levels/tutorial_run.tscn"
 const WORLD_MAP_DATA: String = "res://data/world/world_map.tres"
 
 ## false : go_to() émet seulement navigation_requested (tests, captures).

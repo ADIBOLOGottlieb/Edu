@@ -14,6 +14,8 @@ var opacity_slider: HSlider
 var scale_slider: HSlider
 var vibrations_toggle: CheckButton
 var fps_toggle: CheckButton
+var blood_toggle: CheckButton
+var tutorial_button: Button
 var quality_option: OptionButton
 var language_option: OptionButton
 
@@ -61,6 +63,11 @@ func _build() -> void:
 	fps_toggle.button_pressed = settings.show_fps
 	fps_toggle.custom_minimum_size = Vector2(0.0, MenuStyle.TOUCH * 0.8)
 	_row(right, "Afficher les FPS", fps_toggle)
+	blood_toggle = CheckButton.new()
+	blood_toggle.name = "Blood"
+	blood_toggle.button_pressed = settings.blood_effects
+	blood_toggle.custom_minimum_size = Vector2(0.0, MenuStyle.TOUCH * 0.8)
+	_row(right, "Effets de sang", blood_toggle)
 	quality_option = _option(QUALITY_NAMES, GameSettings.QUALITIES.find(settings.quality))
 	quality_option.name = "Quality"
 	_row(right, "Qualité graphique", quality_option)
@@ -74,6 +81,12 @@ func _build() -> void:
 	fps_toggle.toggled.connect(func(_on: bool) -> void: apply_changes())
 	quality_option.item_selected.connect(func(_index: int) -> void: apply_changes())
 	language_option.item_selected.connect(func(_index: int) -> void: apply_changes())
+	blood_toggle.toggled.connect(func(_on: bool) -> void: apply_changes())
+	tutorial_button = MenuStyle.button("Revoir le tutoriel")
+	tutorial_button.name = "TutorialButton"
+	tutorial_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	tutorial_button.pressed.connect(go_to.bind(TUTORIAL_RUN, {}))
+	right.add_child(tutorial_button)
 	if not MainMenu.is_mobile():
 		music_slider.grab_focus.call_deferred()
 
@@ -95,6 +108,7 @@ func apply_changes() -> void:
 	s.touch_scale = scale_slider.value
 	s.vibrations = vibrations_toggle.button_pressed
 	s.show_fps = fps_toggle.button_pressed
+	s.blood_effects = blood_toggle.button_pressed
 	s.quality = GameSettings.QUALITIES[clampi(quality_option.selected, 0, GameSettings.QUALITIES.size() - 1)]
 	s.language = GameSettings.LANGUAGES[clampi(language_option.selected, 0, GameSettings.LANGUAGES.size() - 1)]
 	service.save()

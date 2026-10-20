@@ -41,6 +41,8 @@ var fall_count: int = 0
 var death_count: int = 0
 ## Temps de course (s), arrêté à l'arrivée.
 var elapsed: float = 0.0
+## Dernière éclaboussure créée (tests), ou null.
+var last_blood: BloodBurst
 
 var _completed: bool = false
 var _respawn_left: float = 0.0
@@ -81,7 +83,16 @@ func total_deaths() -> int:
 func _on_player_died(cause: StringName) -> void:
 	death_count += 1
 	_respawn_left = DEATH_PAUSE
+	_spawn_blood(cause)
 	player_died.emit(cause)
+
+
+## Éclaboussure à la mort par un piège (pas à la capture), si les Réglages l'autorisent.
+func _spawn_blood(cause: StringName) -> void:
+	var settings: SettingsServiceNode = get_node_or_null(^"/root/SettingsService") as SettingsServiceNode
+	if settings != null and not settings.settings.blood_effects:
+		return
+	last_blood = BloodBurst.spawn(self, player.global_position, cause, player.facing)
 
 
 ## Parcours de ville joué, ou null (course libre ou parcours de test).

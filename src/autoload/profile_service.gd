@@ -13,6 +13,8 @@ signal progress_changed()
 ## Capacités du protagoniste (ex. double saut), partagées avec son RunnerBody.
 var abilities: AbilitySet = AbilitySet.new()
 var progression: Progression = Progression.new()
+## Tutoriel « Premiers pas » terminé ou passé (section « profile », ADR-051).
+var tutorial_done: bool = false
 
 
 func _ready() -> void:
@@ -23,6 +25,22 @@ func reload() -> void:
 	var save: SaveServiceNode = get_node_or_null(^"/root/SaveService") as SaveServiceNode
 	if save != null:
 		progression.from_dict(save.section("progress"))
+		tutorial_done = bool(save.section("profile").get("tutorial_done", false))
+
+
+## Premier JOUER d'un nouveau joueur : tutoriel pas encore fait et aucun
+## parcours réussi (un joueur qui a déjà progressé n'y est pas renvoyé).
+func needs_tutorial() -> bool:
+	return not tutorial_done and progression.completed_count() == 0
+
+
+func mark_tutorial_done() -> void:
+	tutorial_done = true
+	var save: SaveServiceNode = get_node_or_null(^"/root/SaveService") as SaveServiceNode
+	if save != null:
+		var profile: Dictionary = save.section("profile")
+		profile["tutorial_done"] = true
+		save.set_section("profile", profile)
 
 
 ## Enregistre une arrivée et sauvegarde ; retourne les étoiles de cette course.

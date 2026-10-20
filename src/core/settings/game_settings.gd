@@ -19,6 +19,8 @@ var quality: StringName = &"high"
 var language: StringName = &"fr"
 ## Compteur d'images par seconde en haut à gauche (mesure sur téléphone).
 var show_fps: bool = false
+## Éclaboussures de sang à la mort par un piège (ADR-052) ; désactivable.
+var blood_effects: bool = true
 
 
 func to_dict() -> Dictionary:
@@ -26,6 +28,7 @@ func to_dict() -> Dictionary:
 		"music_volume": music_volume, "sfx_volume": sfx_volume, "vibrations": vibrations,
 		"touch_opacity": touch_opacity, "touch_scale": touch_scale,
 		"quality": String(quality), "language": String(language), "show_fps": show_fps,
+		"blood_effects": blood_effects,
 	}
 
 
@@ -35,6 +38,7 @@ func from_dict(data: Dictionary) -> void:
 	sfx_volume = clampf(float(data.get("sfx_volume", sfx_volume)), 0.0, 1.0)
 	vibrations = bool(data.get("vibrations", vibrations))
 	show_fps = bool(data.get("show_fps", show_fps))
+	blood_effects = bool(data.get("blood_effects", blood_effects))
 	touch_opacity = clampf(float(data.get("touch_opacity", touch_opacity)), 0.2, 1.0)
 	touch_scale = clampf(float(data.get("touch_scale", touch_scale)), 0.8, 1.4)
 	var wanted_quality: StringName = StringName(str(data.get("quality", quality)))

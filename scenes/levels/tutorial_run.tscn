@@ -1,0 +1,75 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://src/gameplay/level/level_runner.gd" id="1_runner"]
+[ext_resource type="Script" path="res://src/gameplay/level/chunk_streamer.gd" id="2_streamer"]
+[ext_resource type="Resource" path="res://data/levels/tutorial_library.tres" id="3_library"]
+[ext_resource type="PackedScene" path="res://src/gameplay/actors/player/player.tscn" id="4_player"]
+[ext_resource type="Script" path="res://src/gameplay/level/runner_camera.gd" id="5_camera"]
+[ext_resource type="Script" path="res://src/gameplay/level/city_backdrop.gd" id="6_backdrop"]
+[ext_resource type="Script" path="res://src/ui/debug/movement_debug_overlay.gd" id="7_movement"]
+[ext_resource type="Script" path="res://src/ui/debug/level_debug_overlay.gd" id="8_level"]
+[ext_resource type="Script" path="res://src/ui/touch_controls/touch_controls.gd" id="9_touch"]
+[ext_resource type="Resource" path="res://data/cities/lome.tres" id="10_city"]
+[ext_resource type="Resource" path="res://data/cities/lome_theme.tres" id="11_theme"]
+[ext_resource type="Script" path="res://src/gameplay/tutorial/tutorial_director.gd" id="12_tutorial"]
+[ext_resource type="Script" path="res://src/ui/hud/pause_menu.gd" id="14_pause"]
+[ext_resource type="Script" path="res://src/gameplay/equipment/equipment_runtime.gd" id="15_equipment"]
+[ext_resource type="Script" path="res://src/ui/hud/equipment_hud.gd" id="16_equipment_hud"]
+
+[node name="TutorialRun" type="Node2D"]
+
+[node name="Backdrop" type="Node2D" parent="."]
+script = ExtResource("6_backdrop")
+theme = ExtResource("11_theme")
+
+[node name="LevelRunner" type="Node2D" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("1_runner")
+library = ExtResource("3_library")
+mode = 0
+seed_value = 1
+ordered_ids = Array[StringName]([&"t_run", &"t_jump", &"t_slide", &"t_vault", &"t_climb", &"t_sprint", &"t_item", &"t_spikes", &"t_end"])
+player = NodePath("../Player")
+city = ExtResource("10_city")
+route_index = -1
+
+[node name="Streamer" type="Node2D" parent="LevelRunner"]
+script = ExtResource("2_streamer")
+
+[node name="Player" parent="." instance=ExtResource("4_player")]
+position = Vector2(60, -2)
+
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+process_callback = 0
+script = ExtResource("5_camera")
+target = NodePath("../Player")
+
+[node name="MovementOverlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("body")]
+script = ExtResource("7_movement")
+body = NodePath("../Player")
+start_hidden = true
+
+[node name="LevelOverlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("runner")]
+script = ExtResource("8_level")
+runner = NodePath("../LevelRunner")
+start_hidden = true
+
+[node name="TouchControls" type="CanvasLayer" parent="."]
+script = ExtResource("9_touch")
+
+[node name="PauseMenu" type="CanvasLayer" parent="." node_paths=PackedStringArray("runner")]
+process_mode = 3
+script = ExtResource("14_pause")
+runner = NodePath("../LevelRunner")
+
+[node name="Equipment" type="Node2D" parent="." node_paths=PackedStringArray("runner")]
+script = ExtResource("15_equipment")
+runner = NodePath("../LevelRunner")
+
+[node name="EquipmentHud" type="CanvasLayer" parent="." node_paths=PackedStringArray("runtime")]
+script = ExtResource("16_equipment_hud")
+runtime = NodePath("../Equipment")
+
+[node name="Tutorial" type="CanvasLayer" parent="." node_paths=PackedStringArray("runner", "equipment")]
+script = ExtResource("12_tutorial")
+runner = NodePath("../LevelRunner")
+equipment = NodePath("../Equipment")

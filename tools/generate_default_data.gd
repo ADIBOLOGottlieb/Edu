@@ -17,6 +17,7 @@ const LOME_THEME_PATH: String = "res://data/cities/lome_theme.tres"
 const LOME_PATH: String = "res://data/cities/lome.tres"
 const WORLD_PATH: String = "res://data/world/world_map.tres"
 const EQUIPMENT_PATH: String = "res://data/equipment/catalog.tres"
+const TUTORIAL_LIBRARY_PATH: String = "res://data/levels/tutorial_library.tres"
 ## Hauteur des immeubles sous leur toit : la rue est loin en dessous.
 const BUILDING_DEPTH: float = 1400.0
 ## Épaisseur d'une poutre (grue, passerelle).
@@ -36,6 +37,7 @@ func _init() -> void:
 	_save(_lome_city(load(LOME_THEME_PATH) as CityTheme), LOME_PATH, force)
 	_save(_world_map(load(LOME_PATH) as CityDefinition), WORLD_PATH, force)
 	_save(_equipment_catalog(), EQUIPMENT_PATH, force)
+	_save(_tutorial_library(), TUTORIAL_LIBRARY_PATH, force)
 	quit()
 
 
@@ -329,6 +331,28 @@ func _chunk_library() -> ChunkLibrary:
 		], 4, [&"vault", &"gap", &"slide", &"precision"], -40.0),
 	]
 	_add_hazards(library)
+	return library
+
+
+## Parcours d'entraînement « Premiers pas » (ADR-051) : une leçon par tronçon,
+## géométrie reprise de tronçons déjà prouvés (small_gap, low_tunnel, vault_pair,
+## roof_climb). Chaque obstacle impose le geste (trou, tunnel bas, mur).
+func _tutorial_library() -> ChunkLibrary:
+	var library: ChunkLibrary = ChunkLibrary.new()
+	library.start_id = &"t_run"
+	var spikes: ChunkLayout = _chunk(&"t_spikes", 900.0, [_roof(0, 900)], 0, [&"tutorial", &"spikes"])
+	spikes.hazards = [_spikes(440, 60)] as Array[HazardSpec]
+	library.layouts = [
+		_chunk(&"t_run", 900.0, [_roof(0, 900)], 0, [&"tutorial"]),
+		_chunk(&"t_jump", 900.0, [_roof(0, 360), _roof(520, 380)], 0, [&"tutorial", &"gap"]),
+		_chunk(&"t_slide", 1000.0, [_roof(0, 1000), _ceiling(380, 380, 48)], 0, [&"tutorial", &"slide"]),
+		_chunk(&"t_vault", 900.0, [_roof(0, 900), _box(300, 100, 40), _box(620, 90, 36)], 0, [&"tutorial", &"vault"]),
+		_chunk(&"t_climb", 1000.0, [_roof(0, 500), _roof(500, 500, -200)], 0, [&"tutorial", &"wall"], -200.0),
+		_chunk(&"t_sprint", 1400.0, [_roof(0, 1400)], 0, [&"tutorial"]),
+		_chunk(&"t_item", 1100.0, [_roof(0, 1100)], 0, [&"tutorial"]),
+		spikes,
+		_chunk(&"t_end", 800.0, [_roof(0, 800)], 0, [&"tutorial"]),
+	]
 	return library
 
 

@@ -121,8 +121,10 @@ func _build() -> void:
 		play_button.grab_focus.call_deferred()
 
 
+## JOUER : la carte du monde, ou le tutoriel au tout premier lancement (ADR-051).
 func play() -> void:
-	go_to(WORLD_MAP)
+	var profile: ProfileServiceNode = get_node_or_null(^"/root/ProfileService") as ProfileServiceNode
+	go_to(TUTORIAL_RUN if profile != null and profile.needs_tutorial() else WORLD_MAP)
 
 
 func quit() -> void:

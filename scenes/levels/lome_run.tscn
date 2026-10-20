@@ -39,6 +39,7 @@ script = ExtResource("2_streamer")
 position = Vector2(60, -2)
 
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+process_callback = 0
 script = ExtResource("5_camera")
 target = NodePath("../Player")
 

@@ -37,6 +37,15 @@ static func stars_for(time_s: float, deaths: int, par_time_s: float) -> int:
 	return 1
 
 
+## Nombre de parcours réussis, toutes villes confondues.
+func completed_count() -> int:
+	var count: int = 0
+	for entry: Variant in routes.values():
+		if entry is Dictionary and bool((entry as Dictionary).get("completed", false)):
+			count += 1
+	return count
+
+
 func is_completed(route_id: StringName) -> bool:
 	return bool(routes.get(String(route_id), {}).get("completed", false))
 

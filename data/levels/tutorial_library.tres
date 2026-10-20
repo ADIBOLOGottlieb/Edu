@@ -1,0 +1,78 @@
+[gd_resource type="Resource" script_class="ChunkLibrary" format=3]
+
+[ext_resource type="Script" path="res://src/data_types/chunk_layout.gd" id="1_poj08"]
+[ext_resource type="Script" path="res://src/data_types/hazard_spec.gd" id="2_ifvn3"]
+[ext_resource type="Script" path="res://src/data_types/chunk_library.gd" id="3_ww42j"]
+
+[sub_resource type="Resource" id="Resource_5kugp"]
+script = ExtResource("1_poj08")
+id = &"t_run"
+width = 900.0
+blocks = Array[Rect2]([Rect2(0, 0, 900, 1400)])
+tags = Array[StringName]([&"tutorial"])
+
+[sub_resource type="Resource" id="Resource_e2s4f"]
+script = ExtResource("1_poj08")
+id = &"t_jump"
+width = 900.0
+blocks = Array[Rect2]([Rect2(0, 0, 360, 1400), Rect2(520, 0, 380, 1400)])
+tags = Array[StringName]([&"tutorial", &"gap"])
+
+[sub_resource type="Resource" id="Resource_eh1fa"]
+script = ExtResource("1_poj08")
+id = &"t_slide"
+width = 1000.0
+blocks = Array[Rect2]([Rect2(0, 0, 1000, 1400), Rect2(380, -420, 380, 372)])
+tags = Array[StringName]([&"tutorial", &"slide"])
+
+[sub_resource type="Resource" id="Resource_tb3qh"]
+script = ExtResource("1_poj08")
+id = &"t_vault"
+width = 900.0
+blocks = Array[Rect2]([Rect2(0, 0, 900, 1400), Rect2(300, -40, 100, 40), Rect2(620, -36, 90, 36)])
+tags = Array[StringName]([&"tutorial", &"vault"])
+
+[sub_resource type="Resource" id="Resource_0bynu"]
+script = ExtResource("1_poj08")
+id = &"t_climb"
+width = 1000.0
+exit_y = -200.0
+blocks = Array[Rect2]([Rect2(0, 0, 500, 1400), Rect2(500, -200, 500, 1400)])
+tags = Array[StringName]([&"tutorial", &"wall"])
+
+[sub_resource type="Resource" id="Resource_ieiqe"]
+script = ExtResource("1_poj08")
+id = &"t_sprint"
+width = 1400.0
+blocks = Array[Rect2]([Rect2(0, 0, 1400, 1400)])
+tags = Array[StringName]([&"tutorial"])
+
+[sub_resource type="Resource" id="Resource_yq8mb"]
+script = ExtResource("1_poj08")
+id = &"t_item"
+width = 1100.0
+blocks = Array[Rect2]([Rect2(0, 0, 1100, 1400)])
+tags = Array[StringName]([&"tutorial"])
+
+[sub_resource type="Resource" id="Resource_554gv"]
+script = ExtResource("2_ifvn3")
+rect = Rect2(440, -16, 60, 16)
+
+[sub_resource type="Resource" id="Resource_pxxqq"]
+script = ExtResource("1_poj08")
+id = &"t_spikes"
+width = 900.0
+blocks = Array[Rect2]([Rect2(0, 0, 900, 1400)])
+hazards = Array[ExtResource("2_ifvn3")]([SubResource("Resource_554gv")])
+tags = Array[StringName]([&"tutorial", &"spikes"])
+
+[sub_resource type="Resource" id="Resource_owmbt"]
+script = ExtResource("1_poj08")
+id = &"t_end"
+blocks = Array[Rect2]([Rect2(0, 0, 800, 1400)])
+tags = Array[StringName]([&"tutorial"])
+
+[resource]
+script = ExtResource("3_ww42j")
+layouts = Array[ExtResource("1_poj08")]([SubResource("Resource_5kugp"), SubResource("Resource_e2s4f"), SubResource("Resource_eh1fa"), SubResource("Resource_tb3qh"), SubResource("Resource_0bynu"), SubResource("Resource_ieiqe"), SubResource("Resource_yq8mb"), SubResource("Resource_pxxqq"), SubResource("Resource_owmbt")])
+start_id = &"t_run"
